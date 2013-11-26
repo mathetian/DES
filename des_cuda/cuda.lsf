@@ -1,0 +1,8 @@
+#BSUB -J HELLO_CUDA
+#BSUB -L /bin/bash
+#BSUB -o job.out
+#BSUB -e job.err
+#BSUB -n 1
+#BSUB -q gpu
+
+./cuda

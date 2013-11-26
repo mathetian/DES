@@ -1,51 +1,25 @@
 #ifndef common_h
 #define common_h
 
+#include <stdint.h>
+#include <cuda_runtime_api.h>
+#include <openssl/evp.h>
+#include <sys/time.h>
+
 #define OUTPUT_QUIET		0
 #define OUTPUT_NORMAL		1
 #define OUTPUT_VERBOSE		2
 
 #define NUM_BLOCK_PER_MULTIPROCESSOR	3
 #define SIZE_BLOCK_PER_MULTIPROCESSOR	256*1024
-#ifndef MAX_THREAD
-	#define MAX_THREAD			256
-#endif
+#define MAX_THREAD			256
 
-#define STATE_THREAD_AES	4
-#define AES_BLOCK_SIZE		16
-#define AES_KEY_SIZE_128	16
-#define AES_KEY_SIZE_192	24
-#define AES_KEY_SIZE_256	32
 
 #define STATE_THREAD_DES	2
 #define DES_MAXNR		8
 #define DES_BLOCK_SIZE		8
 #define DES_KEY_SIZE		8
 #define DES_KEY_SIZE_64		8
-
-#define IDEA_BLOCK_SIZE		8
-#define IDEA_KEY_SIZE		8
-#define IDEA_KEY_SIZE_64	8
-
-#define BF_BLOCK_SIZE		8
-#define BF_KEY_SIZE_64		8
-#define BF_KEY_SIZE_128		16
-
-#define CAST_BLOCK_SIZE		8
-#define CAST_KEY_SIZE_128	16
-
-#define CMLL_BLOCK_SIZE		16
-#define CMLL_KEY_SIZE_128	16
-#define CMLL_KEY_SIZE_192	24
-#define CMLL_KEY_SIZE_256	32
-
-#define CAMELLIA_BLOCK_SIZE	16
-#define CAMELLIA_KEY_SIZE_128	16
-#define CAMELLIA_KEY_SIZE_192	24
-#define CAMELLIA_KEY_SIZE_256	32
-
-void cuda_device_init(int *nm, int buffer_size, int output_verbosity, uint8_t **host_data, uint64_t **device_data, uint64_t**);
-void cuda_device_finish(uint8_t *host_data, uint64_t *device_data);
 
 #include <openssl/evp.h>
 typedef struct cuda_crypt_parameters_st {
@@ -80,4 +54,22 @@ typedef struct cuda_crypt_parameters_st {
 			((a & 0xff000000000000) >> 40) | \
 			(a >> 56))
 
+#ifndef TX
+	#if (__CUDA_ARCH__ < 200)
+		#define TX (__umul24(blockIdx.x,blockDim.x) + threadIdx.x)
+	#else
+		#define TX (blockIdx.x * blockDim.x + threadIdx.x)
+	#endif
+#endif
+
+#define _CUDA(call) {																	\
+	call;				                                												\
+	cudaerrno=cudaGetLastError();																	\
+	if(cudaSuccess!=cudaerrno) {                                       					         						\
+		if (output_verbosity!=OUTPUT_QUIET) fprintf(stderr, "Cuda error %d in file '%s' in line %i: %s.\n",cudaerrno,__FILE__,__LINE__,cudaGetErrorString(cudaerrno));	\
+		exit(EXIT_FAILURE);                                                  											\
+    } }
+
+static int __attribute__((unused)) output_verbosity;
+static int __attribute__((unused)) isIntegrated;
 #endif
