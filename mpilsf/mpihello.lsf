@@ -5,12 +5,22 @@
 #BSUB -o job.out
 #BSUB -e job.err
 #BSUB -n 8
+		
+INPUT=test184000atoms_verlet.tpr
 
 MPIRUN=`which mpirun`
 
 EXE=./mpihello
 
+if test ! -x `which $EXE` ; then
+    echo
+    echo "ERROR: `which $EXE` not existent or not executable"
+    echo "Aborting"
+    exit 1
+fi
+
 CURDIR=$PWD
+cd $CURDIR
 rm -f nodelist nodes >& /dev/null
 touch nodelist
 touch nodes
@@ -28,6 +38,6 @@ NN=`cat nodelist | wc -l`
 
 date '+RUN STARTED ON %m/%d/%y AT %H:%M:%S'
 
-$MPIRUN -np $NP -machinefile nodelist $EXE -v -deffnm $INPUT
+$MPIRUN -np $NP -machinefile nodelist $EXE -v -deffnm  $INPUT
 
 date '+RUN ENDED ON %m/%d/%y AT %H:%M:%S'
