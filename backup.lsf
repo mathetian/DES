@@ -5,11 +5,6 @@
 #BSUB -o job.out
 #BSUB -e job.err
 #BSUB -n 8
-		
-#####################################################
-#####################################################
-
-INPUT=test184000atoms_verlet.tpr
 
 echo ""
 echo "----------------------- INTIALIZATIONS -----------------------------"
@@ -57,8 +52,6 @@ echo "This job has allocated $NP core(s)"
 echo
 
 ulimit -aH
-echo
-ls -al
 
 echo ""
 echo "----------------------- RUN -----------------------------"
@@ -66,12 +59,7 @@ echo ""
 
 date '+RUN STARTED ON %m/%d/%y AT %H:%M:%S'
 
-#$MPIRUN -np $NP -machinefile nodelist $EXE -v -deffnm  $INPUT >& $EXE.log
 $MPIRUN -np $NP -machinefile nodelist $EXE -v -deffnm $INPUT
+
 date '+RUN ENDED ON %m/%d/%y AT %H:%M:%S'
 
-echo ""
-echo "----------------------- DONE ----------------------------"
-echo ""
-
-ls -al

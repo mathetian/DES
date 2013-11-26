@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#BSUB -q cpu
+#BSUB -J HELLO_MPI
+#BSUB -o job.out
+#BSUB -e job.err
+#BSUB -n 8
+
+MPIRUN=`which mpirun`
+
+EXE=./mpihello
+
+CURDIR=$PWD
+rm -f nodelist nodes >& /dev/null
+touch nodelist
+touch nodes
+NP=0
+
+for host in `echo $LSB_MCPU_HOSTS |sed -e 's/ /:/g'|  sed 's/:n/\nn/g'`
+do
+echo $host >> nodelist
+echo $host | cut -d ":" -f1 >> nodes
+nn=`echo $host | cut -d ":" -f2`
+NP=`echo $NP+$nn | bc`
+done
+
+NN=`cat nodelist | wc -l`
+
+date '+RUN STARTED ON %m/%d/%y AT %H:%M:%S'
+
+$MPIRUN -np $NP -machinefile nodelist $EXE -v -deffnm $INPUT
+
+date '+RUN ENDED ON %m/%d/%y AT %H:%M:%S'

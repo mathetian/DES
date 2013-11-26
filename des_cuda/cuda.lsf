@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #BSUB -J HELLO_CUDA
 #BSUB -L /bin/bash
 #BSUB -o job.out
