@@ -8,6 +8,9 @@
 #include "cuda_common.h"
 #include "common.h"
 
+#define BLOCK_LENGTH 1024
+#define DIM MAX_THREAD
+
 __device__ uint32_t des_d_sp_c[8][64]={
 {
 /* nibble 0 */
@@ -207,39 +210,42 @@ __global__ void DESencKernel(uint64_t *data) {
 	#endif
 
 	__syncthreads();
+	for(int i=0;i<(1<<10);i++)
+	{
+		register uint64_t load = data[TX];
+		register uint32_t right = load;
+		register uint32_t left = load >> 32;
+		
+		IP(right,left);
 
-	register uint64_t load = data[TX];
-	register uint32_t right = load;
-	register uint32_t left = load >> 32;
-	
-	IP(right,left);
+		left=ROTATE(left,29);
+		right=ROTATE(right,29);
 
-	left=ROTATE(left,29);
-	right=ROTATE(right,29);
+		D_ENCRYPT(left,right, 0);
+		D_ENCRYPT(right,left, 1);
+		D_ENCRYPT(left,right, 2);
+		D_ENCRYPT(right,left, 3);
+		D_ENCRYPT(left,right, 4);
+		D_ENCRYPT(right,left, 5);
+		D_ENCRYPT(left,right, 6);
+		D_ENCRYPT(right,left, 7);
+		D_ENCRYPT(left,right, 8);
+		D_ENCRYPT(right,left, 9);
+		D_ENCRYPT(left,right,10);
+		D_ENCRYPT(right,left,11);
+		D_ENCRYPT(left,right,12);
+		D_ENCRYPT(right,left,13);
+		D_ENCRYPT(left,right,14);
+		D_ENCRYPT(right,left,15);
 
-	D_ENCRYPT(left,right, 0);
-	D_ENCRYPT(right,left, 1);
-	D_ENCRYPT(left,right, 2);
-	D_ENCRYPT(right,left, 3);
-	D_ENCRYPT(left,right, 4);
-	D_ENCRYPT(right,left, 5);
-	D_ENCRYPT(left,right, 6);
-	D_ENCRYPT(right,left, 7);
-	D_ENCRYPT(left,right, 8);
-	D_ENCRYPT(right,left, 9);
-	D_ENCRYPT(left,right,10);
-	D_ENCRYPT(right,left,11);
-	D_ENCRYPT(left,right,12);
-	D_ENCRYPT(right,left,13);
-	D_ENCRYPT(left,right,14);
-	D_ENCRYPT(right,left,15);
+		left=ROTATE(left,3);
+		right=ROTATE(right,3);
 
-	left=ROTATE(left,3);
-	right=ROTATE(right,3);
+		FP(right,left);
+		load = left|((uint64_t)right)<<32;
+		data[TX]=load;
 
-	FP(right,left);
-	load = left|((uint64_t)right)<<32;
-	data[TX]=load;
+	}
 }
 
 void DES_cuda_transfer_key_schedule(DES_key_schedule *ks) {
@@ -247,29 +253,38 @@ void DES_cuda_transfer_key_schedule(DES_key_schedule *ks) {
 	_CUDA(cudaMemcpyToSymbolAsync(cs,ks,sizeof(DES_key_schedule),0,cudaMemcpyHostToDevice));
 }
 
-void DES_cuda_transfer_iv(const unsigned char *iv) {
-	cudaError_t cudaerrno;
-	_CUDA(cudaMemcpyToSymbolAsync(d_iv,iv,DES_BLOCK_SIZE,0,cudaMemcpyHostToDevice));
-}
+#define cudaCheckErrors(msg) \
+    do { \
+        cudaError_t __err = cudaGetLastError(); \
+        if (__err != cudaSuccess) { \
+            fprintf(stderr, "Fatal error: %s (%s at %s:%d)\n", \
+                msg, cudaGetErrorString(__err), \
+                __FILE__, __LINE__); \
+            fprintf(stderr, "*** FAILED - ABORTING\n"); \
+            exit(1); \
+        } \
+    } while (0)
 
-void DES_cuda_crypt(cuda_crypt_parameters *c) 
+void DES_cuda_crypt() 
 {
-	int gridSize = c->nbytes/(MAX_THREAD*DES_BLOCK_SIZE);
-	if (!(c->nbytes%(MAX_THREAD*DES_BLOCK_SIZE))==0)
-		gridSize = c->nbytes/(MAX_THREAD*DES_BLOCK_SIZE)+1;
-
-	transferHostToDevice(c->in, (uint32_t *)c->d_in, c->host_data, c->nbytes);
-	
-	fprintf(stdout,"Starting DES kernel for %zu bytes with (%d, (%d))...\n", c->nbytes, gridSize, MAX_THREAD);
-	DESencKernel<<<gridSize,MAX_THREAD>>>(c->d_in);
-	
-	if(EVP_CIPHER_CTX_mode(c->ctx) == EVP_CIPH_ECB_MODE) {
-		transferDeviceToHost(c->out, (uint32_t *)c->d_in, c->host_data, c->host_data, c->nbytes);
-	} else {
-		transferDeviceToHost(c->out, (uint32_t *)c->d_out, c->host_data, c->host_data, c->nbytes);
-		DES_cuda_transfer_iv(c->in+c->nbytes-DES_BLOCK_SIZE);
-	}
+	printf("Starting DES kernel\n");
+	long long*data=new long long[BLOCK_LENGTH*DIM];int size=DIM*BLOCK_LENGTH*sizeof(long long);
+    for(int i=0;i<BLOCK_LENGTH*DIM;i++) data[i]=rand();
+    for(int i=0;i<10;i++)  printf("i: %d, %lld\n",i,data[i]);
+    uint64_t *device_data_in;uint64_t *device_data_out;
+    cudaMalloc((void**)&device_data_in,size);
+    cudaCheckErrors("cudamalloc1");
+	cudaMalloc((void**)&device_data_out,size);
+	cudaCheckErrors("cudamalloc2");
+    cudaMemcpy(device_data_in,data,size,cudaMemcpyHostToDevice);
+    cudaCheckErrors("cudamalloc3");
+	DESencKernel<<<BLOCK_LENGTH,MAX_THREAD>>>(device_data_in);
+	cudaCheckErrors("cudamalloc4");
+	cudaMemcpy(data,device_data_in,size,cudaMemcpyDeviceToHost);
+	cudaCheckErrors("cudamalloc5");
+	for(int i=0;i<10;i++) printf("i: %d, %lld\n",i,data[i]);
 }
+
 static unsigned char key_data[8]={0x02,0x58,0x16,0x16,0x46,0x29,0xB0,0x07};
 
 void cuda_init_key()
@@ -283,5 +298,11 @@ void cuda_init_key()
 int main()
 {
 	cuda_init_key();
+	struct timeval tstart, tend;
+	gettimeofday(&tstart, NULL);
+	DES_cuda_crypt();
+	gettimeofday(&tend, NULL);
+	long long uses = 1000000 * (tend.tv_sec - tstart.tv_sec) + (tend.tv_usec - tstart.tv_usec);
+	printf("loop time: %lld\n", uses);
 	return 0;
 }

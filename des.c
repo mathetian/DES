@@ -163,9 +163,6 @@ __shared__ unsigned char des_SP[2048];
 __constant__ uint64_t cs[16];
 __constant__ uint64_t d_iv;
 
-static __device__ uint64_t *device_data_in;
-static __device__ uint64_t *device_data_out;
-
 #define IP(left,right) { \
 	register uint32_t tt; \
 	PERM_OP(right,left,tt, 4,0x0f0f0f0fL); \
@@ -253,19 +250,37 @@ void DES_cuda_transfer_key_schedule(DES_key_schedule *ks) {
 	_CUDA(cudaMemcpyToSymbolAsync(cs,ks,sizeof(DES_key_schedule),0,cudaMemcpyHostToDevice));
 }
 
+#define cudaCheckErrors(msg) \
+    do { \
+        cudaError_t __err = cudaGetLastError(); \
+        if (__err != cudaSuccess) { \
+            fprintf(stderr, "Fatal error: %s (%s at %s:%d)\n", \
+                msg, cudaGetErrorString(__err), \
+                __FILE__, __LINE__); \
+            fprintf(stderr, "*** FAILED - ABORTING\n"); \
+            exit(1); \
+        } \
+    } while (0)
+
 void DES_cuda_crypt() 
 {
-	transferHostToDevice(c->in, (uint32_t *)c->d_in, c->host_data, c->nbytes);
-	
 	printf("Starting DES kernel\n");
+	long long*data=new long long[BLOCK_LENGTH*DIM];int size=DIM*BLOCK_LENGTH*sizeof(long long);
+    for(int i=0;i<BLOCK_LENGTH*DIM;i++) data[i]=rand();
+    uint64_t *device_data_in;uint64_t *device_data_out;
+    cudaMalloc((void**)&device_data_in,size);
+    cudaCheckErrors("cudamalloc1");
+	cudaMalloc((void**)&device_data_out,size);
+	cudaCheckErrors("cudamalloc2");
+    cudaMemcpy(device_data_in,data,size,cudaMemcpyHostToDevice);
+    cudaCheckErrors("cudamalloc3");
 	DESencKernel<<<BLOCK_LENGTH,MAX_THREAD>>>(device_data_in);
-	if(EVP_CIPHER_CTX_mode(c->ctx) == EVP_CIPH_ECB_MODE) {
-		transferDeviceToHost(c->out, (uint32_t *)c->d_in, c->host_data, c->host_data, c->nbytes);
-	} else {
-		transferDeviceToHost(c->out, (uint32_t *)c->d_out, c->host_data, c->host_data, c->nbytes);
-		DES_cuda_transfer_iv(c->in+c->nbytes-DES_BLOCK_SIZE);
-	}
+	cudaCheckErrors("cudamalloc4");
+	cudaMemcpy(data,device_data_out,size,cudaMemcpyDeviceToHost);
+	cudaCheckErrors("cudamalloc5");
+	for(int i=0;i<10;i++) printf("i: %d, %lld\n",i,data[i]);
 }
+
 static unsigned char key_data[8]={0x02,0x58,0x16,0x16,0x46,0x29,0xB0,0x07};
 
 void cuda_init_key()
@@ -278,6 +293,6 @@ void cuda_init_key()
 
 int main()
 {
-	cuda_init_key();
+	cuda_init_key();DES_cuda_crypt();
 	return 0;
 }
