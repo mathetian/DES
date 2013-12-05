@@ -11,6 +11,8 @@ arun: advanced
 	./$^
 baiscrun: basic
 	./$^
+test: test.cu
+	$(nv) $^ -o $@ $(flags) -lcurand
 clean:
 	rm -rf basic advanced job.err job.out *.o
 
