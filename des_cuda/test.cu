@@ -188,8 +188,8 @@ __constant__ uint64_t d_iv;
 
 #define D_ENCRYPT(LL,R,S) { \
 	register uint32_t t,u; \
-	u=R^cs1[S]; \
-	t=R^cs1[S]>>32; \
+	u=R^cs[S]; \
+	t=R^cs[S]>>32; \
 	t=ROTATE(t,4); \
 	LL ^= *(uint32_t *)(des_SP      +((u     )&0xfc)); \
 	LL ^= *(uint32_t *)(des_SP+0x100+((t     )&0xfc)); \
@@ -208,12 +208,11 @@ __constant__ uint64_t d_iv;
 
 typedef unsigned char const_DES_cblock[8];
 
-#define DES_LONG unsigned int
 
 #define HPERM_OP(a,t,n,m) ((t)=((((a)<<(16-(n)))^(a))&(m)),\
 	(a)=(a)^(t)^(t>>(16-(n))))
 
-__device__ DES_LONG des_skb[8][64]={
+__device__ uint32_t des_skb[8][64]={
 	{
 	/* for C bits (numbered as per FIPS 46) 1 2 3 4 5 6 */
 	0x00000000L,0x00000010L,0x20000000L,0x20000010L,
@@ -403,9 +402,9 @@ __device__ int shifts2[16]={0,0,1,1,1,1,1,1,0,1,1,1,1,1,1,0};
 
 __device__ int generateKey(uint64_t key,uint64_t *store)
 {
-	DES_LONG c,d,t,s,t2;
+	uint32_t c,d,t,s,t2;
 	const unsigned char *in;
-	int i; DES_LONG k[32];
+	int i; uint32_t k[32];
 	const_DES_cblock key1;uint64_t aa=(1<<9)-1;
 	for(i=0;i<8;i++){ key1[i]=(key&aa); key>>=8;}
 	in = &(key1)[0];c2l(in,c);c2l(in,d);
@@ -419,10 +418,11 @@ __device__ int generateKey(uint64_t key,uint64_t *store)
 	d=	(((d&0x000000ffL)<<16L)| (d&0x0000ff00L)     |
 		 ((d&0x00ff0000L)>>16L)|((c&0xf0000000L)>>4L));
 	c&=0x0fffffffL;
+	//one round, 0.25s*16=4s
 	RoundKey0(0);RoundKey0(1);RoundKey1(2);RoundKey1(3);
 	RoundKey1(4);RoundKey1(5);RoundKey1(6);RoundKey1(7);
 	RoundKey0(8);RoundKey1(9);RoundKey1(10);RoundKey1(11);
-	RoundKey1(12);RoundKey1(13);RoundKey1(14);RoundKey0(15);
+    RoundKey1(12);RoundKey1(13);RoundKey1(14);RoundKey0(15);
 	return 0;
 }
 
@@ -439,8 +439,8 @@ __global__ void DESencKernel(uint64_t *data) {
 		register uint64_t load = data[TX];
 		register uint32_t right = load;
 		register uint32_t left = load >> 32;
-		register uint64_t cs1[16];
-		generateKey(load,cs1);
+		//register uint64_t cs1[16];
+		//generateKey(load,cs1);
 		IP(right,left);
 
 		left=ROTATE(left,29);
@@ -462,6 +462,7 @@ __global__ void DESencKernel(uint64_t *data) {
 		D_ENCRYPT(right,left,13);
 		D_ENCRYPT(left,right,14);
 		D_ENCRYPT(right,left,15);
+		D_ENCRYPT(right,left,15);
 
 		left=ROTATE(left,3);
 		right=ROTATE(right,3);
@@ -469,7 +470,6 @@ __global__ void DESencKernel(uint64_t *data) {
 		FP(right,left);
 		load = left|((uint64_t)right)<<32;
 		data[TX]=load;
-
 	}
 }
 
