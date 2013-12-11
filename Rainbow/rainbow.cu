@@ -1,4 +1,5 @@
 #include "common.h"
+#include "rainbow.h"
 
 __device__ int generateKey(uint64_t key,uint64_t *store)
 {
@@ -28,6 +29,7 @@ __device__ int generateKey(uint64_t key,uint64_t *store)
 
 __device__ uint64_t desOneTime(uint64_t*roundKeys)
 {
+	uint64_t rs;
 	uint32_t right = plRight;uint32_t left = plLeft;
 
 	IP(right,left);
@@ -57,9 +59,9 @@ __device__ uint64_t desOneTime(uint64_t*roundKeys)
 	right=ROTATE(right,3);
 
 	FP(right,left);
-	load = left|((uint64_t)right)<<32;
+	rs = left|((uint64_t)right)<<32;
 	
-	data[TX]=load;
+	return rs;
 }
 
 __global__ void desEncrypt(uint64_t *data) 
@@ -70,11 +72,49 @@ __global__ void desEncrypt(uint64_t *data)
 	#endif
 	__syncthreads();
 	register uint64_t key=data[TX];
-	for(int i=0;i<(1<<10);i++)
+	for(int i=0;i<(1<<8);i++)
 	{
 		uint64_t roundKeys[16];
 		generateKey(key,roundKeys);
 		key=desOneTime(roundKeys);
 	}
 	data[TX]=key;
+}
+
+void DES_cuda_crypt() 
+{
+	uint64_t *deviceKeyIn, *deviceKeyOut;int i;
+	uint64_t keys[ALL];struct timeval tstart, tend;
+	int round,size;round=0;
+	printf("Starting DES kernel\n");
+	size=ALL*sizeof(uint64_t);
+    _CUDA(cudaMalloc((void**)&deviceKeyIn,size));
+	_CUDA(cudaMalloc((void**)&deviceKeyOut,size));	
+	while(1)
+	{
+		printf("Begin Round: %d\n",round);
+		gettimeofday(&tstart, NULL);
+	    for(i=0;i<ALL;i++) keys[i]=rand();
+	    /*for(i=0;i<ALL;i++) write file*/
+	    _CUDA(cudaMemcpy(deviceKeyIn,keys,size,cudaMemcpyHostToDevice));
+		desEncrypt<<<BLOCK_LENGTH,MAX_THREAD>>>(deviceKeyIn);
+		_CUDA(cudaMemcpy(keys,deviceKeyOut,size,cudaMemcpyDeviceToHost));
+		 /*for(i=0;i<ALL;i++) write file*/
+		gettimeofday(&tend, NULL);
+		int64 uses=1000000*(tend.tv_sec-tstart.tv_sec)+(tend.tv_usec-tstart.tv_usec);
+		printf("round time: %lld us\n", uses);
+		printf("End Round: %d\n",round);round++;
+	}
+	printf("Ending DES kernel\n");
+}
+
+int main()
+{
+	struct timeval tstart, tend;
+	gettimeofday(&tstart, NULL);
+	DES_cuda_crypt();
+	gettimeofday(&tend, NULL);
+	int64 uses = 1000000 * (tend.tv_sec - tstart.tv_sec) + (tend.tv_usec - tstart.tv_usec);
+	printf("total time: %lld us\n", uses);
+	return 0;
 }

@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #include <sys/time.h>
 #include <openssl/evp.h>
@@ -20,7 +21,7 @@
 		#define TX (blockIdx.x * blockDim.x + threadIdx.x)
 	#endif
 #endif
-
+cudaError_t cudaerrno;
 #define _CUDA(call) {																	\
 	call;				                                												\
 	cudaerrno=cudaGetLastError();																	\
@@ -30,6 +31,5 @@
     } }
 
 typedef long long int64;
-
 
 #endif
