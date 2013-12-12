@@ -390,7 +390,4 @@ __device__ uint32_t plLeft  = 0x6D6F295A;
 	k[S*2+1]=ROTATE(t2,26)&0xffffffffL;\
 	store[S]|=k[S*2];\
 }
-
-__device__ int  generateKey(uint64_t key,uint64_t *store);
-__global__ void desEncrypt(uint64_t *data);
 #endif

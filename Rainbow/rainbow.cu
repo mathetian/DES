@@ -81,11 +81,22 @@ __global__ void desEncrypt(uint64_t *data)
 	data[TX]=key;
 }
 
-void DES_cuda_crypt() 
+void desCrypt() 
 {
 	uint64_t *deviceKeyIn, *deviceKeyOut;int i;
 	uint64_t keys[ALL];struct timeval tstart, tend;
-	int round,size;round=0;
+	int round,size;FILE*f1,*f2;
+	round=0;
+	if((f1=fopen("start.in","w"))==NULL)
+	{
+		printf("desCrypt: fopen start.in error\n");
+		exit(0);
+	}
+	if((f2=fopen("end.in","w"))==NULL)
+	{
+		printf("desCrypt: fopen end.out error\n");
+		exit(0);
+	}
 	printf("Starting DES kernel\n");
 	size=ALL*sizeof(uint64_t);
     _CUDA(cudaMalloc((void**)&deviceKeyIn,size));
@@ -93,18 +104,30 @@ void DES_cuda_crypt()
 	while(1)
 	{
 		printf("Begin Round: %d\n",round);
+		fprintf(f1,"Begin Round: %d\n",round);
+		fprintf(f2,"Begin Round: %d\n",round);
+
 		gettimeofday(&tstart, NULL);
 	    for(i=0;i<ALL;i++) keys[i]=rand();
-	    /*for(i=0;i<ALL;i++) write file*/
+	    for(i=0;i<ALL;i++) fprintf(f1,"%lu\n",keys[i]);
 	    _CUDA(cudaMemcpy(deviceKeyIn,keys,size,cudaMemcpyHostToDevice));
 		desEncrypt<<<BLOCK_LENGTH,MAX_THREAD>>>(deviceKeyIn);
 		_CUDA(cudaMemcpy(keys,deviceKeyOut,size,cudaMemcpyDeviceToHost));
-		 /*for(i=0;i<ALL;i++) write file*/
+		for(i=0;i<ALL;i++) fprintf(f2,"%lu\n",keys[i]);
 		gettimeofday(&tend, NULL);
 		int64 uses=1000000*(tend.tv_sec-tstart.tv_sec)+(tend.tv_usec-tstart.tv_usec);
+		
 		printf("round time: %lld us\n", uses);
-		printf("End Round: %d\n",round);round++;
+		fprintf(f1,"round time: %lld us\n",uses);
+		fprintf(f2,"round time: %lld us\n",uses);
+		
+		printf("End Round: %d\n",round);
+		fprintf(f1,"End Round: %d\n",round);
+		fprintf(f2,"End Round: %d\n",round);
+
+		round++;
 	}
+	fclose(f1);fclose(f2);
 	printf("Ending DES kernel\n");
 }
 
@@ -112,7 +135,7 @@ int main()
 {
 	struct timeval tstart, tend;
 	gettimeofday(&tstart, NULL);
-	DES_cuda_crypt();
+	desCrypt();
 	gettimeofday(&tend, NULL);
 	int64 uses = 1000000 * (tend.tv_sec - tstart.tv_sec) + (tend.tv_usec - tstart.tv_usec);
 	printf("total time: %lld us\n", uses);

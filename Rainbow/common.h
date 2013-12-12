@@ -31,5 +31,4 @@ cudaError_t cudaerrno;
     } }
 
 typedef long long int64;
-
 #endif
