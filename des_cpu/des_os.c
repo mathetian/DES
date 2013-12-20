@@ -118,7 +118,7 @@ void genFunc(int rank, int numproc)
 				memcpy(in,plain_data[i],8);
 				memset(out,0,8);memset(outin,0,8);
 				des_ecb_encrypt(&in,&out,ks,DES_ENCRYPT);
-				des_ecb_encrypt(&out,&outin,ks,DES_DECRYPT);
+				//des_ecb_encrypt(&out,&outin,ks,DES_DECRYPT);
 			}	
 		}
 		clock_gettime(CLOCK_MONOTONIC,&time2);

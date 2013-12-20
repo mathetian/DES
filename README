@@ -1,9 +1,3 @@
-1. To use MPI,
+DESCrack
 
-source /lustre/utility/intel/composer_xe_2013.3.163/bin/compilervars.sh intel64
-source /lustre/utility/intel/mkl/bin/intel64/mklvars_intel64.sh
-source /lustre/utility/intel/impi/4.1.1.036/bin64/mpivars.sh
-
---------------------------------------------------------------------------------
-
-2. 
+--------------------------------------------------

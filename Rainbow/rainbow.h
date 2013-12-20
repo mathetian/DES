@@ -366,10 +366,9 @@ __device__ uint32_t plLeft  = 0x6D6F295A;
 		des_skb[6][ (d>>15L)&0x3f                ]|\
 		des_skb[7][((d>>21L)&0x0f)|((d>>22L)&0x30)];\
 	t2=((t<<16L)|(s&0x0000ffffL))&0xffffffffL;\
-	k[S*2]=ROTATE(t2,30)&0xffffffffL;\
+	store[S]<<=32;\
 	t2=((s>>16L)|(t&0xffff0000L));\
-	k[S*2+1]=ROTATE(t2,26)&0xffffffffL;\
-	store[S]|=k[S*2];\
+	store[S]|=(ROTATE(t2,26)&0xffffffffL);\
 }
 
 #define RoundKey1(S) { \
@@ -385,9 +384,9 @@ __device__ uint32_t plLeft  = 0x6D6F295A;
 		des_skb[6][ (d>>15L)&0x3f                ]|\
 		des_skb[7][((d>>21L)&0x0f)|((d>>22L)&0x30)];\
 	t2=((t<<16L)|(s&0x0000ffffL))&0xffffffffL;\
-	k[S*2]=ROTATE(t2,30)&0xffffffffL;\
+	store[S]=ROTATE(t2,30)&0xffffffffL;\
+	store[S]<<=32;\
 	t2=((s>>16L)|(t&0xffff0000L));\
-	k[S*2+1]=ROTATE(t2,26)&0xffffffffL;\
-	store[S]|=k[S*2];\
+	store[S]|=ROTATE(t2,26)&0xffffffffL;\
 }
 #endif
