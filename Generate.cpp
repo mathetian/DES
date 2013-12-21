@@ -5,12 +5,6 @@
 #include "ChainWalkContext.h"
 using namespace std;
 
-void Logo()
-{
-	printf("DESRainbowCuda 1.0 - Make an implementation of DES Time-and-Memory Tradeoff Technology\n");
-	printf("by Tian Yulong(mathetian@gmail.com)\n");
-}
-
 void Usage()
 {
 	Logo();
