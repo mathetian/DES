@@ -1,10 +1,5 @@
-#include "RainbowChain.cpp"
-
-void Logo()
-{
-	printf("DESRainbowCuda 1.0 - Make an implementation of DES Time-and-Memory Tradeoff Technology\n");
-	printf("by Tian Yulong(mathetian@gmail.com)\n");
-}
+#include "common.h"
+#include "ChainWalkContext.h"
 
 void Usage()
 {
@@ -15,42 +10,51 @@ void Usage()
 	printf("example: verified hello.rt 111111");
 }
 
-
 int main(int argc,char*argv[])
 {
-	if(argc!=3)
+	FILE * file;
+	int chainLen, chainCount, fileLen;
+	RainbowChain chain; int index;
+	ChainWalkContext cwc;
+
+	if(argc != 3)
 	{
 		Usage();
 		return 0;
 	}
-	FILE*file=fopen(argv[1],"r");
-	int chainLen=atoi(argv[2]);
-	if(!file)
+	if((file  = fopen(argv[1],"r")) == NULL)
 	{
 		printf("fopen error\n");
 		return 0;
 	}
-	int fileLen=GetFileLen(file);
-	if(fileLen%16!=0)
+	
+	chainLen = atoi(argv[2]);
+	fileLen  = GetFileLen(file);
+	
+	if(fileLen % 16 != 0)
 	{
 		printf("verified failed, error length\n");
 		return 0;
 	}
-	int chainCount=fileLen/16;
-	RainbowChain chain;
-	for(int i=0;i<chainCount;i++)
+	chainCount = fileLen >> 4;
+	
+	ChainWalkContext::SetChainInfo(chainLen, chainCount);
+	
+	for(index = 0;index < chainCount;index++)
 	{
-		fread(&chain,sizeof(RainbowChain),1,file);
-		ChainWalkContext cwc;
-		cwc.setStartIndex(chain.nStartIndex);
-		for(int j=0;j<chainLen;j++)
+		fread(&chain, sizeof(RainbowChain), 1, file);
+
+		for(int j = 0;j < chainLen;j++)
 		{
-			cwc.PlainToHash();
-			cwc.HashToIndex();
+			cwc.KeyToHash();
+			cwc.HashToKey(j);
 		}
-		printf("%d\b",cwc.GetCurrentIndex());
-		if(cwc.GetCurrentIndex()!=chain.nEndIndex)
-			printf("\n warning: integrity check fail\n");
+
+		if(cwc.GetKey() != chain.nEndKey)
+			printf("\n warning: integrity check fail, index: %d \n",index);
+		if(index % 10000 == 0)
+			printf("\n Have check %d chains\n",index);
+
 	}
 	fclose(file);
 	return 0;

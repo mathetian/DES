@@ -27,7 +27,7 @@ public:
 	void 	 		HashToKey(int nPos);
 	uint64_t 		GetRandomKey();
 	uint64_t 		GetKey();
-
+	void 			SetKey(uint64_t m_nIndex);
 private:
 	uint64_t m_nIndex;
 };
