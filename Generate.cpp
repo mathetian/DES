@@ -74,11 +74,7 @@ int main(int argc,char*argv[])
 		Usage();
 		return 0;
 	}
-
-	if(argc == 5)
-	{
-
-	}
+	
 	chainLen   = atoi(argv[2]);
 	chainCount = atoi(argv[3]);
 	memcpy(suffix,argv[4],sizeof(argv[4]));

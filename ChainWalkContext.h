@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <openssl/rand.h>
 #include <openssl/des.h>
+#include <string>
+using namespace std;
 
 #define HASH_LEN 8
 
@@ -13,15 +15,15 @@ public:
 	ChainWalkContext();
 	virtual ~ ChainWalkContext();
 private:
-	static uint64_t m_plainText;
-	static uint64_t m_keySpaceTotal;	
-	static int 		m_chainLen;
-	static int 		m_chainCount;
+	static uint64_t   m_plainText;
+	static uint64_t   m_keySpaceTotal;	
 	static des_cblock m_dplainText;
-	
 public:
-	static void 	SetChainInfo(int chainlen,int chainCount);
-
+	static int 		  m_chainLen;
+	static int 		  m_chainCount;
+public:
+	static void 	SetChainInfo(int chainLen,int chainCount);
+	static void 	SetupWithPathName(const string & fileName);
 public:
 	void 	 		KeyToHash();
 	void 	 		HashToKey(int nPos);

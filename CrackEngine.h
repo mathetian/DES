@@ -1,26 +1,39 @@
 #ifndef _CRACK_ENGINE_H
 #define _CRACK_ENGINE_H
+
+#include "CipherSet.h"
+#include "ChainWalkContext.h"
+#include "common.h"
+
+#include <stdint.h>
+
 class CrackEngine{
 public:
 	CrackEngine();
 	virtual ~ CrackEngine();
-private:
-	ChainWalkSet m_cws;
-	float m_diskTime;
-	float m_totalTime;
-	int m_totalSteps;
-	int m_falseAlarms;
-private:
-	int BinarySearch(RainbowChain*pChain,int nRainbowChainCount,uint64 nIndex);
-	void GetChainIndexRangeWithSameEndPoint(RainbowChain*pChain,int nRainbowChainCount,int nChainIndex,int&nChainIndexFrom,int&nChainIndexTo);
-	bool checkFalseAlarm(RainbowChain*pChain,int nGuessedPos,unsigned char*pHash,HashSet&hs);
-	void SearchTableChunk(RainbowChain*pChain,int nRainbowChainLen,int nRainbowChainCount,CHashSet&hs);
-	void SearchRainbowTable(string sPathName,HashSet&hs);
+
 public:
-	void run(const string&encryptedText,const string&filename);
-	float GetDiskTime();
-	float GetTotalTime();
-	int GetTotalSteps();
-	int GetFalseAlarms();
+	void  Run(const string & fileName, CipherSet & hs);
+	int   GetDiskTime();
+	int   GetTotalTime();
+	int   GetTotalSteps();
+	int   GetFalseAlarms();
+
+private:
+	ChainWalkContext m_cwc;
+	CipherSet		 m_cs;
+	int              m_diskTime;
+	int          	 m_totalTime;
+	int          	 m_totalSteps;
+	int          	 m_falseAlarms;
+	int 			 m_nTotalChainWalkStep;
+	int 			 m_nToatalChainWalkStepDueToFalseAlarm;
+private:
+	int  BinarySearch(RainbowChain * pChain, int pChainCount, uint64_t nIndex);
+	void GetIndexRange(RainbowChain * pChain,int pChainCount,int nChainIndex, int&nChainIndexFrom, int&nChainIndexTo);
+	bool CheckAlarm(RainbowChain * pChain,int nGuessedPos);
+	void SearchTableChunk(RainbowChain * pChain,int pChainCount);
+	void SearchRainbowTable(const string & fileName);
 };
+
 #endif
