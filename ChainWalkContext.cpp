@@ -1,8 +1,12 @@
 #include "ChainWalkContext.h"
+#include "common.h"
+#include <string.h>
 
-string ChainWalkContext::m_plainText;
-int ChainWalkContext::m_chainLen;
-int ChainWalkContext::m_chainCount;
+uint64_t   ChainWalkContext::m_plainText     = 0x305532286D6F295A;
+uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 56) - 1;
+int        ChainWalkContext::m_chainLen;
+int        ChainWalkContext::m_chainCount;
+des_cblock ChainWalkContext::m_dplainText    = {0x30,0x55,0x32,0x28,0x6D,0x6F,0x29,0x5A};
 
 ChainWalkContext::ChainWalkContext()
 {
@@ -12,64 +16,48 @@ ChainWalkContext::~ChainWalkContext()
 {
 }
 
-void ChainWalkContext::setPlainText(const string&plainText)
+void ChainWalkContext::SetChainInfo(int chainLen, int chainCount)
 {
-	m_plainText=plainText;
+	m_chainLen   = chainLen;
+	m_chainCount = chainCount;
 }
 
-void ChainWalkContext::setChainLen(int chainLen)
-{
-	m_chainLen=chainLen;
-}
-
-void ChainWalkContext::setChainCount(int chainCount)
-{
-	m_chainCount=chainCount;
-}
-
-void ChainWalkContext::setProperty(const string&plainText,int chainLen,int chainCount)
-{
-	setPlainText(plainText);
-	setChainLen(chainLen);
-	setChainCount(chainCount);
-}
-
-void ChainWalkContext::Dump()
-{
-	printf("plainText: %s, chainLen: %d, chainCount: %d\n",m_plainText,m_chainLen,m_chainCount);
-}
-
-void ChainWalkContext::GenerateRandomIndex()
+uint64_t ChainWalkContext::GetRandomKey()
 {
 	RAND_bytes((unsigned char*)&m_nIndex,8);
-	m_nIndex=m_nIndex%m_nPlainSpaceTotal;
-}
-
-void ChainWalkContext::setIndex(uint64 nIndex)
-{
-	m_nIndex=nIndex;
-}
-
-void ChainWalkContext::IndexToPlain()
-{
-	int i;
-}
-
-void ChainWalkContext::PlainToHash()
-{
-
-}
-
-void ChainWalkContext::HashToIndex()
-{
-	m_nIndex=(*(uint64*)m_Hash+m_nReduceOffset+nPos)%m_nPlainSpaceTotal;
-}
-
-uint64 ChainWalkContext::GetIndex()
-{
+	m_nIndex = m_nIndex & m_keySpaceTotal;
 	return m_nIndex;
 }
 
-uint64 ChainWalkContext::GetHashValue()
+/**
+    des_cblock: typedef unsigned char DES_cblock[8];
+**/
+/**
+typedef struct DES_ks
 {
+    union
+	{
+		DES_cblock cblock;
+		DES_LONG deslong[2];
+	} ks[16];
+} DES_key_schedule;
+DES_LONG is 'unsigned int'
+**/
+
+void ChainWalkContext::KeyToHash()
+{
+	des_key_schedule ks;unsigned char out[8];
+	SetupDESKey(m_nIndex,ks); memset(out,0,8);
+	des_ecb_encrypt(&m_dplainText,&out,ks,DES_ENCRYPT);
+	Arr7ToU56(out,m_nIndex);
+}
+
+void ChainWalkContext::HashToKey(int nPos)
+{
+	m_nIndex = (m_nIndex + nPos) & m_keySpaceTotal;
+}
+
+uint64_t ChainWalkContext::GetKey()
+{
+	return m_nIndex;
 }

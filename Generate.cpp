@@ -1,106 +1,141 @@
+#include <iostream>
+using namespace std;
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <iostream>
+#include <sys/time.h>
+#include <string.h>
+
 #include "ChainWalkContext.h"
-using namespace std;
+#include "common.h"
 
 void Usage()
 {
 	Logo();
-	printf("Usage: generate plaintext\\\n");
-	printf("	   			chainLen chainCount\\\n");
-	printf("				fileNamePrefix\\\n");
+	printf("Usage: generate chainLen chainCount\\\n");
+	printf("				 suffix\\\n");
 
 	printf("\n");
-	printf("example: generate 0x305532286D6F295A 1000 10000");
+	printf("example: generate 1000 10000 suffix");
 }
 
-void Bench()
+void Benchmark()
 {
 	ChainWalkContext cwc;
-	cwc.GenerateRandomIndex();
-	cwc.IndexToPlain();
-	clock_t t1=clock();
-	int nLoop=25000000;
-	int i;
-	for(i=0;i<nLoop;i++)
-		cwc.PlainToHash();
-	clock_t t2=clock();int nSecond=(t2-t1)/CLOCK_PER_SEC;
-	printf("%d of %d rainbow chains generated (%d m %d s)\n",nSecond/60,nSecond%60);
+	struct timeval tstart, tend;
+	uint64_t useTimes; 
+	int index, nLoop = 1 << 25;	
 
-	cwc.GenerateRandomIndex();
-	t1=clock();
-	for(i=0;i<nLoop;i++)
+	cwc.GetRandomKey();
+	
+	gettimeofday(&tstart, NULL);
+
+	for(index = 0;index < nLoop;index++) 
+		cwc.KeyToHash();
+
+	gettimeofday(&tend, NULL);
+
+	useTimes = 1000000*(tend.tv_sec-tstart.tv_sec)+(tend.tv_usec-tstart.tv_usec);
+    printf("Benchmark: nLoop %d: keyToHash time: %lld us\n", nLoop, (long long)useTimes);
+
+	cwc.GetRandomKey();
+
+	gettimeofday(&tstart, NULL);
+	for(index = 0;index < nLoop;index++)
 	{
-		cwc.IndexToPlain();
-		cwc.PlainToHash();
-		cwc.HashToIndex(i);
+		cwc.KeyToHash();
+		cwc.HashToKey(index);
 	}
-	t2=clock();nSecond=(t2-t1)/CLOCK_PER_SEC;
-	printf("%d of %d rainbow chains generated (%d m %d s)\n",nSecond/60,nSecond%60);
+
+	gettimeofday(&tend, NULL);
+
+	useTimes = 1000000*(tend.tv_sec-tstart.tv_sec)+(tend.tv_usec-tstart.tv_usec);
+    printf("Benchmark: nLoop %d: total time: %lld us\n", nLoop, (long long)useTimes);
 }
 
 int main(int argc,char*argv[])
 {
-	if(argc!=5)
+	int chainLen, chainCount, index;
+	char suffix[256], szFileName[256];
+	FILE * file; ChainWalkContext cwc;
+	uint64_t nDatalen, nChainStart, useTimes;
+	struct timeval tstart, tend;
+
+	if(argc == 2)
+	{
+		if(strcmp(argv[1],"benchmark") == 0)
+			Benchmark();
+		return 0;
+	}
+
+	if(argc != 4)
 	{
 		Usage();
 		return 0;
 	}
-	const char*plainText=argv[1];
-	int chainLen=atoi(argv[2]);
-	int chainCount=atoi(argv[3]);
-	const char*fileNamePrefix=argv[4];
-	char szFileName[256];
-	sprintf(szFileName,"DES_%s_%d-%d_%s",plainText,chainLen,chainCount,fileNamePrefix);
-	FILE*file=fopen(szFileName,"r+b");
-	if(file==NULL)
+
+	if(argc == 5)
+	{
+
+	}
+	chainLen   = atoi(argv[2]);
+	chainCount = atoi(argv[3]);
+	memcpy(suffix,argv[4],sizeof(argv[4]));
+	sprintf(szFileName,"DES_%d-%d_%s",chainLen,chainCount,suffix);
+	if((file = fopen(szFileName,"r+b")) == NULL)
 	{
 		printf("failed to create %s\n",szFileName);
 		return 0;
 	}
-	unsigned int nDatalen=GetFileLen(file);
-	nDatalen=nDatalen/16*16;
-	if(nDatalen==chainCount*16)
+
+	nDatalen = GetFileLen(file);
+	nDatalen = (nDatalen >> 4) << 4;
+
+	if(nDatalen == (chainCount << 4))
 	{
 		printf("precompute has finised\n");
 		return 0;
 	}
-	if(nDatalen>0) printf("continuing from interrupted precomputing\n");
-	fseek(file,nDatalen,SEEK_SET);
-	ChainWalkContext cwc;
-	nChainStart+=nDatalen/16;
-	clock_t t1=clock();
-	int i;
-	for(i=nDatalen/16;i<chainCount;i++)
+
+	if(nDatalen > 0) printf("continuing from interrupted precomputing\n");
+	
+	fseek(file, nDatalen, SEEK_SET);
+	nChainStart += (nDatalen >> 4);
+
+	index = nDatalen >> 4;
+
+	cwc.SetChainInfo(chainLen, chainCount);
+	for(;index < chainCount; index++)
 	{
-		cwc.setIndex(nChainStart++);
-		uint64 nIndex=cwc.GetIndex();
-		if(fwrite(&nIndex,1,8,file)!=8)
+		uint64_t nKey = cwc.GetRandomKey();
+		if(fwrite(&nKey,1,8,file)!=8)
 		{
 			printf("disk write error\n");
 			break;
 		}
-		int npos;
-		for(npos=0;npos<chainLen-1;npos++)
+
+		int nPos;
+		for(nPos = 0;nPos < chainLen - 1;nPos++)
 		{
-			cwc.IndexToPlain();
-			cwc.PlainToHash();
-			cwc.HashToIndex(npos);
+			cwc.KeyToHash();
+			cwc.HashToKey(nPos);
 		}
-		nIndex=cwc.GetIndex();
-		if(fwrite(&nIndex,1,8,file)!=8)
+
+		nKey = cwc.GetKey();
+
+		if(fwrite(&nKey,1,8,file)!=8)
 		{
 			printf("disk write error\n");
 			break;
 		}
-		if((i+1)%100000==0||i+1==chainCount)
+
+		if((index + 1)%100000 == 0||index + 1 == chainCount)
 		{
-			clock_t t2=clock();
-			int nSecond=(t2-t1)/CLOCK_PER_SEC;
-			printf("%d of %d rainbow chains generated (%d m %d s)\n",i+1,chainCount,nSecond/60,nSecond%60);
-			t1=clock();
+			gettimeofday(&tend, NULL);
+			useTimes = 1000000*(tend.tv_sec - tstart.tv_sec) + (tend.tv_usec - tstart.tv_usec);
+    		printf("Generate: nLoop %d: total time: %lld us\n", 100000, (long long)useTimes);
+			gettimeofday(&tstart, NULL);
 		}
 	}
 	fclose(file);
