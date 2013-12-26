@@ -8,7 +8,7 @@ using namespace std;
 #include <string.h>
 
 #include "ChainWalkContext.h"
-#include "common.h"
+#include "Common.h"
 
 void Usage()
 {

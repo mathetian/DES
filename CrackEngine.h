@@ -3,7 +3,7 @@
 
 #include "CipherSet.h"
 #include "ChainWalkContext.h"
-#include "common.h"
+#include "Common.h"
 
 #include <stdint.h>
 

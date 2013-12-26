@@ -1,8 +1,14 @@
-#include "common.h"
+#include "Common.h"
+#include <sys/sysinfo.h>
 
-
-unsigned int GetFileLen(FILE*file)
+unsigned int GetFileLen(FILE* file)
 {
+    unsigned int pos = ftell(file);
+    fseek(file, 0, SEEK_END);
+    unsigned int len = ftell(file);
+    fseek(file, pos, SEEK_SET);
+
+    return len;
 }
 
 void Logo()
@@ -12,7 +18,10 @@ void Logo()
 }
 
 unsigned int GetAvailPhysMemorySize()
-{
+{   
+    struct sysinfo info;
+    sysinfo(&info);
+    return info.freeram;
 }
 
 void U56ToArr7(const uint64_t & key56, unsigned char * key_56)
