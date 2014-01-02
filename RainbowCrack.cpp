@@ -5,10 +5,10 @@
 void Usage()
 {
 	Logo();
-	printf("Usage: Crack   encryptedText hashListFileName\\\n");
+	printf("Usage: crack   encryptedText hashListFileName\\\n");
 
 	printf("\n");
-	printf("example: Crack 0x305532286D6F295A hello.txt");
+	printf("example: crack 0x305532286D6F295A hello.txt");
 }
 
 int main(int argc,char*argv[])

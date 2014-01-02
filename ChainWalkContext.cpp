@@ -1,6 +1,4 @@
 #include "ChainWalkContext.h"
-#include "common.h"
-#include <string.h>
 
 uint64_t   ChainWalkContext::m_plainText     = 0x305532286D6F295A;
 uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 56) - 1;

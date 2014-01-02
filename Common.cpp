@@ -13,8 +13,7 @@ unsigned int GetFileLen(FILE* file)
 
 void Logo()
 {
-	printf("DESRainbowCuda 1.0 - Make an implementation of DES Time-and-Memory Tradeoff Technology\n");
-	printf("by Tian Yulong(mathetian@gmail.com)\n");
+	printf("DESRainbowCrack 1.0\n 	Make an implementation of DES Time-and-Memory Tradeoff Technology\n 	By Tian Yulong(mathetian@gmail.com)\n\n");
 }
 
 unsigned int GetAvailPhysMemorySize()
@@ -59,7 +58,7 @@ void SetupDESKey(const uint64_t&key56,des_key_schedule &ks)
 	key[6]=(key_56[5]<<2)|(key_56[6]>>6);
 	key[7]=(key_56[6<<1]);
 
-	des_set_key(&key,ks);
+	DES_set_key_unchecked(&key, &ks);
 }
 
 SortedSegment::SortedSegment()
@@ -85,14 +84,22 @@ int SortedSegment::getLength()
 RainbowChain * SortedSegment::getFirst()
 {
 	fseek(file,offset+curOffset,SEEK_SET);
-	fread(chains,sizeof(RainbowChain),1,file);
+	if((fread(chains,sizeof(RainbowChain),1,file)) != sizeof(RainbowChain))
+	{
+		printf("Error length\n");
+		exit(0);
+	}
 	return chains;
 }
 
 RainbowChain * SortedSegment::getAll()
 {
 	fseek(file,offset,SEEK_SET);
-	fread(chains,sizeof(RainbowChain),length,file);
+	if((fread(chains,sizeof(RainbowChain),length,file)) != sizeof(RainbowChain) * length)
+	{
+		printf("Error length\n");
+		exit(0);
+	}
 	return chains;
 }
 
@@ -100,6 +107,10 @@ RainbowChain * SortedSegment::getNext()
 {
 	if(curOffset==length*sizeof(RainbowChain))
 		return NULL;
-	fread(chains,sizeof(RainbowChain),1,tmpFile);
+	if((fread(chains,sizeof(RainbowChain),1,tmpFile)) != sizeof(RainbowChain))
+	{
+		printf("Error length\n");
+		exit(0);
+	}
 	curOffset+=sizeof(RainbowChain);
 }

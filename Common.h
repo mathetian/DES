@@ -1,9 +1,13 @@
-#ifndef _RAINBOW_CHAIN_H
-#define _RAINBOW_CHAIN_H
+#ifndef _COMMON_H
+#define _COMMON_H
 
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
+
+#include <sys/time.h>
 #include <openssl/des.h>
 
 typedef struct _RainbowChain{
@@ -46,13 +50,11 @@ public:
 	int  getLength();
 
 public:
-	static FILE*file;
-	static FILE*tmpFile;
+	 FILE * file;
+	 FILE * tmpFile;
 
 private:
-	int offset;
-	int length;
-	int curOffset;
+	int offset, length, curOffset;
 	RainbowChain chains[CHAIN_IN_MEMORY_MAX];
 };
 

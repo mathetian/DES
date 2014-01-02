@@ -1,12 +1,13 @@
 #ifndef _CHAIN_WALK_CONTEXT_H
 #define _CHAIN_WALK_CONTEXT_H
 
-#include <stdlib.h>
-#include <stdint.h>
+
 #include <openssl/rand.h>
-#include <openssl/des.h>
+#include <stdint.h>
 #include <string>
 using namespace std;
+
+#include "Common.h"
 
 #define HASH_LEN 8
 

@@ -1,57 +1,49 @@
-#include <iostream>
-using namespace std;
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <sys/time.h>
-#include <string.h>
-
-#include "ChainWalkContext.h"
 #include "Common.h"
+#include "TimeStamp.h"
+#include "ChainWalkContext.h"
+
+
 
 void Usage()
 {
 	Logo();
-	printf("Usage: generate chainLen chainCount\\\n");
-	printf("				 suffix\\\n");
-
-	printf("\n");
-	printf("example: generate 1000 10000 suffix");
+	printf("Usage: generator chainLen chainCount suffix\n");
+	printf("                 benchmark\n\n");
+	printf("example 1: generator 1000 10000 suffix\n");
+	printf("example 2: generator benchmark\n\n");
 }
+
+typedef long long ll;
 
 void Benchmark()
 {
 	ChainWalkContext cwc;
-	struct timeval tstart, tend;
-	uint64_t useTimes; 
-	int index, nLoop = 1 << 25;	
+	int index, nLoop = 1 << 21;	
+	char str[256]; 
+	memset(str, 0, sizeof(str));
 
 	cwc.GetRandomKey();
 	
-	gettimeofday(&tstart, NULL);
+	TimeStamp::StartTime();
 
 	for(index = 0;index < nLoop;index++) 
 		cwc.KeyToHash();
 
-	gettimeofday(&tend, NULL);
+	sprintf(str, "Benchmark: nLoop %d: keyToHash time:", nLoop);
 
-	useTimes = 1000000*(tend.tv_sec-tstart.tv_sec)+(tend.tv_usec-tstart.tv_usec);
-    printf("Benchmark: nLoop %d: keyToHash time: %lld us\n", nLoop, (long long)useTimes);
-
+	TimeStamp::StopTime(str);
+	
 	cwc.GetRandomKey();
 
-	gettimeofday(&tstart, NULL);
+	TimeStamp::StartTime();
+
 	for(index = 0;index < nLoop;index++)
 	{
 		cwc.KeyToHash();
 		cwc.HashToKey(index);
 	}
-
-	gettimeofday(&tend, NULL);
-
-	useTimes = 1000000*(tend.tv_sec-tstart.tv_sec)+(tend.tv_usec-tstart.tv_usec);
-    printf("Benchmark: nLoop %d: total time: %lld us\n", nLoop, (long long)useTimes);
+	sprintf(str, "Benchmark: nLoop %d: total time:    ", nLoop);
+	TimeStamp::StopTime(str);
 }
 
 int main(int argc,char*argv[])
@@ -59,8 +51,8 @@ int main(int argc,char*argv[])
 	int chainLen, chainCount, index;
 	char suffix[256], szFileName[256];
 	FILE * file; ChainWalkContext cwc;
-	uint64_t nDatalen, nChainStart, useTimes;
-	struct timeval tstart, tend;
+	uint64_t nDatalen, nChainStart;
+	char str[256];
 
 	if(argc == 2)
 	{
@@ -74,12 +66,13 @@ int main(int argc,char*argv[])
 		Usage();
 		return 0;
 	}
-	
-	chainLen   = atoi(argv[2]);
-	chainCount = atoi(argv[3]);
-	memcpy(suffix,argv[4],sizeof(argv[4]));
+	chainLen   = atoi(argv[1]);
+	chainCount = atoi(argv[2]);
+
+	memcpy(suffix, argv[3], sizeof(argv[3]));
 	sprintf(szFileName,"DES_%d-%d_%s",chainLen,chainCount,suffix);
-	if((file = fopen(szFileName,"r+b")) == NULL)
+	
+	if((file = fopen(szFileName,"a+")) == NULL)
 	{
 		printf("failed to create %s\n",szFileName);
 		return 0;
@@ -94,7 +87,11 @@ int main(int argc,char*argv[])
 		return 0;
 	}
 
-	if(nDatalen > 0) printf("continuing from interrupted precomputing\n");
+	if(nDatalen > 0)
+	{
+		printf("continuing from interrupted precomputing\n");
+		printf("have computed %lld chains\n", (ll)(nDatalen >> 4));
+	} 
 	
 	fseek(file, nDatalen, SEEK_SET);
 	nChainStart += (nDatalen >> 4);
@@ -102,10 +99,14 @@ int main(int argc,char*argv[])
 	index = nDatalen >> 4;
 
 	cwc.SetChainInfo(chainLen, chainCount);
-	for(;index < chainCount; index++)
+	
+	TimeStamp::StartTime();
+
+	for(;index < chainCount;index++)
 	{
 		uint64_t nKey = cwc.GetRandomKey();
-		if(fwrite(&nKey,1,8,file)!=8)
+
+		if(fwrite(&nKey, 1, 8, file)!=8)
 		{
 			printf("disk write error\n");
 			break;
@@ -126,12 +127,11 @@ int main(int argc,char*argv[])
 			break;
 		}
 
-		if((index + 1)%100000 == 0||index + 1 == chainCount)
+		if((index + 1)%10000 == 0||index + 1 == chainCount)
 		{
-			gettimeofday(&tend, NULL);
-			useTimes = 1000000*(tend.tv_sec - tstart.tv_sec) + (tend.tv_usec - tstart.tv_usec);
-    		printf("Generate: nLoop %d: total time: %lld us\n", 100000, (long long)useTimes);
-			gettimeofday(&tstart, NULL);
+			sprintf(str,"Generate: nChains %d: total time:", 10000);
+			TimeStamp::StopTime(str);
+			TimeStamp::StartTime();
 		}
 	}
 	fclose(file);
