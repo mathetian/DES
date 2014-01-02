@@ -54,8 +54,8 @@ public:
 	int  getLength();
 
 public:
-	 FILE * file;
-	 FILE * tmpFile;
+	static FILE * file;
+	static FILE * tmpFile;
 
 private:
 	int offset, length, curOffset;

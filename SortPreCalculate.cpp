@@ -3,16 +3,13 @@
 #include <queue>
 using namespace std;
 
-#include <stdio.h>
-#include "common.h"
+#include "Common.h"
 
 void Usage()
 {
 	Logo();
-	printf("Usage: sort fileName\n");
-
-	printf("\n");
-	printf("example: sort fileName");
+	printf("Usage  : sort fileName\n");
+	printf("example: sort DES_100_100_test\n\n");
 }
 
 int QuickSort(RainbowChain * pChain,int length)
@@ -40,6 +37,7 @@ void ExternalSort(FILE*file,const char * tmpfileName)
 	memoryCount = nAvailPhys >> 4;
 
 	segNums = chainCount/memoryCount;
+	
 	if(chainCount % memoryCount != 0) 
 		segNums++;
 	
@@ -87,11 +85,18 @@ void ExternalSort(FILE*file,const char * tmpfileName)
 	}
 }
 
+void printMemory(const char * str, long long nAvailPhys)
+{
+	long long a = 1000, b = 1000*1000;
+	long long c = b * 1000;
+	printf("%s %lld GB, %lld MB, %lld KB, %lld B\n", str, nAvailPhys/c, (nAvailPhys%c)/b, (nAvailPhys%b)/a, nAvailPhys%1000);
+}
+
 int main(int argc,char*argv[])
 {
-	const char * sPathName; 
-	FILE * file;
-	unsigned int fileLen, nAvailPhys;
+	const char * sPathName; FILE * file, * file2;
+	long long fileLen, nAvailPhys;
+	char str[256];
 
 	if(argc!=2)
 	{
@@ -100,9 +105,10 @@ int main(int argc,char*argv[])
 	}
 
 	sPathName = argv[1];
-	if((file = fopen(sPathName,"r+b")) == NULL)
+
+	if((file = fopen(sPathName,"r")) == NULL)
 	{
-		printf("failed to open: %s\n",sPathName);
+		printf("Failed to open: %s\n",sPathName);
 		return 0;
 	}
 
@@ -110,11 +116,14 @@ int main(int argc,char*argv[])
 	
 	if(fileLen % 16 != 0)
 	{
-		printf("rainbow table size check failed\n");
+		printf("Rainbow table size check failed\n");
 		return 0;
 	}
+	printf("%s FileLen %lld bytes\n", argv[1], fileLen);
+
 	nAvailPhys = GetAvailPhysMemorySize();	
-	printf("available physical memory: %u bytes\n",nAvailPhys);
+	sprintf(str, "Available free physical memory: ");
+	printMemory(str, nAvailPhys);
 
 	if(nAvailPhys >= fileLen)
 	{
@@ -129,10 +138,11 @@ int main(int argc,char*argv[])
 				printf("disk read fail\n");
 				goto ABORT;
 			}
-			printf("Sorting the rainbow table\n");
+			printf("Sorting the rainbow table...\n");
 			QuickSort(pChain, nRainbowChainCount);
 			printf("writing sorted rainbow table...\n");
-			fseek(file, 0, SEEK_SET);
+			fclose(file);
+			file = fopen(argv[1],"w");
 			fwrite(pChain, 1, fileLen, file);
 			delete [] pChain;
 		}

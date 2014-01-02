@@ -1,6 +1,9 @@
 #include "Common.h"
 #include <sys/sysinfo.h>
 
+FILE * SortedSegment::file;
+FILE * SortedSegment::tmpFile;
+
 void Logo()
 {
 	printf("DESRainbowCrack 1.0\n 	Make an implementation of DES Time-and-Memory Tradeoff Technology\n 	By Tian Yulong(mathetian@gmail.com)\n\n");
