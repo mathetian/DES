@@ -20,6 +20,7 @@ public:
 	void     Done();
 	bool     Solved();
 	int      GetKeyFoundNum();
+	void     PrintAllFound();
 
 private:
 	vector<uint64_t> m_vKeys;

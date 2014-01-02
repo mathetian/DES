@@ -27,7 +27,6 @@ public:
 
 public:
 	static void 	SetChainInfo(uint64_t chainLen,uint64_t chainCount);
-	static void 	SetupWithPathName(const string & fileName);
 
 public:
 	void 	 		KeyToCipher();

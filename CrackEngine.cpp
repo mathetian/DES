@@ -69,11 +69,8 @@ bool CrackEngine::CheckAlarm(RainbowChain * pChain, uint64_t nGuessPos)
 void CrackEngine::SearchRainbowTable(const char * fileName)
 {
 	char str[256];
-	uint64_t nChainLen, nChainCount;
 	uint64_t fileLen, nAllocateSize, nDataRead;
 	FILE * file; RainbowChain * pChain;
-		
-	AnylysisFileName(fileName, nChainLen, nChainCount);
 
 	if((file = fopen(fileName,"rb")) == NULL)
 	{
@@ -83,7 +80,7 @@ void CrackEngine::SearchRainbowTable(const char * fileName)
 
 	fileLen = GetFileLen(file);
 
-	if(fileLen % 16 != 0 || nChainCount*16 != fileLen)
+	if(fileLen % 16 != 0 || ChainWalkContext::m_chainCount*16 != fileLen)
 	{
 		printf("file length check error\n");
 		return;
@@ -105,7 +102,6 @@ void CrackEngine::SearchRainbowTable(const char * fileName)
 	{
 		if(ftell(file) == fileLen) break;
 
-
 		TimeStamp::StartTime();
 		
 		nDataRead = fread(pChain,1, nAllocateSize,file);
@@ -120,7 +116,7 @@ void CrackEngine::SearchRainbowTable(const char * fileName)
 
 		TimeStamp::StartTime();
 		
-		SearchTableChunk(pChain,nDataRead >> 4);		
+		SearchTableChunk(pChain, nDataRead >> 4);		
     	
     	sprintf(str,"cryptanalysis time: ");
     	TimeStamp::StopTime(str);
@@ -133,82 +129,79 @@ void CrackEngine::SearchRainbowTable(const char * fileName)
 
 void CrackEngine::SearchTableChunk(RainbowChain * pChain, int pChainCount)
 {
-	int nFalseAlarm, nChainWalkStepDueToFalseAlarm;
-	int nHashLen, nPos, nIndex;
+	uint64_t nFalseAlarm, nIndex, nGuessPos;
 	uint64_t key = m_cs.GetLeftKey();
 
 	printf("Searching for key: %lld...",(long long)key);
-	
-	nFalseAlarm = 0; 
-	nChainWalkStepDueToFalseAlarm = 0;
+
+	nFalseAlarm  = 0;
 	
 	vector <uint64_t> pEndKeys(ChainWalkContext::m_chainLen, 0);
 
-	for(nPos = ChainWalkContext::m_chainLen - 2;nPos >= 0;nPos--)
-	{
+	for(nGuessPos = 0;nGuessPos < ChainWalkContext::m_chainLen;nIndex++)
+	{	
 		m_cwc.SetKey(key);
-
-		for(nIndex = nPos + 1; nIndex < ChainWalkContext::m_chainLen;nIndex++)
-		{
-			m_cwc.KeyToHash();
-			m_cwc.HashToKey(nIndex);
-		}
 		
-		pEndKeys[nPos] = m_cwc.GetKey();
+		for(nIndex = nGuessPos;nIndex < ChainWalkContext::m_chainLen;nIndex++)
+		{
+			m_cwc.KeyToCipher();
+			m_cwc.KeyReduction(nIndex);
+		}
+
+		pEndKeys[nGuessPos] = m_cwc.GetKey();
 	}
 
-	for(nPos = 0; nPos < m_cwc.m_chainLen - 1;nPos++)
+	for(nGuessPos = 0; nGuessPos < ChainWalkContext::m_chainLen;nGuessPos++)
 	{
-		int nMathingIndexE = BinarySearch(pChain, pChainCount, pEndKeys[nPos]);
+		uint64_t nMathingIndexE = BinarySearch(pChain, pChainCount, pEndKeys[nGuessPos]);
 		
 		if(nMathingIndexE != -1)
 		{
-			int nMathingIndexEFrom, nMathingIndexETo;
+			uint64_t nMathingIndexEFrom, nMathingIndexETo;
 			GetIndexRange(pChain,pChainCount,nMathingIndexE,nMathingIndexEFrom,nMathingIndexETo);
+			
 			for(nIndex = nMathingIndexEFrom;nIndex <= nMathingIndexETo;nIndex++)
 			{
-				if(CheckAlarm(pChain+nIndex, nPos))
+				if(CheckAlarm(pChain+nIndex, nGuessPos))
 					goto NEXT_HASH;
-				else
-				{
-					nChainWalkStepDueToFalseAlarm += nPos+1;
-					nFalseAlarm ++;
-				}
+				else nFalseAlarm++;
 			}
 		}
 	}
 NEXT_HASH:;
-	m_nTotalChainWalkStep += pChainCount;
+	m_totalChains += pChainCount;
 	m_falseAlarms += nFalseAlarm;
-	m_nToatalChainWalkStepDueToFalseAlarm += nChainWalkStepDueToFalseAlarm;
 }
 
-void CrackEngine::Run(const string & fileName, CipherSet & cs)
+void CrackEngine::Run(const char * fileName, CipherSet & cs)
 {
 	this -> m_cs = cs;
-	ChainWalkContext::SetupWithPathName(fileName);
-	while(cs.AnyHashLeft())
+	uint64_t nChainLen, nChainCount;
+	AnylysisFileName(fileName, nChainLen, nChainCount);
+	ChainWalkContext::SetChainInfo(nChainLen, nChainCount);
+
+	while(cs.AnyKeyLeft())
 	{
 		SearchRainbowTable(fileName);
 	}
 }
 
-int CrackEngine::GetDiskTime()
+struct timeval CrackEngine::GetDiskTime()
 {
 	return m_diskTime;
 }
 
-int CrackEngine::GetTotalTime()
+struct timeval CrackEngine::GetTotalTime()
 {
 	return m_totalTime;
 }
 
-int CrackEngine::GetTotalSteps()
+uint64_t CrackEngine::GetTotalChains()
 {
-	return m_totalSteps;
+	return m_totalChains;
 }
 
-int CrackEngine::GetFalseAlarms()
+uint64_t CrackEngine::GetFalseAlarms()
 {
 	return m_falseAlarms;
 }

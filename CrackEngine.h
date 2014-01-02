@@ -13,10 +13,10 @@ public:
 
 public:
 	void  Run(const char * fileName, CipherSet & hs);
-	int   GetDiskTime();
-	int   GetTotalTime();
-	int   GetTotalSteps();
-	int   GetFalseAlarms();
+	struct timeval   GetDiskTime();
+	struct timeval   GetTotalTime();
+	uint64_t   		 GetTotalChains();
+	uint64_t		 GetFalseAlarms();
 
 private:
 	ChainWalkContext m_cwc;

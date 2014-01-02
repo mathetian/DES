@@ -38,3 +38,15 @@ bool CipherSet::Solved()
 {
 	return solve == 1 ? 1 : 0;
 }
+
+int CipherSet::GetKeyFoundNum()
+{
+	return m_vFound.size();
+}
+
+void CipherSet::PrintAllFound()
+{
+	int index = 0;
+	for(;index < m_vFound.size();index++)
+		printf("Time: %d, %lld %lld\n",index,(long long)m_vFound.at(index).first,(long long)m_vFound.at(index).second);
+}
