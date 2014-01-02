@@ -74,12 +74,12 @@ bool AnylysisFileName(const char * filename, uint64_t & chainLen, uint64_t & cha
 	int len = strlen(filename), i = 0, j;
 	if(len <= 6 || filename[3] != '_') return false;
 	char str[256]; memset(str, 0, sizeof(str));
-	for(i = 3; i< len ;i++) if(filename[i] == '-') break;
-	if(i == len || i == 3 || !isdigit(filename[3])) return false;
+	for(i = 4;i< len;i++) if(filename[i] == '-') break;
+	if(i == len || i == 3) return false;
 	memcpy(str,filename + 4, i - 4);
 	chainLen = atoll(str); memset(str, 0, sizeof(str));
 	for(j = i + 1;j < len;j++) if(filename[j] == '_') break;
-	if(j == len || j == i+1 || !isdigit(filename[i+1])) return false;
+	if(j == len || j == i+1) return false;
 	memcpy(str,filename + i + 1,j - i - 1);
 	chainCount = atoll(str);
 	return true;

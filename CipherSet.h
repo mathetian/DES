@@ -18,6 +18,7 @@ public:
 
 	void     AddResult(uint64_t cipherKey,uint64_t key);
 	void     Done();
+	void 	 Succeed();
 	bool     Solved();
 	int      GetKeyFoundNum();
 	void     PrintAllFound();

@@ -29,9 +29,14 @@ void CipherSet::AddResult(uint64_t cipherKey,uint64_t key)
 	m_vFound.push_back(make_pair(cipherKey, key));
 }
 
+void CipherSet::Succeed()
+{
+	solve = 1;
+}
+
 void CipherSet::Done()
 {
-	index++; solve = 1;
+	index++;
 }
 
 bool CipherSet::Solved()

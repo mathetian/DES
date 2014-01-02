@@ -2,8 +2,6 @@
 #include "TimeStamp.h"
 #include "ChainWalkContext.h"
 
-
-
 void Usage()
 {
 	Logo();

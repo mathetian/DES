@@ -6,7 +6,7 @@ void Usage()
 {
 	Logo();
 	printf("Usage: crack   encryptedText hashListFileName\n");
-	printf("example: crack 0x305532286D6F295A DES_100-10_test\n\n");
+	printf("example: crack 82745036057028954 DES_100-10_test\n\n");
 }
 
 int main(int argc,char*argv[])
@@ -21,7 +21,6 @@ int main(int argc,char*argv[])
 		Usage();
 		return 0;
 	}
-
 	cipherKey  = atoll(argv[1]);
 	fileName   = argv[2];
 	
