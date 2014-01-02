@@ -1,6 +1,11 @@
 #include "Common.h"
 #include <sys/sysinfo.h>
 
+void Logo()
+{
+	printf("DESRainbowCrack 1.0\n 	Make an implementation of DES Time-and-Memory Tradeoff Technology\n 	By Tian Yulong(mathetian@gmail.com)\n\n");
+}
+
 unsigned int GetFileLen(FILE* file)
 {
     unsigned int pos = ftell(file);
@@ -9,11 +14,6 @@ unsigned int GetFileLen(FILE* file)
     fseek(file, pos, SEEK_SET);
 
     return len;
-}
-
-void Logo()
-{
-	printf("DESRainbowCrack 1.0\n 	Make an implementation of DES Time-and-Memory Tradeoff Technology\n 	By Tian Yulong(mathetian@gmail.com)\n\n");
 }
 
 unsigned int GetAvailPhysMemorySize()
@@ -27,7 +27,7 @@ void U56ToArr7(const uint64_t & key56, unsigned char * key_56)
 {	
 	int mask = (1<<8) - 1;
 	
-	key_56[0] = key56 & mask;
+	key_56[0] =  key56 & mask;
 	key_56[1] = (key56 >>  8) & mask;
 	key_56[2] = (key56 >> 16) & mask;
 	key_56[3] = (key56 >> 24) & mask;
@@ -36,27 +36,30 @@ void U56ToArr7(const uint64_t & key56, unsigned char * key_56)
 	key_56[6] = (key56 >> 48) & mask;
 }
 
+/**
+	Problem with that, how to convert 64 bit wrong to 56 bit right
+**/
 void Arr7ToU56(const unsigned char * key_56, uint64_t & key56)
 {
 	int index; key56 = 0;
 	for(index = 0;index < 7;index++)
-		key56 |= (key_56[index] << (8*index));
+		key56 |= (((long long)key_56[index]) << (8*index));
 }
 
-void SetupDESKey(const uint64_t&key56,des_key_schedule &ks)
+void SetupDESKey(const uint64_t & key56,des_key_schedule & ks)
 {
 	des_cblock key, key_56;
 	
 	U56ToArr7(key56,key_56);
 
-	key[0]=key_56[0];
-	key[1]=(key_56[0]<<7)|(key_56[1]>>1);
-	key[2]=(key_56[1]<<6)|(key_56[2]>>2);
-	key[3]=(key_56[2]<<5)|(key_56[3]>>3);
-	key[4]=(key_56[3]<<4)|(key_56[4]>>4);
-	key[5]=(key_56[4]<<3)|(key_56[5]>>5);
-	key[6]=(key_56[5]<<2)|(key_56[6]>>6);
-	key[7]=(key_56[6<<1]);
+	key[0] =  key_56[0];
+	key[1] = (key_56[0]<<7)|(key_56[1]>>1);
+	key[2] = (key_56[1]<<6)|(key_56[2]>>2);
+	key[3] = (key_56[2]<<5)|(key_56[3]>>3);
+	key[4] = (key_56[3]<<4)|(key_56[4]>>4);
+	key[5] = (key_56[4]<<3)|(key_56[5]>>5);
+	key[6] = (key_56[5]<<2)|(key_56[6]>>6);
+	key[7] = (key_56[6]<<1);
 
 	DES_set_key_unchecked(&key, &ks);
 }

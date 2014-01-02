@@ -27,7 +27,7 @@ void Benchmark()
 	TimeStamp::StartTime();
 
 	for(index = 0;index < nLoop;index++) 
-		cwc.KeyToHash();
+		cwc.KeyToCipher();
 
 	sprintf(str, "Benchmark: nLoop %d: keyToHash time:", nLoop);
 
@@ -39,8 +39,8 @@ void Benchmark()
 
 	for(index = 0;index < nLoop;index++)
 	{
-		cwc.KeyToHash();
-		cwc.HashToKey(index);
+		cwc.KeyToCipher();
+		cwc.KeyReduction(index);
 	}
 	sprintf(str, "Benchmark: nLoop %d: total time:    ", nLoop);
 	TimeStamp::StopTime(str);
@@ -48,10 +48,12 @@ void Benchmark()
 
 int main(int argc,char*argv[])
 {
-	int chainLen, chainCount, index;
+	long long chainLen, chainCount, index;
 	char suffix[256], szFileName[256];
+
 	FILE * file; ChainWalkContext cwc;
 	uint64_t nDatalen, nChainStart;
+
 	char str[256];
 
 	if(argc == 2)
@@ -66,11 +68,11 @@ int main(int argc,char*argv[])
 		Usage();
 		return 0;
 	}
-	chainLen   = atoi(argv[1]);
-	chainCount = atoi(argv[2]);
+	chainLen   = atoll(argv[1]);
+	chainCount = atoll(argv[2]);
 
 	memcpy(suffix, argv[3], sizeof(argv[3]));
-	sprintf(szFileName,"DES_%d-%d_%s",chainLen,chainCount,suffix);
+	sprintf(szFileName,"DES_%lld-%lld_%s", chainLen, chainCount,suffix);
 	
 	if((file = fopen(szFileName,"a+")) == NULL)
 	{
@@ -113,15 +115,15 @@ int main(int argc,char*argv[])
 		}
 
 		int nPos;
-		for(nPos = 0;nPos < chainLen - 1;nPos++)
+		for(nPos = 0;nPos < chainLen;nPos++)
 		{
-			cwc.KeyToHash();
-			cwc.HashToKey(nPos);
+			cwc.KeyToCipher();
+			cwc.KeyReduction(nPos);
 		}
 
 		nKey = cwc.GetKey();
 
-		if(fwrite(&nKey,1,8,file)!=8)
+		if(fwrite(&nKey, 1, 8, file) != 8)
 		{
 			printf("disk write error\n");
 			break;
@@ -129,7 +131,7 @@ int main(int argc,char*argv[])
 
 		if((index + 1)%10000 == 0||index + 1 == chainCount)
 		{
-			sprintf(str,"Generate: nChains %d: total time:", 10000);
+			sprintf(str,"Generate: nChains: %d, chainLen: %lld: total time:", 10000, chainLen);
 			TimeStamp::StopTime(str);
 			TimeStamp::StartTime();
 		}

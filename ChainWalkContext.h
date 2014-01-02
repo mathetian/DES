@@ -15,22 +15,30 @@ class ChainWalkContext{
 public:
 	ChainWalkContext();
 	virtual ~ ChainWalkContext();
+
 private:
 	static uint64_t   m_plainText;
 	static uint64_t   m_keySpaceTotal;	
-	static des_cblock m_dplainText;
+	static unsigned char m_dplainText[8];
+
 public:
-	static int 		  m_chainLen;
-	static int 		  m_chainCount;
+	static uint64_t   m_chainLen;
+	static uint64_t   m_chainCount;
+
 public:
-	static void 	SetChainInfo(int chainLen,int chainCount);
+	static void 	SetChainInfo(uint64_t chainLen,uint64_t chainCount);
 	static void 	SetupWithPathName(const string & fileName);
+
 public:
-	void 	 		KeyToHash();
-	void 	 		HashToKey(int nPos);
+	void 	 		KeyToCipher();
+	void 	 		KeyReduction(int nPos);
 	uint64_t 		GetRandomKey();
 	uint64_t 		GetKey();
 	void 			SetKey(uint64_t m_nIndex);
+
+private:
+	void 			CipherToKey(unsigned char * out);
+
 private:
 	uint64_t m_nIndex;
 };
