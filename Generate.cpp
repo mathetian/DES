@@ -53,6 +53,8 @@ int main(int argc,char*argv[])
 
 	FILE * file; ChainWalkContext cwc;
 	uint64_t nDatalen, nChainStart;
+	RainbowChain chain;
+
 
 	char str[256];
 
@@ -106,13 +108,7 @@ int main(int argc,char*argv[])
 
 	for(;index < chainCount;index++)
 	{
-		uint64_t nKey = cwc.GetRandomKey();
-
-		if(fwrite(&nKey, 1, 8, file)!=8)
-		{
-			printf("disk write error\n");
-			break;
-		}
+		chain.nStartKey = cwc.GetRandomKey();
 
 		int nPos;
 		for(nPos = 0;nPos < chainLen;nPos++)
@@ -121,9 +117,9 @@ int main(int argc,char*argv[])
 			cwc.KeyReduction(nPos);
 		}
 
-		nKey = cwc.GetKey();
+		chain.nEndKey = cwc.GetKey();
 
-		if(fwrite(&nKey, 1, 8, file) != 8)
+		if(fwrite((char*)&chain, sizeof(RainbowChain), 1, file) != 1)
 		{
 			printf("disk write error\n");
 			break;

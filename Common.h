@@ -11,10 +11,14 @@
 #include <openssl/des.h>
 
 typedef struct _RainbowChain{
-	int nStartKey, nEndKey;
+	uint64_t nStartKey, nEndKey;
 	bool operator < (const struct _RainbowChain &m) const 
 	{
         return nStartKey < m.nStartKey;
+    }
+    void print()
+    {
+    	printf("%lld %lld\n",(long long)nStartKey,(long long)nEndKey);
     }
 }RainbowChain;
 

@@ -1,20 +1,14 @@
 PROGS = common chainWalkContext generator verified sort crack
 
-LIB = -lrt -lssl -lcrypto -O0 -g
+LIB = -lrt -lssl -lcrypto -ldl -O0 -g
 
 all: ${PROGS}
 
-common: Common.cpp
-	g++ -c $^ $(LIB)
-
-chainWalkContext: ChainWalkContext.cpp
-	g++ -c $^ $(LIB)
-
 generator: Generate.cpp Common.cpp ChainWalkContext.cpp
-	g++ $^ -o $@ ${LIB} -ldl
+	g++ $^ -o $@ ${LIB} 
 
-verified: common
-	g++ $(CXXFLAGS) Public.cpp ChainWalkContext.cpp HashAlgorithm.cpp HashRoutine.cpp RainbowTableDump.cpp -lssl -o rtdump
+verified: Verified.cpp Common.cpp ChainWalkContext.cpp
+	g++ $^ -o $@ ${LIB}
 
 sort: common
 	g++ $(CXXFLAGS) Public.cpp RainbowTableSort.cpp -o rtsort

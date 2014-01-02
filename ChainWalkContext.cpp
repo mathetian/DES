@@ -67,3 +67,8 @@ uint64_t ChainWalkContext::GetKey()
 {
 	return m_nIndex;
 }
+
+void 	 ChainWalkContext::SetKey(uint64_t key)
+{
+	m_nIndex = key;
+}
