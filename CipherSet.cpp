@@ -1,6 +1,6 @@
 #include "CipherSet.h"
 
-CipherSet::CipherSet()
+CipherSet::CipherSet() : index(0), solve(0)
 {
 }
 
@@ -8,29 +8,30 @@ CipherSet::~CipherSet()
 {
 }
 
-void CipherSet::AddHash(uint64_t sHash)
+void CipherSet::AddKey(uint64_t cipherKey)
 {
-	m_vHash.push_back(sHash);
+	m_vKeys.push_back(cipherKey);
 }
 
-bool CipherSet::AnyHashLeft()
+bool CipherSet::AnyKeyLeft()
 {
-	return index == m_vHash.size() ? 0 : 1;
+	return index == m_vKeys.size() ? 0 : 1;
 }
 
-uint64_t CipherSet::GetLeftHash()
+uint64_t CipherSet::GetLeftKey()
 {
-	return m_vHash.at(index);
+	solve = 0;
+	return m_vKeys.at(index);
 }
 
 void CipherSet::AddResult(uint64_t cipherKey,uint64_t key)
 {
-	m_vFound.push_back(make_pair(cipherKey,key));
+	m_vFound.push_back(make_pair(cipherKey, key));
 }
 
 void CipherSet::Done()
 {
-	index++;solve = 1;
+	index++; solve = 1;
 }
 
 bool CipherSet::Solved()

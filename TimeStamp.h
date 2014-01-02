@@ -29,6 +29,17 @@ public:
 		printf("%s %lld s, %lld us\n", str, (long long)difference.tv_sec, (long long)difference.tv_usec);
 	}	
 
+	static void AddTime(struct timeval & totalTime)
+	{
+		totalTime.tv_sec  += difference.tv_sec;
+		totalTime.tv_usec += difference.tv_usec;
+		if(totalTime.tv_usec >= 1000000)
+		{
+			totalTime.tv_sec++;
+			totalTime.tv_usec -= 1000000;
+		}
+	}
+
 private:
 	static int timeval_subtract (struct timeval *result, struct timeval *x, struct timeval *y) 
 	{

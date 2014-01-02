@@ -39,6 +39,8 @@ extern void Arr7ToU56(const unsigned char * key_56, uint64_t & key56);
 
 extern void SetupDESKey(const uint64_t&key56,des_key_schedule &ks);
 
+extern bool AnylysisFileName(const char * filename, uint64_t & chainLen, uint64_t & chainCount);
+
 #define CHAIN_IN_MEMORY_MAX 1024 
 
 class SortedSegment{

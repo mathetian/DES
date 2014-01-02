@@ -1,6 +1,6 @@
 #ifndef _MEMORY_POOL_H
 #define _MEMORY_POOL_H
-#include "common.h"
+#include "Common.h"
 
 class MemoryPool{
 public:
@@ -8,12 +8,12 @@ public:
 	virtual ~ MemoryPool();
 
 public:
-	unsigned char*Allocate(unsigned int nFileLen,unsigned int&nAllocateSize);
+	unsigned char*Allocate(uint64_t nFileLen,uint64_t&nAllocateSize);
 
 private:
-	unsigned char * m_pMem;
-	unsigned int    m_nMemSize;
-	unsigned int    m_nMemMax;
-	unsigned int    m_nAvailPhys;
+	unsigned char      * m_pMem;
+	uint64_t    m_nMemSize;
+	uint64_t    m_nMemMax;
+	uint64_t    m_nAvailPhys;
 };
 #endif

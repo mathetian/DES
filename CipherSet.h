@@ -1,31 +1,31 @@
-#ifndef _HASH_SET_H
-#define _HASH_SET_H
+#ifndef _CIPHER_SET_H
+#define _CIPHER_SET_H
 
 #include <vector>
 using namespace std;
 
-#include <stdint.h>
+#include "Common.h"
 
 class CipherSet{
 public:
 	CipherSet();
-	virtual ~ CipherSet();
+  ~ CipherSet();
 
 public:
-	void     AddHash(uint64_t cipherKey);
-	bool     AnyHashLeft();
-	uint64_t GetLeftHash();
+	void     AddKey(uint64_t cipherKey);
+	bool     AnyKeyLeft();
+	uint64_t GetLeftKey();
+
 	void     AddResult(uint64_t cipherKey,uint64_t key);
 	void     Done();
 	bool     Solved();
-
-public:
 	int      GetKeyFoundNum();
 
 private:
-	vector<uint64_t> m_vHash;
+	vector<uint64_t> m_vKeys;
 	vector<pair<uint64_t,uint64_t> > m_vFound;
 	int index;
 	int solve;
 };
+
 #endif

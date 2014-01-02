@@ -1,19 +1,18 @@
 #ifndef _CRACK_ENGINE_H
 #define _CRACK_ENGINE_H
 
+#include "Common.h"
 #include "CipherSet.h"
 #include "ChainWalkContext.h"
-#include "Common.h"
-
-#include <stdint.h>
+#include "MemoryPool.h"
 
 class CrackEngine{
 public:
 	CrackEngine();
-	virtual ~ CrackEngine();
+  ~ CrackEngine();
 
 public:
-	void  Run(const string & fileName, CipherSet & hs);
+	void  Run(const char * fileName, CipherSet & hs);
 	int   GetDiskTime();
 	int   GetTotalTime();
 	int   GetTotalSteps();
@@ -22,18 +21,22 @@ public:
 private:
 	ChainWalkContext m_cwc;
 	CipherSet		 m_cs;
-	int              m_diskTime;
-	int          	 m_totalTime;
-	int          	 m_totalSteps;
-	int          	 m_falseAlarms;
-	int 			 m_nTotalChainWalkStep;
-	int 			 m_nToatalChainWalkStepDueToFalseAlarm;
+	struct timeval   m_diskTime;
+	struct timeval   m_totalTime;
+	uint64_t         m_totalChains;
+	uint64_t         m_falseAlarms;
+
 private:
-	int  BinarySearch(RainbowChain * pChain, int pChainCount, uint64_t nIndex);
-	void GetIndexRange(RainbowChain * pChain,int pChainCount,int nChainIndex, int&nChainIndexFrom, int&nChainIndexTo);
-	bool CheckAlarm(RainbowChain * pChain,int nGuessedPos);
-	void SearchTableChunk(RainbowChain * pChain,int pChainCount);
-	void SearchRainbowTable(const string & fileName);
+	static MemoryPool mp;
+
+private:
+	uint64_t  BinarySearch(RainbowChain * pChain, uint64_t pChainCount, uint64_t nIndex);
+	void      GetIndexRange(RainbowChain * pChain, uint64_t pChainCount, uint64_t nChainIndex, uint64_t & nChainIndexFrom, uint64_t & nChainIndexTo);
+
+private:
+	bool      CheckAlarm(RainbowChain * pChain, uint64_t nGuessedPos);
+	void      SearchTableChunk(RainbowChain * pChain,int pChainCount);
+	void      SearchRainbowTable(const char * fileName);
 };
 
 #endif

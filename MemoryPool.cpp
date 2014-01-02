@@ -19,11 +19,10 @@ MemoryPool::~MemoryPool()
 	{
 		delete m_pMem;
 		m_pMem = NULL;
-		m_nMemSize = 0;
 	}
 }
 
-unsigned char* MemoryPool::Allocate(unsigned int nFileLen,unsigned int & nAllocatedSize)
+unsigned char* MemoryPool::Allocate(uint64_t nFileLen, uint64_t & nAllocatedSize)
 {
 	unsigned int nTargetSize;
 
@@ -43,9 +42,10 @@ unsigned char* MemoryPool::Allocate(unsigned int nFileLen,unsigned int & nAlloca
 	}
 
 	m_pMem = new unsigned char[nTargetSize];
+
 	if(m_pMem != NULL)
 	{
-		m_nMemSize = nTargetSize;
+		m_nMemSize     = nTargetSize;
 		nAllocatedSize = nTargetSize;
 		return m_pMem;
 	}

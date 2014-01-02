@@ -1,5 +1,7 @@
 #include "Common.h"
 #include <sys/sysinfo.h>
+#include <string>
+using namespace std;
 
 FILE * SortedSegment::file;
 FILE * SortedSegment::tmpFile;
@@ -65,6 +67,22 @@ void SetupDESKey(const uint64_t & key56,des_key_schedule & ks)
 	key[7] = (key_56[6]<<1);
 
 	DES_set_key_unchecked(&key, &ks);
+}
+
+bool AnylysisFileName(const char * filename, uint64_t & chainLen, uint64_t & chainCount)
+{
+	int len = strlen(filename), i = 0, j;
+	if(len <= 6 || filename[3] != '_') return false;
+	char str[256]; memset(str, 0, sizeof(str));
+	for(i = 3; i< len ;i++) if(filename[i] == '-') break;
+	if(i == len || i == 3 || !isdigit(filename[3])) return false;
+	memcpy(str,filename + 4, i - 4);
+	chainLen = atoll(str); memset(str, 0, sizeof(str));
+	for(j = i + 1;j < len;j++) if(filename[j] == '_') break;
+	if(j == len || j == i+1 || !isdigit(filename[i+1])) return false;
+	memcpy(str,filename + i + 1,j - i - 1);
+	chainCount = atoll(str);
+	return true;
 }
 
 SortedSegment::SortedSegment()

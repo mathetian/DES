@@ -1,35 +1,30 @@
 #include "CrackEngine.h"
-#include <sys/time.h>
-#include "MemoryPool.h"
+#include "TimeStamp.h"
 
-CrackEngine::CrackEngine()
+MemoryPool CrackEngine::mp;
+
+CrackEngine::CrackEngine() : m_totalChains(0), m_falseAlarms(0)			
 {
-	m_diskTime    = 0;
-	m_totalTime   = 0;
-	m_totalSteps  = 0;
-	m_falseAlarms = 0;
-	m_nTotalChainWalkStep = 0;
-	m_nToatalChainWalkStepDueToFalseAlarm = 0;
 }
 
 CrackEngine::~CrackEngine()
 {
 }
 
-int CrackEngine::BinarySearch(RainbowChain * pChain,int pChainCount,uint64_t nIndex)
+uint64_t CrackEngine::BinarySearch(RainbowChain * pChain, uint64_t pChainCount, uint64_t nIndex)
 {
-	int low=0, high=pChainCount;
+	long long low=0, high=pChainCount;
 	while(low<high)
 	{
-		int mid = (low+high)/2;
+		long long mid = (low+high)/2;
 		if(pChain[mid].nEndKey == nIndex) return mid;
-		else if(pChain[mid].nEndKey < nIndex) low=mid+1;
+		else if(pChain[mid].nEndKey < nIndex) low = mid + 1;
 		else high=mid;
 	}
 	return low;
 }
 
-void CrackEngine::GetIndexRange(RainbowChain*pChain,int pChainCount,int nChainIndex,int&nChainIndexFrom,int&nChainIndexTo)
+void CrackEngine::GetIndexRange(RainbowChain * pChain,uint64_t pChainCount, uint64_t nChainIndex,uint64_t&nChainIndexFrom, uint64_t&nChainIndexTo)
 {
 	nChainIndexFrom = nChainIndex;
 	nChainIndexTo   = nChainIndex;
@@ -47,40 +42,40 @@ void CrackEngine::GetIndexRange(RainbowChain*pChain,int pChainCount,int nChainIn
 	}
 }
 
-bool CrackEngine::CheckAlarm(RainbowChain*pChain,int nGuessPos)
+bool CrackEngine::CheckAlarm(RainbowChain * pChain, uint64_t nGuessPos)
 {
-	ChainWalkContext cwc;int nPos;
+	ChainWalkContext cwc;int nPos; uint64_t old = pChain -> nStartKey;
+	
 	cwc.SetKey(pChain -> nStartKey);
-
-	uint64_t old = cwc.GetKey();
 
 	for(nPos = 0;nPos < nGuessPos;nPos++)
 	{
 		old = cwc.GetKey();
-		cwc.KeyToHash();
-		cwc.HashToKey(nPos);
+		cwc.KeyToCipher();
+		cwc.KeyReduction(nPos);
 	}
 
-	if(cwc.GetKey() == m_cs.GetLeftHash())
+	if(cwc.GetKey() == m_cs.GetLeftKey())
 	{
 		printf("plaintext of %lld is %lld\n",(long long)cwc.GetKey(), (long long)old);
-		m_cs.AddResult(m_cs.GetLeftHash(), old);
+		m_cs.AddResult(m_cs.GetLeftKey(), old);
+		m_cs.Done();
 		return true;
 	}
 
 	return false;
 }
 
-void CrackEngine::SearchRainbowTable(const string&fileName)
+void CrackEngine::SearchRainbowTable(const char * fileName)
 {
-	int nRainbowChainLen,nRainbowChainCount;
-	FILE * file; unsigned int fileLen, nAllocateSize;
-	static MemoryPool mp; RainbowChain * pChain;
-	struct timeval tstart, tend; bool fVerified;
-	uint64_t useTimes; 
-	unsigned int nDataRead;
-	
-	if((file = fopen(fileName.c_str(),"rb")) == NULL)
+	char str[256];
+	uint64_t nChainLen, nChainCount;
+	uint64_t fileLen, nAllocateSize, nDataRead;
+	FILE * file; RainbowChain * pChain;
+		
+	AnylysisFileName(fileName, nChainLen, nChainCount);
+
+	if((file = fopen(fileName,"rb")) == NULL)
 	{
 		printf("SearchRainbowTable: fopen error\n");
 		return;
@@ -88,12 +83,15 @@ void CrackEngine::SearchRainbowTable(const string&fileName)
 
 	fileLen = GetFileLen(file);
 
-	if(fileLen % 16 != 0 || nRainbowChainCount*16 != fileLen)
+	if(fileLen % 16 != 0 || nChainCount*16 != fileLen)
 	{
 		printf("file length check error\n");
 		return;
 	}
-
+	/**
+		Reuse the space and avoid duplicate allocation
+		Allocate at most max(fileLen,memorySize);
+	**/
 	if((pChain = (RainbowChain*)mp.Allocate(fileLen, nAllocateSize)) == NULL)
 	{
 		printf("SearchRainbowTable: allocate error\n");
@@ -106,51 +104,56 @@ void CrackEngine::SearchRainbowTable(const string&fileName)
 	while(true)
 	{
 		if(ftell(file) == fileLen) break;
-		
-		gettimeofday(&tstart, NULL);
-		nDataRead = fread(pChain,1,nAllocateSize,file);
-		gettimeofday(&tend, NULL);
 
-		useTimes = 1000000*(tend.tv_sec-tstart.tv_sec)+(tend.tv_usec-tstart.tv_usec);
+
+		TimeStamp::StartTime();
+		
+		nDataRead = fread(pChain,1, nAllocateSize,file);
+		if(nDataRead != nAllocateSize)
+		{
+			printf("Warning nDataRead: %lld, nAllocateSize: %lld\n", (long long)nDataRead, (long long)nAllocateSize);
+		}
+
+		sprintf(str,"%lld bytes read, disk access time:", (long long)nAllocateSize);
+		TimeStamp::StopTime(str);
+		TimeStamp::AddTime(m_diskTime);
+
+		TimeStamp::StartTime();
+		
+		SearchTableChunk(pChain,nDataRead >> 4);		
     	
-    	printf("%u bytes read, disk access time: %lld us\n", nDataRead, (long long)useTimes);
-		m_diskTime += useTimes;
-				
-		gettimeofday(&tstart, NULL);
-		SearchTableChunk(pChain,nDataRead >> 4);
-		gettimeofday(&tend, NULL);
+    	sprintf(str,"cryptanalysis time: ");
+    	TimeStamp::StopTime(str);
+    	TimeStamp::AddTime(m_totalTime);
 		
-		useTimes = 1000000*(tend.tv_sec-tstart.tv_sec)+(tend.tv_usec-tstart.tv_usec);
-    	printf("cryptanalysis time: %lld us\n",(long long)useTimes);
-		m_totalTime += useTimes;
-		
-		if(m_cs.solved())
-			break;
+		if(m_cs.Solved()) break;
 	}
 	fclose(file);
 }
 
 void CrackEngine::SearchTableChunk(RainbowChain * pChain, int pChainCount)
 {
-	printf("Searching for cipherText: %lld...",(long long)m_cs.GetLeftHash());
-	
 	int nFalseAlarm, nChainWalkStepDueToFalseAlarm;
 	int nHashLen, nPos, nIndex;
-	uint64_t cipherText = m_cs.GetLeftHash();
+	uint64_t key = m_cs.GetLeftKey();
+
+	printf("Searching for key: %lld...",(long long)key);
 	
 	nFalseAlarm = 0; 
 	nChainWalkStepDueToFalseAlarm = 0;
 	
-	vector <int> pEndKeys(ChainWalkContext::m_chainLen, 0);
+	vector <uint64_t> pEndKeys(ChainWalkContext::m_chainLen, 0);
 
 	for(nPos = ChainWalkContext::m_chainLen - 2;nPos >= 0;nPos--)
 	{
-		m_cwc.SetKey(cipherText);
+		m_cwc.SetKey(key);
+
 		for(nIndex = nPos + 1; nIndex < ChainWalkContext::m_chainLen;nIndex++)
 		{
 			m_cwc.KeyToHash();
 			m_cwc.HashToKey(nIndex);
 		}
+		
 		pEndKeys[nPos] = m_cwc.GetKey();
 	}
 
