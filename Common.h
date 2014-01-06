@@ -10,17 +10,14 @@
 #include <sys/time.h>
 #include <openssl/des.h>
 
-typedef struct _RainbowChain{
+class RainbowChain{
+public:
 	uint64_t nStartKey, nEndKey;
-	bool operator < (const struct _RainbowChain &m) const 
+	bool operator < (const RainbowChain &m) const 
 	{
-        return nStartKey < m.nStartKey;
+        return nEndKey < m.nEndKey;
     }
-    void print()
-    {
-    	printf("%lld %lld\n",(long long)nStartKey,(long long)nEndKey);
-    }
-}RainbowChain;
+};
 
 extern unsigned int GetFileLen(FILE*file);
 

@@ -1,6 +1,9 @@
 #include "CrackEngine.h"
 #include "TimeStamp.h"
 
+#include <iostream>
+using namespace std;
+
 MemoryPool CrackEngine::mp;
 
 CrackEngine::CrackEngine() : m_totalChains(0), m_falseAlarms(0)			
@@ -44,7 +47,7 @@ void CrackEngine::GetIndexRange(RainbowChain * pChain,uint64_t pChainCount, uint
 	}
 }
 
-bool CrackEngine::CheckAlarm(RainbowChain * pChain, uint64_t nGuessPos)
+bool CrackEngine::CheckAlarm(RainbowChain * pChain, uint64_t nGuessPos, uint64_t testV)
 {
 	ChainWalkContext cwc;int nPos; uint64_t old = pChain -> nStartKey;
 	
@@ -57,7 +60,7 @@ bool CrackEngine::CheckAlarm(RainbowChain * pChain, uint64_t nGuessPos)
 		cwc.KeyReduction(nPos);
 	}
 
-	if(cwc.GetKey() == m_cs.GetLeftKey())
+	if(cwc.GetKey() == testV)
 	{
 		printf("plaintext of %lld is %lld\n",(long long)cwc.GetKey(), (long long)old);
 		m_cs.AddResult(m_cs.GetLeftKey(), old);
@@ -144,27 +147,34 @@ void CrackEngine::SearchTableChunk(RainbowChain * pChain, int pChainCount)
 	for(nGuessPos = 0;nGuessPos < ChainWalkContext::m_chainLen;nGuessPos++)
 	{	
 		m_cwc.SetKey(key);
-		
-		for(nIndex = nGuessPos;nIndex < ChainWalkContext::m_chainLen;nIndex++)
+		m_cwc.KeyReduction(nGuessPos);
+
+		for(nIndex = nGuessPos + 1;nIndex < ChainWalkContext::m_chainLen;nIndex++)
 		{
 			m_cwc.KeyToCipher();
 			m_cwc.KeyReduction(nIndex);
 		}
+
 		pEndKeys[nGuessPos] = m_cwc.GetKey();
 	}
 
-	for(nGuessPos = 0; nGuessPos < ChainWalkContext::m_chainLen;nGuessPos++)
+	m_cwc.SetKey(key);
+	m_cwc.KeyReduction(nGuessPos);
+	uint64_t testV = m_cwc.GetKey();
+
+	for(nGuessPos = 0;nGuessPos < ChainWalkContext::m_chainLen;nGuessPos++)
 	{
 		uint64_t nMathingIndexE = BinarySearch(pChain, pChainCount, pEndKeys[nGuessPos]);
 
 		if(pChain[nMathingIndexE].nEndKey == pEndKeys[nGuessPos])
 		{
+			cout << nMathingIndexE <<endl;
 			uint64_t nMathingIndexEFrom, nMathingIndexETo;
 			GetIndexRange(pChain,pChainCount,nMathingIndexE,nMathingIndexEFrom,nMathingIndexETo);
-
+			cout << nMathingIndexEFrom<<" "<<nMathingIndexETo<<endl;
 			for(nIndex = nMathingIndexEFrom;nIndex <= nMathingIndexETo;nIndex++)
 			{
-				if(CheckAlarm(pChain+nIndex, nGuessPos))
+				if(CheckAlarm(pChain+nIndex, nGuessPos, testV))
 					goto NEXT_HASH;
 				else nFalseAlarm++;
 			}

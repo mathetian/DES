@@ -34,7 +34,7 @@ private:
 	void      GetIndexRange(RainbowChain * pChain, uint64_t pChainCount, uint64_t nChainIndex, uint64_t & nChainIndexFrom, uint64_t & nChainIndexTo);
 
 private:
-	bool      CheckAlarm(RainbowChain * pChain, uint64_t nGuessedPos);
+	bool      CheckAlarm(RainbowChain * pChain, uint64_t nGuessedPos,uint64_t testV);
 	void      SearchTableChunk(RainbowChain * pChain,int pChainCount);
 	void      SearchRainbowTable(const char * fileName);
 };

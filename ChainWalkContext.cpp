@@ -1,7 +1,8 @@
 #include "ChainWalkContext.h"
 
 uint64_t   ChainWalkContext::m_plainText     = 0x305532286D6F295A;
-uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 56) - 1;
+/*uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 56) - 1;*/
+uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 20) - 1;
 uint64_t   ChainWalkContext::m_chainLen;
 uint64_t   ChainWalkContext::m_chainCount;
 unsigned char ChainWalkContext::m_dplainText[8] = {0x30,0x55,0x32,0x28,0x6D,0x6F,0x29,0x5A};
@@ -71,4 +72,13 @@ uint64_t ChainWalkContext::GetKey()
 void 	 ChainWalkContext::SetKey(uint64_t key)
 {
 	m_nIndex = key;
+}
+
+uint64_t ChainWalkContext::Crypt(uint64_t key)
+{
+	des_key_schedule ks;unsigned char out[8];
+	SetupDESKey(key,ks); memset(out,0,8);
+	des_ecb_encrypt(&m_dplainText,&out,ks,DES_ENCRYPT);
+	Arr7ToU56(out, key);
+	return key;
 }

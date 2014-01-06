@@ -1,4 +1,4 @@
-PROGS = generator verified sort crack
+PROGS = generator verified sort crack test
 
 LIB = -lrt -lssl -lcrypto -ldl -O0 -g
 
@@ -15,6 +15,12 @@ sort: SortPreCalculate.cpp Common.cpp
 	
 crack: DESCrack.cpp Common.cpp ChainWalkContext.cpp CipherSet.cpp CrackEngine.cpp MemoryPool.cpp
 	g++ $^ -o $@ ${LIB}
-   
+
+test: Eest.cpp ChainWalkContext.cpp Common.cpp
+	g++ $^ -o $@ ${LIB}
+
+test2: Eest2.cpp Common.cpp
+	g++ $^ -o $@ ${LIB}
+	
 clean:
 	rm -f ${PROGS} DES_*

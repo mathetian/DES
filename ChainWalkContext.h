@@ -34,6 +34,8 @@ public:
 	uint64_t 		GetRandomKey();
 	uint64_t 		GetKey();
 	void 			SetKey(uint64_t m_nIndex);
+	
+	uint64_t 		Crypt(uint64_t key);
 
 private:
 	void 			CipherToKey(unsigned char * out);

@@ -2,11 +2,14 @@
 #include "ChainWalkContext.h"
 #include "CrackEngine.h"
 
+#include <iostream>
+using namespace std;
+
 void Usage()
 {
 	Logo();
 	printf("Usage: crack   encryptedText hashListFileName\n");
-	printf("example: crack 82745036057028954 DES_100-10_test\n\n");
+	printf("example: crack 8574994055708726611 DES_100-10_test\n\n");
 }
 
 int main(int argc,char*argv[])
