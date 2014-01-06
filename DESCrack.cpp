@@ -8,36 +8,40 @@ using namespace std;
 void Usage()
 {
 	Logo();
-	printf("Usage: crack   encryptedText hashListFileName\n");
-	printf("example: crack 8574994055708726611 DES_100-10_test\n\n");
+	printf("Usage: crack   hashListFileName encryptedText \n");
+	printf("example: crack DES_1024-30000_test 12345 7831224 541234 3827427\n\n");
 }
 
 int main(int argc,char*argv[])
 {
-	uint64_t     cipherKey;
+	int keyNum, index;
 	const char * fileName;
 	CrackEngine  ce;
-	CipherSet    cs;
+	CipherSet  * p_cs = CipherSet::GetInstance();
 
-	if(argc!=3)
+	if(argc <= 2)
 	{
 		Usage();
 		return 0;
 	}
-	cipherKey  = atoll(argv[1]);
-	fileName   = argv[2];
-	
-	cs.AddKey(cipherKey);
-	ce.Run(fileName, cs);
+
+	fileName   = argv[1];
+
+	keyNum = argc - 2;
+
+	for(index = 0;index < keyNum;index++)
+		p_cs -> AddKey(atoll(argv[index+2]));
+
+	ce.Run(fileName);
 
 	printf("Statistics\n");
 	printf("-------------------------------------------------------\n");
 	
-	int foundNum = cs.GetKeyFoundNum();
+	int foundNum = p_cs -> GetKeyFoundNum();
 	struct timeval diskTime  = ce.GetDiskTime();	
 	struct timeval totalTime = ce.GetTotalTime();
 	
-	cs.PrintAllFound();
+	p_cs -> PrintAllFound();
 	
 	printf("Key found: %d\n", foundNum);
 	printf("Total disk access time: %lld s, %lld us\n",(long long)diskTime.tv_sec,(long long)diskTime.tv_usec);

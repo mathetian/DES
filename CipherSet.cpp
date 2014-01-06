@@ -1,5 +1,17 @@
 #include "CipherSet.h"
 
+#include <iostream>
+using namespace std;
+
+CipherSet * CipherSet::p_cs;
+
+CipherSet * CipherSet::GetInstance()
+{
+	if(!p_cs)
+		p_cs = new CipherSet();
+	return p_cs;
+}
+
 CipherSet::CipherSet() : index(0), solve(0)
 {
 }
@@ -53,5 +65,5 @@ void CipherSet::PrintAllFound()
 {
 	int index = 0;
 	for(;index < m_vFound.size();index++)
-		printf("Time: %d, %lld %lld\n",index,(long long)m_vFound.at(index).first,(long long)m_vFound.at(index).second);
+		printf("Time: %d, %lld %lld\n",index + 1,(long long)m_vFound.at(index).first,(long long)m_vFound.at(index).second);
 }

@@ -8,9 +8,8 @@ using namespace std;
 
 class CipherSet{
 public:
-	CipherSet();
   ~ CipherSet();
-
+  static CipherSet * GetInstance();
 public:
 	void     AddKey(uint64_t cipherKey);
 	bool     AnyKeyLeft();
@@ -24,6 +23,9 @@ public:
 	void     PrintAllFound();
 
 private:
+	CipherSet();
+	static CipherSet * p_cs;
+
 	vector<uint64_t> m_vKeys;
 	vector<pair<uint64_t,uint64_t> > m_vFound;
 	int index;

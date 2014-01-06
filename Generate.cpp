@@ -13,7 +13,7 @@ void Usage()
 	printf("				 single startKey");
 	printf("example 1: generator 1000 10000 suffix\n");
 	printf("example 2: generator benchmark\n");
-	printf("example 3: generator single 14120357\n\n");
+	printf("example 3: generator single 563109\n\n");
 }
 
 typedef long long ll;

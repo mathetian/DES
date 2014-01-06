@@ -12,7 +12,7 @@ public:
   ~ CrackEngine();
 
 public:
-	void  Run(const char * fileName, CipherSet & hs);
+	void  Run(const char * fileName);
 	struct timeval   GetDiskTime();
 	struct timeval   GetTotalTime();
 	uint64_t   		 GetTotalChains();
@@ -20,7 +20,7 @@ public:
 
 private:
 	ChainWalkContext m_cwc;
-	CipherSet		 m_cs;
+	CipherSet	 *   p_cs;
 	struct timeval   m_diskTime;
 	struct timeval   m_totalTime;
 	uint64_t         m_totalChains;
