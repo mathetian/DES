@@ -48,7 +48,7 @@ void Arr7ToU56(const unsigned char * key_56, uint64_t & key56)
 {
 	int index; key56 = 0;
 	for(index = 7;index >= 0;index--)
-		key56 |= (((long long)key_56[index]) << (8*(7-index)));
+		key56 |= (((long long)key_56[index]) << (8*(7-index) + 1));
 }
 
 void SetupDESKey(const uint64_t & key56,des_key_schedule & ks)

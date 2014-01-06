@@ -2,7 +2,7 @@
 
 uint64_t   ChainWalkContext::m_plainText     = 0x305532286D6F295A;
 /*uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 56) - 1;*/
-uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 20) - 1;
+uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 25) - 1;
 uint64_t   ChainWalkContext::m_chainLen;
 uint64_t   ChainWalkContext::m_chainCount;
 unsigned char ChainWalkContext::m_dplainText[8] = {0x30,0x55,0x32,0x28,0x6D,0x6F,0x29,0x5A};
@@ -54,6 +54,7 @@ void ChainWalkContext::KeyToCipher()
 void ChainWalkContext::CipherToKey(unsigned char * out)
 {
 	Arr7ToU56(out, m_nIndex);
+	m_nIndex &= m_keySpaceTotal;
 }
 
 /**
@@ -66,12 +67,12 @@ void ChainWalkContext::KeyReduction(int nPos)
 
 uint64_t ChainWalkContext::GetKey()
 {
-	return m_nIndex;
+	return m_nIndex & m_keySpaceTotal;
 }
 
 void 	 ChainWalkContext::SetKey(uint64_t key)
 {
-	m_nIndex = key;
+	m_nIndex = key & m_keySpaceTotal;
 }
 
 uint64_t ChainWalkContext::Crypt(uint64_t key)

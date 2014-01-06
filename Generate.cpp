@@ -2,13 +2,18 @@
 #include "TimeStamp.h"
 #include "ChainWalkContext.h"
 
+#include <iostream>
+using namespace std;
+
 void Usage()
 {
 	Logo();
 	printf("Usage: generator chainLen chainCount suffix\n");
-	printf("                 benchmark\n\n");
+	printf("                 benchmark\n");
+	printf("				 single startKey");
 	printf("example 1: generator 1000 10000 suffix\n");
-	printf("example 2: generator benchmark\n\n");
+	printf("example 2: generator benchmark\n");
+	printf("example 3: generator single 14120357\n\n");
 }
 
 typedef long long ll;
@@ -44,6 +49,23 @@ void Benchmark()
 	TimeStamp::StopTime(str);
 }
 
+void Single(int startKey)
+{
+	ChainWalkContext cwc; int index;
+	cwc.SetKey(startKey); uint64_t key = cwc.GetKey();
+	fwrite((char*)&key,sizeof(uint64_t),1,stdout);
+	fflush(stdout);
+	for(index = 0;index < 1024;index++)
+	{
+		cwc.KeyToCipher();
+		cwc.KeyReduction(index);
+		key = cwc.GetKey();
+		//cout << key << endl;
+		fwrite((char*)&key,sizeof(uint64_t),1,stdout);
+		fflush(stdout);
+	}
+}
+
 int main(int argc,char*argv[])
 {
 	long long chainLen, chainCount, index;
@@ -52,8 +74,7 @@ int main(int argc,char*argv[])
 	FILE * file; ChainWalkContext cwc;
 	uint64_t nDatalen, nChainStart;
 	RainbowChain chain;
-
-
+	
 	char str[256];
 
 	if(argc == 2)
@@ -62,7 +83,12 @@ int main(int argc,char*argv[])
 			Benchmark();
 		return 0;
 	}
-
+	if(argc == 3)
+	{
+		if(strcmp(argv[1],"single") == 0)
+			Single(atoi(argv[2]));
+		return 0;
+	}
 	if(argc != 4)
 	{
 		Usage();
