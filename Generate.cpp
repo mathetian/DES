@@ -113,6 +113,9 @@ int main(int argc,char*argv[])
 		{
 			cwc.KeyToCipher();
 			cwc.KeyReduction(nPos);
+			uint64_t key1 = cwc.GetKey();
+			/*if(index == 0)
+			fwrite((char*)&key1,sizeof(uint64_t),1,file);*/
 		}
 
 		chain.nEndKey = cwc.GetKey();
