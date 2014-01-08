@@ -65,7 +65,7 @@ void ChainWalkContext::KeyReduction(int nPos)
 	/**
 		Exist very big problem, will worse the distribution.
 	**/
-	nPos = 0;
+	//nPos = 0;
 	m_nIndex = (m_nIndex + nPos) & m_keySpaceTotal;	
 }
 
@@ -84,6 +84,6 @@ uint64_t ChainWalkContext::Crypt(uint64_t key)
 	des_key_schedule ks;unsigned char out[8];
 	SetupDESKey(key,ks); memset(out,0,8);
 	des_ecb_encrypt(&m_dplainText,&out,ks,DES_ENCRYPT);
-	Arr7ToU56(out, key);
+	Arr7ToU56(out, key); key &= m_keySpaceTotal;
 	return key;
 }

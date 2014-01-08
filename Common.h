@@ -15,7 +15,7 @@ public:
 	uint64_t nStartKey, nEndKey;
 	bool operator < (const RainbowChain &m) const 
 	{
-        return nEndKey < m.nEndKey;
+        return nStartKey < m.nStartKey;
     }
 };
 
