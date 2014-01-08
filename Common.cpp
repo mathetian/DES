@@ -6,6 +6,12 @@ using namespace std;
 FILE * SortedSegment::file;
 FILE * SortedSegment::tmpFile;
 
+bool RainbowChain::operator < (const RainbowChain &m) const 
+{
+    //return nStartKey < m.nStartKey;
+	return nEndKey < m.nEndKey;
+}
+
 void Logo()
 {
 	printf("DESRainbowCrack 1.0\n 	Make an implementation of DES Time-and-Memory Tradeoff Technology\n 	By Tian Yulong(mathetian@gmail.com)\n\n");
@@ -32,7 +38,7 @@ void U56ToArr7(const uint64_t & key56, unsigned char * key_56)
 {	
 	int mask = (1<<8) - 1;
 	
-	key_56[7] =  key56 & mask;
+	key_56[7] =         key56 & mask;
 	key_56[6] = (key56 >>  8) & mask;
 	key_56[5] = (key56 >> 16) & mask;
 	key_56[4] = (key56 >> 24) & mask;
@@ -47,9 +53,7 @@ void U56ToArr7(const uint64_t & key56, unsigned char * key_56)
 **/
 void Arr7ToU56(const unsigned char * key_56, uint64_t & key56)
 {
-	int index; key56 = 0;
-	for(index = 7;index >= 0;index--)
-		key56 |= (((long long)key_56[index]) << (8*(7-index) + 1));
+	key56 = *(int*)key_56;
 }
 
 void SetupDESKey(const uint64_t & key56,des_key_schedule & ks)
@@ -57,17 +61,6 @@ void SetupDESKey(const uint64_t & key56,des_key_schedule & ks)
 	des_cblock key, key_56;
 	
 	U56ToArr7(key56,key_56);
-
-/*	
-	key[0] =  key_56[0];
-	key[1] = (key_56[0]<<7)|(key_56[1]>>1);
-	key[2] = (key_56[1]<<6)|(key_56[2]>>2);
-	key[3] = (key_56[2]<<5)|(key_56[3]>>3);
-	key[4] = (key_56[3]<<4)|(key_56[4]>>4);
-	key[5] = (key_56[4]<<3)|(key_56[5]>>5);
-	key[6] = (key_56[5]<<2)|(key_56[6]>>6);
-	key[7] = (key_56[6]<<1);
-*/
 
 	DES_set_key_unchecked(&key_56, &ks);
 }

@@ -13,10 +13,7 @@
 class RainbowChain{
 public:
 	uint64_t nStartKey, nEndKey;
-	bool operator < (const RainbowChain &m) const 
-	{
-        return nStartKey < m.nStartKey;
-    }
+	bool operator < (const RainbowChain &m) const;
 };
 
 extern unsigned int GetFileLen(FILE*file);

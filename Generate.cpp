@@ -152,6 +152,12 @@ void TestNativeRandom()
 	fclose(file);
 }
 
+void clear(uint64_t & start)
+{
+	uint64_t a = (1 << 22) - 4;
+	start &= a;
+}
+
 int main(int argc,char*argv[])
 {
 	long long chainLen, chainCount, index;
@@ -233,9 +239,6 @@ int main(int argc,char*argv[])
 		{
 			cwc.KeyToCipher();
 			cwc.KeyReduction(nPos);
-			uint64_t key1 = cwc.GetKey();
-			/*if(index == 0)
-			fwrite((char*)&key1,sizeof(uint64_t),1,file);*/
 		}
 
 		chain.nEndKey = cwc.GetKey();

@@ -3,9 +3,11 @@
 uint64_t   ChainWalkContext::m_plainText     = 0x305532286D6F295A;
 /*uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 56) - 1;*/
 uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 20) - 1;
+uint64_t   ChainWalkContext::m_keySpaceTotalT = (1ull << 22) - (1ull << 8) - 2;
+
 uint64_t   ChainWalkContext::m_chainLen;
 uint64_t   ChainWalkContext::m_chainCount;
-unsigned char ChainWalkContext::m_dplainText[8] = {0x30,0x55,0x32,0x28,0x6D,0x6F,0x29,0x5A};
+unsigned char ChainWalkContext::m_dplainText[8] = {0x6B,0x05,0x6E,0x18,0x75,0x9F,0x5C,0xCA};
 
 ChainWalkContext::ChainWalkContext()
 {
@@ -24,7 +26,7 @@ void ChainWalkContext::SetChainInfo(uint64_t chainLen, uint64_t chainCount)
 uint64_t ChainWalkContext::GetRandomKey()
 {
 	RAND_bytes((unsigned char*)&m_nIndex,8);
-	m_nIndex = m_nIndex & m_keySpaceTotal;
+	m_nIndex = m_nIndex & m_keySpaceTotalT;
 	return m_nIndex;
 }
 
@@ -54,7 +56,7 @@ void ChainWalkContext::KeyToCipher()
 void ChainWalkContext::CipherToKey(unsigned char * out)
 {
 	Arr7ToU56(out, m_nIndex);
-	m_nIndex &= m_keySpaceTotal;
+	m_nIndex &= m_keySpaceTotalT;
 }
 
 /**
@@ -65,18 +67,17 @@ void ChainWalkContext::KeyReduction(int nPos)
 	/**
 		Exist very big problem, will worse the distribution.
 	**/
-	//nPos = 0;
-	m_nIndex = (m_nIndex + nPos) & m_keySpaceTotal;	
+	m_nIndex = (m_nIndex + nPos) & m_keySpaceTotalT;	
 }
 
 uint64_t ChainWalkContext::GetKey()
 {
-	return m_nIndex & m_keySpaceTotal;
+	return m_nIndex & m_keySpaceTotalT;
 }
 
 void 	 ChainWalkContext::SetKey(uint64_t key)
 {
-	m_nIndex = key & m_keySpaceTotal;
+	m_nIndex = key & m_keySpaceTotalT;
 }
 
 uint64_t ChainWalkContext::Crypt(uint64_t key)

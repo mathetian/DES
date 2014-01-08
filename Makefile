@@ -1,4 +1,4 @@
-PROGS = generator verified sort crack test
+PROGS = generator verified sort crack
 
 LIB = -lrt -lssl -lcrypto -ldl -O0 -g
 
