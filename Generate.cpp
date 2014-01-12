@@ -232,14 +232,11 @@ void TestCaseGenerator()
 
 	for(int index = 0;index < 100;index++)
 	{
-		chain.nStartKey = rand() & ChainWalkContext::m_keySpaceTotalT;
+		chain.nStartKey = cwc.GetRandomKey();
 		chain.nEndKey   = cwc.Crypt(chain.nStartKey);
 		fwrite((char*)&chain, sizeof(RainbowChain), 1, file);
 	}
 
-	chain.nStartKey = 9194558;
-	chain.nEndKey = cwc.Crypt(chain.nStartKey);
-	fwrite((char*)&chain, sizeof(RainbowChain), 1, file);
 	fclose(file);
 }
 
@@ -340,7 +337,7 @@ int main(int argc,char*argv[])
 
 		if((index + 1)%10000 == 0||index + 1 == chainCount)
 		{
-			sprintf(str,"Generate: nChains: %d, chainLen: %lld: total time:", 10000, chainLen);
+			sprintf(str,"Generate: nChains: %lld, chainLen: %lld: total time:", index, chainLen);
 			TimeStamp::StopTime(str);
 			TimeStamp::StartTime();
 		}

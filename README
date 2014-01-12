@@ -3,4 +3,34 @@ DESCrack
 
 TEST 1, 
 **************************************************
-KeySpace, 2^20
+KeySpace, 2^20 (2^10 * 2^11)
+
+Solve it very soon.
+
+Successful Probability, 90% +
+
+TEST 2, 
+**************************************************
+KeySpace, 2^28 (2^10 * 2^18)
+
+Solve it very soon.
+
+Successful Probability, 50% + (Not very sure and too tired to conduct experiments.)
+
+TEST 3, 
+**************************************************
+KeySpace, 2^32 (2^11 * 2^21)
+
+Precomputation Time,  7s for 2^11 * 2^13. So 2^21 t/s. Total time 20min.
+
+Chain Reconstruction,  12s for 100 test cases. Disk time costs just 5% ~ 10%. 
+
+Successful Probability, 72%.
+
+----------------------------------------------------
+Todo List,
+----------------------------------------------------
+1. CPU Parallel and GPU CUDA version
+
+2. Distributed Crack tool
+

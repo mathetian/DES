@@ -17,4 +17,4 @@ crack: DESCrack.cpp Common.cpp ChainWalkContext.cpp CipherSet.cpp CrackEngine.cp
 	g++ $^ -o $@ ${LIB}
 	
 clean:
-	rm -f ${PROGS} DES_*
+	rm -f ${PROGS} DES_* *.txt

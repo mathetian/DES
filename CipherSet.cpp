@@ -65,5 +65,12 @@ void CipherSet::PrintAllFound()
 {
 	int index = 0;
 	for(;index < m_vFound.size();index++)
-		printf("Time: %d, %x %x\n",index + 1,(unsigned int)m_vFound.at(index).first,(unsigned int)m_vFound.at(index).second);
+	{
+		unsigned int high1 = (m_vFound.at(index).first >> 32);
+		unsigned int low1  = (m_vFound.at(index).first & ((1ull << 32) - 1));
+		unsigned int high2 = (m_vFound.at(index).second >> 32);
+		unsigned int low2  = (m_vFound.at(index).second & ((1ull << 32) - 1));
+		printf("Time: %d, 0x%x%x 0x%x%x\n", index + 1, high1, low1, high2, low2);
+
+	}
 }
