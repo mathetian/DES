@@ -59,9 +59,8 @@ bool CrackEngine::CheckAlarm(RainbowChain * pChain, uint64_t nGuessPos, uint64_t
 		old = cwc.GetKey();
 		cwc.KeyToCipher();
 		cwc.KeyReduction(nPos);
-	}
-
-	if(cwc.GetKey() == testV)
+	}	
+	if(cwc.GetKey() == pVerified[nGuessPos])
 	{
 		printf("plaintext of %lld is %lld\n",(long long)cwc.GetKey(), (long long)old);
 		p_cs -> AddResult(p_cs -> GetLeftKey(), old);
@@ -151,6 +150,7 @@ void CrackEngine::SearchTableChunk(RainbowChain * pChain, int pChainCount)
 		{
 			uint64_t nMathingIndexEFrom, nMathingIndexETo;
 			GetIndexRange(pChain, pChainCount, nMathingIndexE,nMathingIndexEFrom,nMathingIndexETo);
+			
 			for(nIndex = nMathingIndexEFrom;nIndex <= nMathingIndexETo;nIndex++)
 			{
 				if(CheckAlarm(pChain + nIndex, nGuessPos, pEndKeys[nGuessPos]))
@@ -215,16 +215,30 @@ uint64_t CrackEngine::GetFalseAlarms()
 
 void CrackEngine::InitEndKeys(uint64_t key)
 {
-	pEndKeys = vector<uint64_t>(ChainWalkContext::m_chainLen, 0);
+	pEndKeys  = vector<uint64_t>(ChainWalkContext::m_chainLen, 0);
+	pVerified = vector<uint64_t>(ChainWalkContext::m_chainLen, 0);
+
 	for(int nGuessPos = 0;nGuessPos < ChainWalkContext::m_chainLen;nGuessPos++)
 	{	
 		m_cwc.SetKey(key);
 		m_cwc.KeyReduction(nGuessPos);
+
+		pVerified[nGuessPos] = m_cwc.GetKey();
+		
 		for(int nIndex = nGuessPos + 1;nIndex < ChainWalkContext::m_chainLen;nIndex++)
 		{
 			m_cwc.KeyToCipher();
 			m_cwc.KeyReduction(nIndex);
 		}
+		
 		pEndKeys[nGuessPos] = m_cwc.GetKey();
+
+		/**
+			No bug was found in this part.
+		**/
+		/*
+			if(key == 12629012 && nGuessPos == 0)
+			cout << key << ":" << m_cwc.GetKey() << endl;
+		*/
 	}
 }

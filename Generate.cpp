@@ -236,6 +236,10 @@ void TestCaseGenerator()
 		chain.nEndKey   = cwc.Crypt(chain.nStartKey);
 		fwrite((char*)&chain, sizeof(RainbowChain), 1, file);
 	}
+
+	chain.nStartKey = 9194558;
+	chain.nEndKey = cwc.Crypt(chain.nStartKey);
+	fwrite((char*)&chain, sizeof(RainbowChain), 1, file);
 	fclose(file);
 }
 

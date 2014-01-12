@@ -29,7 +29,8 @@ private:
 private:
 	static MemoryPool mp;
 	vector <uint64_t> pEndKeys;
-
+	vector <uint64_t> pVerified;
+	
 private:
 	uint64_t  BinarySearch(RainbowChain * pChain, uint64_t pChainCount, uint64_t nIndex);
 	void      GetIndexRange(RainbowChain * pChain, uint64_t pChainCount, uint64_t nChainIndex, uint64_t & nChainIndexFrom, uint64_t & nChainIndexTo);

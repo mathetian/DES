@@ -39,15 +39,14 @@ int main(int argc,char*argv[])
 		RainbowChain chain;
 		while(fread((char*)&chain, sizeof(RainbowChain), 1, file))
 		{
-			cout << chain.nStartKey << endl;
-			p_cs -> AddKey(chain.nStartKey);
+			p_cs -> AddKey(chain.nEndKey);
 		}
 	}
 	else if(strcmp(argv[1],"text") == 0)
 	{
 		keyNum = argc - 3;
 		for(index = 0;index < keyNum;index++)
-			p_cs -> AddKey(atoll(argv[index+2]));
+			p_cs -> AddKey(atoll(argv[index+3]));
 	}
 	else
 	{
