@@ -128,12 +128,12 @@ void Distinct(const char * sPathName)
 	while(index < nRainbowChainCount)
 	{
 		tmpChain[num++] = pChain[index];
-		while(index + 1 < nRainbowChainCount && \
-				pChain[index].nStartKey == pChain[index+1].nStartKey)
-			index++;
 		/*while(index + 1 < nRainbowChainCount && \
-				pChain[index].nEndKey == pChain[index+1].nEndKey)
+				pChain[index].nStartKey == pChain[index+1].nStartKey)
 			index++;*/
+		while(index + 1 < nRainbowChainCount && \
+				pChain[index].nEndKey == pChain[index+1].nEndKey)
+			index++;
 		index ++;
 	}
 	FILE * file2 = fopen("Distinct.txt","wb");

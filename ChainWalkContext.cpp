@@ -1,7 +1,6 @@
 #include "ChainWalkContext.h"
 
 uint64_t   ChainWalkContext::m_plainText     = 0x305532286D6F295A;
-/*uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 56) - 1;*/
 uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 20) - 1;
 uint64_t   ChainWalkContext::m_keySpaceTotalT = (1ull << 24) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 17);
 
@@ -68,6 +67,7 @@ void ChainWalkContext::KeyReduction(int nPos)
 		Exist very big problem, will worse the distribution.
 	**/
 	m_nIndex = (m_nIndex + nPos) & m_keySpaceTotalT;	
+	m_nIndex = (m_nIndex + (nPos << 8)) & m_keySpaceTotalT;
 }
 
 uint64_t ChainWalkContext::GetKey()
