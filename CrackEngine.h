@@ -28,6 +28,7 @@ private:
 
 private:
 	static MemoryPool mp;
+	vector <uint64_t> pEndKeys;
 
 private:
 	uint64_t  BinarySearch(RainbowChain * pChain, uint64_t pChainCount, uint64_t nIndex);
@@ -37,6 +38,7 @@ private:
 	bool      CheckAlarm(RainbowChain * pChain, uint64_t nGuessedPos,uint64_t testV);
 	void      SearchTableChunk(RainbowChain * pChain,int pChainCount);
 	void      SearchRainbowTable(const char * fileName);
+	void      InitEndKeys(uint64_t key);
 };
 
 #endif

@@ -83,8 +83,8 @@ void 	 ChainWalkContext::SetKey(uint64_t key)
 uint64_t ChainWalkContext::Crypt(uint64_t key)
 {
 	des_key_schedule ks;unsigned char out[8];
-	SetupDESKey(key,ks); memset(out,0,8);
+	SetupDESKey(key, ks); memset(out,0,8);
 	des_ecb_encrypt(&m_dplainText,&out,ks,DES_ENCRYPT);
-	Arr7ToU56(out, key); key &= m_keySpaceTotal;
+	Arr7ToU56(out, key); key &= m_keySpaceTotalT;
 	return key;
 }

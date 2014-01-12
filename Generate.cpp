@@ -5,6 +5,8 @@
 #include <iostream>
 using namespace std;
 
+#include <assert.h>
+
 void Usage()
 {
 	Logo();
@@ -14,13 +16,15 @@ void Usage()
 	printf("                 testrandom\n");
 	printf("                 testnativerandom\n");
 	printf("                 testkeyschedule\n");
+	printf("                 testcasegenerator\n");
 
 	printf("example 1: generator 1000 10000 suffix\n");
 	printf("example 2: generator benchmark\n");
 	printf("example 3: generator single 563109\n");
 	printf("example 4: generator testrandom\n");
 	printf("example 5: generator testnativerandom\n");
-	printf("example 6: generator testkeyschedule\n\n");
+	printf("example 6: generator testkeyschedule\n");
+	printf("example 7: generator testcasegenerator\n\n");
 }
 
 typedef long long ll;
@@ -216,6 +220,25 @@ void TestKeySchedule()
 	fclose(file);
 }
 
+void TestCaseGenerator()
+{
+	FILE * file; RainbowChain chain;
+	ChainWalkContext cwc;
+	srand(time(0));
+
+	file = fopen("TestCaseGenerator.txt","w");
+	
+	assert(file && "TestCaseGenerator fopen error\n");
+
+	for(int index = 0;index < 100;index++)
+	{
+		chain.nStartKey = rand() & ChainWalkContext::m_keySpaceTotalT;
+		chain.nEndKey   = cwc.Crypt(chain.nStartKey);
+		fwrite((char*)&chain, sizeof(RainbowChain), 1, file);
+	}
+	fclose(file);
+}
+
 int main(int argc,char*argv[])
 {
 	long long chainLen, chainCount, index;
@@ -237,6 +260,8 @@ int main(int argc,char*argv[])
 			TestNativeRandom();
 		else if(strcmp(argv[1],"testkeyschedule") == 0)
 			TestKeySchedule();
+		else if(strcmp(argv[1],"testcasegenerator") == 0)
+			TestCaseGenerator();
 		else  Usage();
 		return 0;
 	}

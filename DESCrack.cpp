@@ -4,12 +4,16 @@
 
 #include <iostream>
 using namespace std;
+#include <assert.h>
 
 void Usage()
 {
 	Logo();
-	printf("Usage: crack   hashListFileName encryptedText \n");
-	printf("example: crack DES_1024-30000_test 12345 7831224 541234 3827427\n\n");
+	printf("Usage: crack   text hashListFileName encryptedText \n");
+	printf("               file hashListFileName encryptedFile \n\n");
+
+	printf("example 1: crack text DES_1024-30000_test 12345 7831224 541234 3827427\n");
+	printf("example 2: crack file DES_1024-30000_test fileName\n\n");
 }
 
 int main(int argc,char*argv[])
@@ -19,20 +23,39 @@ int main(int argc,char*argv[])
 	CrackEngine  ce;
 	CipherSet  * p_cs = CipherSet::GetInstance();
 
-	if(argc <= 2)
+	if(argc <= 3)
 	{
 		Usage();
 		return 0;
 	}
-
-	fileName   = argv[1];
-
-	keyNum = argc - 2;
-
-	for(index = 0;index < keyNum;index++)
-		p_cs -> AddKey(atoll(argv[index+2]));
-
-	ce.Run(fileName);
+	if(strcmp(argv[1],"file") == 0)
+	{
+		if(argc != 4)
+		{
+			Usage();return 0;
+		}
+		FILE * file = fopen(argv[3],"r");
+		assert(file && "main fopen error\n");
+		RainbowChain chain;
+		while(fread((char*)&chain, sizeof(RainbowChain), 1, file))
+		{
+			cout << chain.nStartKey << endl;
+			p_cs -> AddKey(chain.nStartKey);
+		}
+	}
+	else if(strcmp(argv[1],"text") == 0)
+	{
+		keyNum = argc - 3;
+		for(index = 0;index < keyNum;index++)
+			p_cs -> AddKey(atoll(argv[index+2]));
+	}
+	else
+	{
+		Usage();
+		return 0;
+	}
+	
+	ce.Run(argv[2]);
 
 	printf("Statistics\n");
 	printf("-------------------------------------------------------\n");

@@ -20,11 +20,12 @@ private:
 	static uint64_t   m_plainText;
 	static uint64_t   m_keySpaceTotal;	
 	static unsigned char m_dplainText[8];
-	static uint64_t   m_keySpaceTotalT;
+	
 	
 public:
 	static uint64_t   m_chainLen;
 	static uint64_t   m_chainCount;
+	static uint64_t   m_keySpaceTotalT;
 
 public:
 	static void 	SetChainInfo(uint64_t chainLen,uint64_t chainCount);

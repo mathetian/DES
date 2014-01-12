@@ -65,7 +65,7 @@ bool CrackEngine::CheckAlarm(RainbowChain * pChain, uint64_t nGuessPos, uint64_t
 	{
 		printf("plaintext of %lld is %lld\n",(long long)cwc.GetKey(), (long long)old);
 		p_cs -> AddResult(p_cs -> GetLeftKey(), old);
-		p_cs ->Succeed();
+		p_cs -> Succeed();
 		return true;
 	}
 
@@ -142,26 +142,6 @@ void CrackEngine::SearchTableChunk(RainbowChain * pChain, int pChainCount)
 	printf("Searching for key: %lld...\n",(long long)key);
 
 	nFalseAlarm  = 0;
-	
-	vector <uint64_t> pEndKeys(ChainWalkContext::m_chainLen, 0);
-
-	for(nGuessPos = 0;nGuessPos < ChainWalkContext::m_chainLen;nGuessPos++)
-	{	
-		m_cwc.SetKey(key);
-		m_cwc.KeyReduction(nGuessPos);
-
-		for(nIndex = nGuessPos + 1;nIndex < ChainWalkContext::m_chainLen;nIndex++)
-		{
-			m_cwc.KeyToCipher();
-			m_cwc.KeyReduction(nIndex);
-		}
-
-		pEndKeys[nGuessPos] = m_cwc.GetKey();
-	}
-
-	m_cwc.SetKey(key);
-	m_cwc.KeyReduction(nGuessPos);
-	uint64_t testV = m_cwc.GetKey();
 
 	for(nGuessPos = 0;nGuessPos < ChainWalkContext::m_chainLen;nGuessPos++)
 	{
@@ -170,16 +150,15 @@ void CrackEngine::SearchTableChunk(RainbowChain * pChain, int pChainCount)
 		if(pChain[nMathingIndexE].nEndKey == pEndKeys[nGuessPos])
 		{
 			uint64_t nMathingIndexEFrom, nMathingIndexETo;
-			GetIndexRange(pChain,pChainCount,nMathingIndexE,nMathingIndexEFrom,nMathingIndexETo);
-			//cout << nMathingIndexE <<" "<<nMathingIndexEFrom <<" "<< nMathingIndexETo << endl;
+			GetIndexRange(pChain, pChainCount, nMathingIndexE,nMathingIndexEFrom,nMathingIndexETo);
 			for(nIndex = nMathingIndexEFrom;nIndex <= nMathingIndexETo;nIndex++)
 			{
-				if(CheckAlarm(pChain+nIndex, nGuessPos, testV))
+				if(CheckAlarm(pChain + nIndex, nGuessPos, pEndKeys[nGuessPos]))
 					goto NEXT_HASH;
 				else nFalseAlarm++;
 			}
 		}
-		if(nGuessPos % 100 == 0) cout << nGuessPos << endl;
+		if(nGuessPos % 100 == 0) printf("nGuessPos %lld\n", (long long)nGuessPos);
 	}
 NEXT_HASH:;
 	m_totalChains += pChainCount;
@@ -206,6 +185,8 @@ void CrackEngine::Run(const char * fileName)
 	{
 		printf("-------------------------------------------------------\n");
 		printf("Time: %d, key: %lld\n\n",index++,(long long)p_cs -> GetLeftKey());
+		
+		InitEndKeys(p_cs -> GetLeftKey());
 		SearchRainbowTable(fileName);
 		
 		printf("-------------------------------------------------------\n");
@@ -230,4 +211,20 @@ uint64_t CrackEngine::GetTotalChains()
 uint64_t CrackEngine::GetFalseAlarms()
 {
 	return m_falseAlarms;
+}
+
+void CrackEngine::InitEndKeys(uint64_t key)
+{
+	pEndKeys = vector<uint64_t>(ChainWalkContext::m_chainLen, 0);
+	for(int nGuessPos = 0;nGuessPos < ChainWalkContext::m_chainLen;nGuessPos++)
+	{	
+		m_cwc.SetKey(key);
+		m_cwc.KeyReduction(nGuessPos);
+		for(int nIndex = nGuessPos + 1;nIndex < ChainWalkContext::m_chainLen;nIndex++)
+		{
+			m_cwc.KeyToCipher();
+			m_cwc.KeyReduction(nIndex);
+		}
+		pEndKeys[nGuessPos] = m_cwc.GetKey();
+	}
 }
