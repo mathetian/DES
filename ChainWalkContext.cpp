@@ -2,8 +2,8 @@
 
 uint64_t   ChainWalkContext::m_plainText     = 0x305532286D6F295A;
 uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 20) - 1;
-uint64_t   ChainWalkContext::m_keySpaceTotalT = (1ull << 24) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 17);
-
+//uint64_t   ChainWalkContext::m_keySpaceTotalT = (1ull << 24) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 17);
+uint64_t   ChainWalkContext::m_keySpaceTotalT = (1ull << 32) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24);
 uint64_t   ChainWalkContext::m_chainLen;
 uint64_t   ChainWalkContext::m_chainCount;
 unsigned char ChainWalkContext::m_dplainText[8] = {0x6B,0x05,0x6E,0x18,0x75,0x9F,0x5C,0xCA};
@@ -68,6 +68,7 @@ void ChainWalkContext::KeyReduction(int nPos)
 	**/
 	m_nIndex = (m_nIndex + nPos) & m_keySpaceTotalT;	
 	m_nIndex = (m_nIndex + (nPos << 8)) & m_keySpaceTotalT;
+	m_nIndex = (m_nIndex + ((nPos << 8) << 8)) & m_keySpaceTotalT;
 }
 
 uint64_t ChainWalkContext::GetKey()
