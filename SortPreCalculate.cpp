@@ -4,12 +4,15 @@
 using namespace std;
 
 #include "Common.h"
+#include <assert.h>
 
 void Usage()
 {
 	Logo();
 	printf("Usage  : sort fileName\n");
-	printf("example: sort DES_100_100_test\n\n");
+	printf("         sort distinct fileName\n");
+	printf("example 1: sort DES_100_100_test\n");
+	printf("example 2: sort distinct DES_100_100_test\n\n");
 }
 
 int QuickSort(RainbowChain * pChain,int length)
@@ -92,12 +95,68 @@ void printMemory(const char * str, long long nAvailPhys)
 	printf("%s %lld GB, %lld MB, %lld KB, %lld B\n", str, nAvailPhys/c, (nAvailPhys%c)/b, (nAvailPhys%b)/a, nAvailPhys%1000);
 }
 
+void Distinct(const char * sPathName)
+{
+	FILE * file; int fileLen;
+	
+	if((file = fopen(sPathName,"r")) == NULL)
+	{
+		printf("Failed to open: %s\n",sPathName);
+		return;
+	}
+
+	fileLen = GetFileLen(file);
+
+	int nRainbowChainCount = fileLen >> 4;
+
+	RainbowChain * pChain = (RainbowChain*)new unsigned char[fileLen];
+	RainbowChain * tmpChain = (RainbowChain*)new unsigned char[fileLen];
+	
+	fseek(file, 0, SEEK_SET);
+
+	printf("Begin Read file\n");
+	if(fread(pChain, 1, fileLen, file) != fileLen)
+	{
+		printf("disk read fail\n");
+		return;
+	}
+	printf("End Read file\n");
+	fclose(file);
+	QuickSort(pChain, nRainbowChainCount);
+	printf("Begin Distinct\n");
+	int index = 0, num =0;
+	while(index < nRainbowChainCount)
+	{
+		tmpChain[num++] = pChain[index];
+		while(index + 1 < nRainbowChainCount && \
+				pChain[index].nStartKey == pChain[index+1].nStartKey)
+			index++;
+		/*while(index + 1 < nRainbowChainCount && \
+				pChain[index].nEndKey == pChain[index+1].nEndKey)
+			index++;*/
+		index ++;
+	}
+	FILE * file2 = fopen("Distinct.txt","wb");
+	assert(file2 && "fopen error");
+	printf("End Distinct\n");
+	fwrite((char*)tmpChain, sizeof(RainbowChain), num, file2);
+	fclose(file2);
+}
+
 int main(int argc,char*argv[])
 {
 	const char * sPathName; FILE * file, * file2;
 	long long fileLen, nAvailPhys;
 	char str[256];
 
+	if(argc == 3)
+	{
+		if(strcmp(argv[1],"distinct") == 0)
+			Distinct(argv[2]);
+		else
+			Usage();
+		return 0;
+	}
 	if(argc!=2)
 	{
 		Usage();

@@ -3,7 +3,7 @@
 uint64_t   ChainWalkContext::m_plainText     = 0x305532286D6F295A;
 /*uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 56) - 1;*/
 uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 20) - 1;
-uint64_t   ChainWalkContext::m_keySpaceTotalT = (1ull << 22) - (1ull << 8) - 2;
+uint64_t   ChainWalkContext::m_keySpaceTotalT = (1ull << 24) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 17);
 
 uint64_t   ChainWalkContext::m_chainLen;
 uint64_t   ChainWalkContext::m_chainCount;

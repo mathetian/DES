@@ -10,13 +10,17 @@ void Usage()
 	Logo();
 	printf("Usage: generator chainLen chainCount suffix\n");
 	printf("                 benchmark\n");
-	printf("				 single startKey\n");
-	printf("				 testrandom\n\n");
+	printf("                 single startKey\n");
+	printf("                 testrandom\n");
+	printf("                 testnativerandom\n");
+	printf("                 testkeyschedule\n");
 
 	printf("example 1: generator 1000 10000 suffix\n");
 	printf("example 2: generator benchmark\n");
 	printf("example 3: generator single 563109\n");
-	printf("example 4: generator testrandom\n\n");
+	printf("example 4: generator testrandom\n");
+	printf("example 5: generator testnativerandom\n");
+	printf("example 6: generator testkeyschedule\n\n");
 }
 
 typedef long long ll;
@@ -48,6 +52,7 @@ void Benchmark()
 		cwc.KeyToCipher();
 		cwc.KeyReduction(index);
 	}
+
 	sprintf(str, "Benchmark: nLoop %d: total time:    ", nLoop);
 	TimeStamp::StopTime(str);
 }
@@ -94,19 +99,42 @@ void TestRandom()
 	fclose(file);
 }
 
+int get(unsigned char cc)
+{
+	int a = cc; int f = 0;
+	while(a)
+	{
+		if((a & 1) == 1)
+			f++;
+		a >>= 1;
+	}
+	if(f % 2 == 1)
+		return 0;
+	return 1;
+}
+
 void clear(unsigned char * key, int type)
 {
 	if(type ==  20)
 	{
-		int index   = 2;
-		key[index] &= 63;
-		for(index++;index < 8;index++)
-			key[index] = 0;
+		key[0] &= ((1<<8) - 2);
+		key[0] |= get(key[0]);
+		key[1] &= ((1<<8) - 2);
+		key[1] |= get(key[1]);
+		key[2] &= ((1<<8) - 4);
+		key[2] |= get(key[2]);
+
+		for(int index = 3;index < 8;index++)
+			key[index] = 1;
 	}
 	else if(type == 24)
 	{
 		for(int index = 3;index < 8;index++)
 			key[index] = 0;
+	}
+	else if(type == 26)
+	{
+		unsigned char rkey[8];
 	}
 	else if(type == 28)
 	{
@@ -119,6 +147,23 @@ void clear(unsigned char * key, int type)
 
 unsigned char plainText[8] = {0x6B,0x05,0x6E,0x18,0x75,0x9F,0x5C,0xCA};
 
+void Generate(unsigned char * key, int type)
+{
+	if(type == 20)
+	{
+		int rr = rand() % (1 << 20);
+		int ff = (1 << 7) - 1;
+		key[0] = (rr & ff) << 1;
+		rr >>= 7;
+		key[1] = (rr & ff) << 1;
+		rr >>= 7;
+		key[2] = (rr) << 2;
+		int index = 3;
+		for(;index < 8;index++)
+			key[index] = 0;
+	}
+}
+
 void TestNativeRandom()
 {
 	unsigned char key[8], out[8]; des_key_schedule ks;
@@ -130,19 +175,19 @@ void TestNativeRandom()
 		return;
 	}
 	
-	int type = 20;
-	for(int index = 0;index < (1<<type);index++)
+	int type = 20; srand(time(0));
+	for(int index = 0;index < (1<<10);index++)
 	{
-		RAND_bytes(key, 8); clear(key, type);
-		chain.nStartKey = *(int*)key;
+		Generate(key,20);
+		chain.nStartKey = *(uint64_t*)key; 
+
 		memset(out, 0, 8);
 
 		DES_set_key_unchecked(&key, &ks);
-		
 		des_ecb_encrypt(&plainText,&out,ks,DES_ENCRYPT);
 
 		clear(out, type);
-		chain.nEndKey = *(int*)out;
+		chain.nEndKey = *(uint64_t*)out;
 		fwrite((char*)&chain, sizeof(RainbowChain), 1, file);
 
 		if(index % 1000000 == 0)
@@ -152,10 +197,23 @@ void TestNativeRandom()
 	fclose(file);
 }
 
-void clear(uint64_t & start)
+unsigned char keyData  [8] = {0x01,0x70,0xF1,0x75,0x46,0x8F,0xB5,0xE6};
+
+void TestKeySchedule()
 {
-	uint64_t a = (1 << 22) - 4;
-	start &= a;
+	des_key_schedule ks; FILE * file; int index = 0;
+	DES_set_key_unchecked(&keyData, &ks);
+	if((file = fopen("TestKeySchedule.txt","wb")) == NULL)
+	{
+		printf("TestKeySchedule fopen error\n");
+		return;
+	}
+	
+	for(;index < 16;index++)
+	{
+		fwrite(ks.ks[index].cblock,8,1,file);
+	}
+	fclose(file);
 }
 
 int main(int argc,char*argv[])
@@ -166,7 +224,7 @@ int main(int argc,char*argv[])
 	FILE * file; ChainWalkContext cwc;
 	uint64_t nDatalen, nChainStart;
 	RainbowChain chain;
-	
+		
 	char str[256];
 
 	if(argc == 2)
@@ -177,6 +235,8 @@ int main(int argc,char*argv[])
 			TestRandom();
 		else if(strcmp(argv[1],"testnativerandom") == 0)
 			TestNativeRandom();
+		else if(strcmp(argv[1],"testkeyschedule") == 0)
+			TestKeySchedule();
 		else  Usage();
 		return 0;
 	}
