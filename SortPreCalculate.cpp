@@ -11,10 +11,10 @@ using namespace std;
 void Usage()
 {
 	Logo();
-	printf("Usage  : sort fileName\n");
-	printf("         sort distinct fileName\n");
-	printf("example 1: sort DES_100_100_test\n");
-	printf("example 2: sort distinct DES_100_100_test\n\n");
+	printf("Usage  : sort sort number fileName\n");
+	printf("         sort distinct number fileName\n");
+	printf("example 1: sort sort 1 DES_100_100_test\n");
+	printf("example 2: sort distinct 1 DES_100_100_test\n\n");
 }
 
 typedef pair<RainbowChain, int> PPR;
@@ -140,19 +140,19 @@ void printMemory(const char * str, long long nAvailPhys)
 	printf("%s %lld GB, %lld MB, %lld KB, %lld B\n", str, nAvailPhys/c, (nAvailPhys%c)/b, (nAvailPhys%b)/a, nAvailPhys%1000);
 }
 
-void Distinct(vector <string> fileNames, vector <FILE*> files)
+void Distinct(const char * fileName)
 {
-/*	FILE * file; int fileLen;
+	FILE * file; uint64_t fileLen;
 	
-	if((file = fopen(sPathName,"r")) == NULL)
+	if((file = fopen(fileName, "r")) == NULL)
 	{
-		printf("Failed to open: %s\n",sPathName);
+		printf("Failed to open: %s\n",fileName);
 		return;
 	}
 
 	fileLen = GetFileLen(file);
 
-	int nRainbowChainCount = fileLen >> 4;
+	uint64_t nRainbowChainCount = fileLen >> 4;
 
 	RainbowChain * pChain = (RainbowChain*)new unsigned char[fileLen];
 	RainbowChain * tmpChain = (RainbowChain*)new unsigned char[fileLen];
@@ -167,9 +167,9 @@ void Distinct(vector <string> fileNames, vector <FILE*> files)
 	}
 	printf("End Read file\n");
 	fclose(file);
-	QuickSort(pChain, nRainbowChainCount);
+
 	printf("Begin Distinct\n");
-	int index = 0, num =0;
+	uint64_t index = 0, num =0;
 	while(index < nRainbowChainCount)
 	{
 		tmpChain[num++] = pChain[index];
@@ -182,10 +182,10 @@ void Distinct(vector <string> fileNames, vector <FILE*> files)
 	assert(file2 && "fopen error");
 	printf("End Distinct\n");
 	fwrite((char*)tmpChain, sizeof(RainbowChain), num, file2);
-	fclose(file2);*/
+	fclose(file2);
 }
 
-void SortFiles(vector <string> fileNames, vector <FILE*> files)
+void SortFiles(vector <string> fileNames, vector <FILE*> files, const char * prefix)
 {
 	int index = 0; uint64_t nAvailPhys; char str[256];
 
@@ -199,8 +199,9 @@ void SortFiles(vector <string> fileNames, vector <FILE*> files)
 
 	for(;index < fileNames.size();index++)
 	{
+
 		uint64_t & fileLen = fileLens[index];
-		
+
 		fileLen = GetFileLen(files[index]);
 
 		assert((fileLen % 16 ==0) && ("Rainbow table size check failed\n"));
@@ -239,10 +240,10 @@ void SortFiles(vector <string> fileNames, vector <FILE*> files)
 		else ExternalSort(files[index]);
 	}
 
-	targetFile = fopen("TargetFiles.txt","w");
+	targetFile = fopen(prefix,"w");
 	fclose(targetFile);
 
-	targetFile = fopen("TargetFiles.txt","r+");
+	targetFile = fopen(prefix,"r+");
 	assert(targetFile && ("targetFile fopen error\n"));
 
 	printf("Begin Actually ExternalSort\n");
@@ -258,7 +259,7 @@ ABORT:
 
 int main(int argc,char*argv[])
 {
-	if(argc == 1)
+	if(argc != 4)
 	{
 		Usage();
 		return 0;
@@ -266,34 +267,33 @@ int main(int argc,char*argv[])
 
 	if(strcmp(argv[1],"distinct") == 0)
 	{
-		vector <string> fileNames(argc - 2, "");
-		vector <FILE*>  files(argc - 2, NULL);
-
-		int index = 2;
-		for(;index < argc;index++)
-		{
-			fileNames[index] = argv[index];
-			files[index]     = fopen(argv[index],"r+");
-			assert(files[index] && ("fopen error\n"));
-		}
-		/*Distinct(fileNames);*/
+		int num = atoi(argv[2]);
+		assert((num == 1) && "Sorry for that, I want to write `less` code");
+		Distinct(argv[3]);
 	}	
-	else
+	else if(strcmp(argv[1],"sort") == 0)
 	{
-		vector <string> fileNames(argc - 1, "");
-		vector <FILE*>  files(argc - 1, NULL);
+		int num =  atoi(argv[2]);
 
-		int index = 1;
-		for(;index < argc;index++)
+		assert((num < 9) && ("sorry number must be less than ten\n"));
+
+		vector <string> fileNames(num, "");
+		vector <FILE*>  files(num, NULL);
+
+		for(int index = 0;index < num;index++)
 		{
-			fileNames[index-1] = argv[index];
-			files[index-1]     = fopen(argv[index],"r+");
-			assert(files[index-1] && ("fopen error\n"));
-		}
+			fileNames[index] = argv[3];
+			fileNames[index] +=  "_";
+			fileNames[index].push_back(index + '0');
+			files[index] = fopen(fileNames[index].c_str(),"r+");
+			assert(files[index] && "fopen error\n");
+		}	
+
 		printf("Begin SortFiles\n");
-		SortFiles(fileNames, files);
+		SortFiles(fileNames, files, argv[3]);
 		printf("End SortFiles\n");
 	}
+	else Usage();
 
 	return 0;
 }
