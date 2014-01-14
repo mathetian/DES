@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <vector>
 #include <queue>
+#include <string>
+#include <iostream>
 using namespace std;
 
 #include "Common.h"
@@ -15,76 +17,119 @@ void Usage()
 	printf("example 2: sort distinct DES_100_100_test\n\n");
 }
 
-int QuickSort(RainbowChain * pChain,int length)
-{ sort(pChain,pChain+length); }
+typedef pair<RainbowChain, int> PPR;
 
-void ExternalSort(FILE*file,const char * tmpfileName)
+struct cmp
 {
-	FILE*tmpFile;int nAvailPhys, chainCount;
-    int memoryCount, segNums, lastCount, fileLen;
-    vector<SortedSegment*> svec; int index;
-	priority_queue<pair<RainbowChain*,int> > chainPQ;
-
-    if((tmpFile = fopen(tmpfileName,"w+r")) == NULL)
-    {
-    	printf("ExternalSort: fopen error\n");
-		return;
+    bool operator()(PPR a,PPR b){
+    	RainbowChain  r1 = a.first;
+    	RainbowChain  r2 = b.first;
+    	if(r1.nEndKey < r2.nEndKey)
+    		return -1;
+    	else if(r1.nEndKey == r2.nEndKey)
+    		return 0;
+    	return 1;
     }
+};
 
-	SortedSegment::file=file;
-	SortedSegment::tmpFile=file;
+int QuickSort(RainbowChain * pChain, uint64_t length)
+{ sort(pChain, pChain + length); }
 
-	nAvailPhys  = GetAvailPhysMemorySize();
-	fileLen     = GetFileLen(file);
-	chainCount  = fileLen >> 4;
-	memoryCount = nAvailPhys >> 4;
+void ExternalSort(FILE * file, vector <FILE*> tmpFiles)
+{
+	int index = 0; RainbowChain chain;
 
-	segNums = chainCount/memoryCount;
-	
-	if(chainCount % memoryCount != 0) 
-		segNums++;
-	
-	lastCount = chainCount % memoryCount;
-	
-	if(lastCount == 0) lastCount = memoryCount;
+	fseek(file, 0, SEEK_SET);
 
-	svec = vector<SortedSegment*>(segNums,NULL);
-	
-	for(index = 0;index < segNums;index++)
+	vector <uint64_t> tmpLens(tmpFiles.size(), 0);
+
+	for(;index < tmpFiles.size();index++)
 	{
-		SortedSegment * seg = new SortedSegment();
-		svec[index] = seg;
-		if(index < segNums - 1)
-		seg -> setProperty(memoryCount*index,memoryCount,0);
-		else
-		seg -> setProperty(memoryCount*index,lastCount,0);
+		fseek(tmpFiles[index], 0, SEEK_SET);
+		tmpLens[index] = GetFileLen(tmpFiles[index]) >> 4;
 	}
 
-	fseek(file,0,SEEK_SET);
-	fseek(tmpFile,0,SEEK_SET);
+	priority_queue<PPR, vector<PPR>, cmp> chainPQ;
 
-	for(index = 0;index < segNums;index++)
+	for(index = 0;index < tmpFiles.size();index++)
 	{
-		RainbowChain * chains = svec.at(index) -> getAll();
-		QuickSort(chains, svec.at(index) -> getLength());
-		fwrite(chains,sizeof(RainbowChain),svec.at(index) -> getLength(),tmpFile);
+		fread((char*)&chain,sizeof(RainbowChain),1,tmpFiles[index]);
+		chainPQ.push(make_pair(chain,index));
 	}
-
-	fseek(file   ,0,SEEK_SET);
-	fseek(tmpFile,0,SEEK_SET);
-
-	for(index = 0;index < segNums;index++)
-		chainPQ.push(make_pair(svec.at(index)->getNext(),index));
 
 	while(!chainPQ.empty())
 	{
-		RainbowChain * chain = chainPQ.top().first;
-		int id = chainPQ.top().second;
+		chain = chainPQ.top().first;
+		index = chainPQ.top().second;
+		
 		chainPQ.pop();
-		fread(chain,sizeof(RainbowChain),1,file);
-		RainbowChain * next = svec.at(id)->getNext();
-		if(!next) continue;
-		chainPQ.push(make_pair(next,id));
+
+		fwrite((char*)&chain, sizeof(RainbowChain), 1, file);
+		tmpLens[index]--;
+		if(tmpLens[index] == 0) continue;
+		fread((char*)&chain, sizeof(RainbowChain), 1, tmpFiles[index]);
+
+		chainPQ.push(make_pair(chain, index));
+	}
+}
+
+void ExternalSort(FILE * file)
+{
+	uint64_t nAvailPhys, fileLen, chainCount;
+
+	uint64_t memoryCount; int tmpNum; int index = 0;
+
+	char str[256];
+
+	nAvailPhys = GetAvailPhysMemorySize();
+
+	fileLen    = GetFileLen(file); 
+
+	chainCount  = fileLen >> 4;
+	
+	memoryCount = nAvailPhys >> 4;
+	
+	uint64_t eachLen = memoryCount << 4;
+	uint64_t lastLen = fileLen % eachLen;
+	if(lastLen == 0) lastLen = eachLen;
+
+	tmpNum      = fileLen/nAvailPhys;
+	
+	if(fileLen % nAvailPhys != 0) tmpNum++;
+
+	assert((nAvailPhys <= fileLen) && "Error ExternalSort type\n");
+
+	RainbowChain * chains =  (RainbowChain*)new unsigned char[eachLen];
+
+	fseek(file, 0, SEEK_SET);
+
+	vector <FILE*> tmpFiles(tmpNum, NULL);
+
+	for(;index < tmpNum;index++)
+	{
+		sprintf(str,"tmpFiles-%d",index);
+		tmpFiles[index] = fopen(str, "w");
+		assert(tmpFiles[index] &&("tmpFiles fopen error\n"));
+		if(index < tmpNum - 1)
+		{
+			fread((char*)chains, sizeof(RainbowChain), memoryCount, file);
+			QuickSort(chains, memoryCount);
+			fwrite((char*)chains, sizeof(RainbowChain), memoryCount, tmpFiles[index]);
+		}
+		else
+		{
+			fread((char*)chains, lastLen, 1, file);
+			assert((lastLen % 16 == 0) && ("Error lastLen"));
+			QuickSort(chains, lastLen >> 4);
+			fwrite((char*)&chains, lastLen, 1, tmpFiles[index]);
+		}	
+	}
+
+	ExternalSort(file, tmpFiles);
+
+	for(index = 0;index < tmpNum;index++)
+	{
+		fclose(tmpFiles[index]);
 	}
 }
 
@@ -95,9 +140,9 @@ void printMemory(const char * str, long long nAvailPhys)
 	printf("%s %lld GB, %lld MB, %lld KB, %lld B\n", str, nAvailPhys/c, (nAvailPhys%c)/b, (nAvailPhys%b)/a, nAvailPhys%1000);
 }
 
-void Distinct(const char * sPathName)
+void Distinct(vector <string> fileNames, vector <FILE*> files)
 {
-	FILE * file; int fileLen;
+/*	FILE * file; int fileLen;
 	
 	if((file = fopen(sPathName,"r")) == NULL)
 	{
@@ -128,9 +173,6 @@ void Distinct(const char * sPathName)
 	while(index < nRainbowChainCount)
 	{
 		tmpChain[num++] = pChain[index];
-		/*while(index + 1 < nRainbowChainCount && \
-				pChain[index].nStartKey == pChain[index+1].nStartKey)
-			index++;*/
 		while(index + 1 < nRainbowChainCount && \
 				pChain[index].nEndKey == pChain[index+1].nEndKey)
 			index++;
@@ -140,74 +182,118 @@ void Distinct(const char * sPathName)
 	assert(file2 && "fopen error");
 	printf("End Distinct\n");
 	fwrite((char*)tmpChain, sizeof(RainbowChain), num, file2);
-	fclose(file2);
+	fclose(file2);*/
 }
 
-int main(int argc,char*argv[])
+void SortFiles(vector <string> fileNames, vector <FILE*> files)
 {
-	const char * sPathName; FILE * file, * file2;
-	long long fileLen, nAvailPhys;
-	char str[256];
+	int index = 0; uint64_t nAvailPhys; char str[256];
 
-	if(argc == 3)
-	{
-		if(strcmp(argv[1],"distinct") == 0)
-			Distinct(argv[2]);
-		else
-			Usage();
-		return 0;
-	}
-	if(argc!=2)
-	{
-		Usage();
-		return 0;
-	}
+	vector <uint64_t> fileLens(fileNames.size(), 0);	
 
-	sPathName = argv[1];
-
-	if((file = fopen(sPathName,"r")) == NULL)
-	{
-		printf("Failed to open: %s\n",sPathName);
-		return 0;
-	}
-
-	fileLen = GetFileLen(file);
-	
-	if(fileLen % 16 != 0)
-	{
-		printf("Rainbow table size check failed\n");
-		return 0;
-	}
-	printf("%s FileLen %lld bytes\n", argv[1], fileLen);
+	FILE * targetFile;
 
 	nAvailPhys = GetAvailPhysMemorySize();	
 	sprintf(str, "Available free physical memory: ");
 	printMemory(str, nAvailPhys);
 
-	if(nAvailPhys >= fileLen)
+	for(;index < fileNames.size();index++)
 	{
-		int nRainbowChainCount = fileLen >> 4;
-		RainbowChain * pChain = (RainbowChain*)new unsigned char[fileLen];
-		if(pChain!=NULL)
+		uint64_t & fileLen = fileLens[index];
+		
+		fileLen = GetFileLen(files[index]);
+
+		assert((fileLen % 16 ==0) && ("Rainbow table size check failed\n"));
+
+		printf("%s FileLen %lld bytes\n", fileNames[index].c_str(), (long long)fileLen);
+
+		if(nAvailPhys > fileLen)
 		{
-			printf("Loading rainbow table...\n");
-			fseek(file, 0, SEEK_SET);
-			if(fread(pChain, 1, fileLen, file) != fileLen)
+			uint64_t nRainbowChainCount = fileLen >> 4;
+		
+			RainbowChain * pChain = (RainbowChain*)new unsigned char[fileLen];
+			
+			if(pChain!=NULL)
 			{
-				printf("disk read fail\n");
-				goto ABORT;
+				printf("%d, Loading rainbow table...\n", index);
+				
+				fseek(files[index], 0, SEEK_SET);
+
+				if(fread(pChain, 1, fileLen, files[index]) != fileLen)
+				{
+					printf("%d, disk read fail\n", index);
+					goto ABORT;
+				}
+
+				printf("%d, Sorting the rainbow table...\n", index);
+				
+				QuickSort(pChain, nRainbowChainCount);
+
+				printf("%d, Writing sorted rainbow table...\n", index);
+				
+				fseek(files[index], 0, SEEK_SET);								
+				fwrite(pChain, 1, fileLen, files[index]);
+				delete [] pChain;
 			}
-			printf("Sorting the rainbow table...\n");
-			QuickSort(pChain, nRainbowChainCount);
-			printf("writing sorted rainbow table...\n");
-			fclose(file);
-			file = fopen(argv[1],"w");
-			fwrite(pChain, 1, fileLen, file);
-			delete [] pChain;
 		}
+		else ExternalSort(files[index]);
 	}
-	else ExternalSort(file,"tmpFile");
+
+	targetFile = fopen("TargetFiles.txt","w");
+	fclose(targetFile);
+
+	targetFile = fopen("TargetFiles.txt","r+");
+	assert(targetFile && ("targetFile fopen error\n"));
+
+	printf("Begin Actually ExternalSort\n");
+	ExternalSort(targetFile, files);
+	printf("End Actually ExternalSort\n");
+	fclose(targetFile);
+
 ABORT:
-	fclose(file);
+	for(index = 0;index < fileNames.size();index++)
+		fclose(files[index]);
+	
+}
+
+int main(int argc,char*argv[])
+{
+	if(argc == 1)
+	{
+		Usage();
+		return 0;
+	}
+
+	if(strcmp(argv[1],"distinct") == 0)
+	{
+		vector <string> fileNames(argc - 2, "");
+		vector <FILE*>  files(argc - 2, NULL);
+
+		int index = 2;
+		for(;index < argc;index++)
+		{
+			fileNames[index] = argv[index];
+			files[index]     = fopen(argv[index],"r+");
+			assert(files[index] && ("fopen error\n"));
+		}
+		/*Distinct(fileNames);*/
+	}	
+	else
+	{
+		vector <string> fileNames(argc - 1, "");
+		vector <FILE*>  files(argc - 1, NULL);
+
+		int index = 1;
+		for(;index < argc;index++)
+		{
+			fileNames[index-1] = argv[index];
+			files[index-1]     = fopen(argv[index],"r+");
+			assert(files[index-1] && ("fopen error\n"));
+		}
+		printf("Begin SortFiles\n");
+		SortFiles(fileNames, files);
+		printf("End SortFiles\n");
+	}
+
 	return 0;
 }

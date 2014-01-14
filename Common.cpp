@@ -3,8 +3,8 @@
 #include <string>
 using namespace std;
 
-FILE * SortedSegment::file;
-FILE * SortedSegment::tmpFile;
+/*FILE * SortedSegment::file;
+FILE * SortedSegment::tmpFile;*/
 
 bool RainbowChain::operator < (const RainbowChain &m) const 
 {
@@ -17,7 +17,7 @@ void Logo()
 	printf("DESRainbowCrack 1.0\n 	Make an implementation of DES Time-and-Memory Tradeoff Technology\n 	By Tian Yulong(mathetian@gmail.com)\n\n");
 }
 
-unsigned int GetFileLen(FILE* file)
+unsigned int GetFileLen(FILE * file)
 {
     unsigned int pos = ftell(file);
     fseek(file, 0, SEEK_END);
@@ -81,7 +81,7 @@ bool AnylysisFileName(const char * filename, uint64_t & chainLen, uint64_t & cha
 	return true;
 }
 
-SortedSegment::SortedSegment()
+/*SortedSegment::SortedSegment()
 {
 }
 
@@ -101,21 +101,12 @@ int SortedSegment::getLength()
 	return length;
 }
 
-RainbowChain * SortedSegment::getFirst()
-{
-	fseek(file,offset+curOffset,SEEK_SET);
-	if((fread(chains,sizeof(RainbowChain),1,file)) != sizeof(RainbowChain))
-	{
-		printf("Error length\n");
-		exit(0);
-	}
-	return chains;
-}
 
 RainbowChain * SortedSegment::getAll()
 {
-	fseek(file,offset,SEEK_SET);
-	if((fread(chains,sizeof(RainbowChain),length,file)) != sizeof(RainbowChain) * length)
+	fseek(file, offset, SEEK_SET);
+
+	if((fread(chains, sizeof(RainbowChain), length, file)) != length)
 	{
 		printf("Error length\n");
 		exit(0);
@@ -125,12 +116,13 @@ RainbowChain * SortedSegment::getAll()
 
 RainbowChain * SortedSegment::getNext()
 {
-	if(curOffset==length*sizeof(RainbowChain))
+	if(curOffset == length*sizeof(RainbowChain))
 		return NULL;
-	if((fread(chains,sizeof(RainbowChain),1,tmpFile)) != sizeof(RainbowChain))
+
+	if((fread(chains, sizeof(RainbowChain), 1, tmpFile)) != 1)
 	{
 		printf("Error length\n");
 		exit(0);
 	}
 	curOffset+=sizeof(RainbowChain);
-}
+}*/
