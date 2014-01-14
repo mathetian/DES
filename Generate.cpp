@@ -1,3 +1,5 @@
+#include <mpi.h>
+
 #include "Common.h"
 #include "TimeStamp.h"
 #include "ChainWalkContext.h"
@@ -240,18 +242,85 @@ void TestCaseGenerator()
 	fclose(file);
 }
 
-int main(int argc,char*argv[])
+void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, int rank, int numproc)
+{
+	FILE * file; ChainWalkContext cwc; char str[256];
+
+	uint64_t nDatalen, index, nChainStart;
+
+	RainbowChain chain;
+
+	uint64_t chainCount = totalChainCount / numproc;
+
+
+	if((file = fopen(szFileName,"a+")) == NULL)
+	{
+		printf("rank %d of %d, failed to create %s\n",rank, numproc, szFileName);
+		return;
+	}
+
+	nDatalen = GetFileLen(file);
+	nDatalen = (nDatalen >> 4) << 4;
+
+	if(nDatalen == (chainCount << 4))
+	{
+		printf("rank %d of %d, precompute has finised\n",rank, numproc);
+		return;
+	}
+
+	if(nDatalen > 0)
+	{
+		printf("rank %d of %d, continuing from interrupted precomputing, ", rank, numproc);
+		printf("have computed %lld chains\n", (ll)(nDatalen >> 4));
+	} 
+	
+	fseek(file, nDatalen, SEEK_SET);
+
+	nChainStart += (nDatalen >> 4);
+
+	index = nDatalen >> 4;
+
+	cwc.SetChainInfo(chainLen, chainCount);
+	
+	TimeStamp::StartTime();
+
+	for(;index < chainCount;index++)
+	{
+		chain.nStartKey = cwc.GetRandomKey();
+
+		int nPos;
+		for(nPos = 0;nPos < chainLen;nPos++)
+		{
+			cwc.KeyToCipher();
+			cwc.KeyReduction(nPos);
+		}
+
+		chain.nEndKey = cwc.GetKey();
+
+		if(fwrite((char*)&chain, sizeof(RainbowChain), 1, file) != 1)
+		{
+			printf("rank %d of %d, disk write error\n", rank, numproc);
+			break;
+		}
+
+		if((index + 1)%10000 == 0||index + 1 == chainCount)
+		{
+			sprintf(str,"rank %d of %d, generate: nChains: %lld, chainLen: %lld: total time:", rank, numproc, (long long)index, (long long)chainLen);
+			TimeStamp::StopTime(str);
+			TimeStamp::StartTime();
+		}
+	}
+	fclose(file);
+}
+
+int main(int argc,char * argv[])
 {
 	long long chainLen, chainCount, index;
 	char suffix[256], szFileName[256];
-
-	FILE * file; ChainWalkContext cwc;
-	uint64_t nDatalen, nChainStart;
-	RainbowChain chain;
-		
-	char str[256];
-
-	if(argc == 2)
+	
+	int numproc,rank;
+    
+        if(argc == 2)
 	{
 		if(strcmp(argv[1],"benchmark") == 0)
 			Benchmark();
@@ -284,64 +353,15 @@ int main(int argc,char*argv[])
 	chainCount = atoll(argv[2]);
 
 	memcpy(suffix, argv[3], sizeof(argv[3]));
-	sprintf(szFileName,"DES_%lld-%lld_%s", chainLen, chainCount,suffix);
-	
-	if((file = fopen(szFileName,"a+")) == NULL)
-	{
-		printf("failed to create %s\n",szFileName);
-		return 0;
-	}
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &numproc);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-	nDatalen = GetFileLen(file);
-	nDatalen = (nDatalen >> 4) << 4;
+    sprintf(szFileName,"DES_%lld-%lld_%s_%d", chainLen, chainCount, suffix, rank);
 
-	if(nDatalen == (chainCount << 4))
-	{
-		printf("precompute has finised\n");
-		return 0;
-	}
+    Generator(szFileName, chainLen, chainCount, rank, numproc);
 
-	if(nDatalen > 0)
-	{
-		printf("continuing from interrupted precomputing\n");
-		printf("have computed %lld chains\n", (ll)(nDatalen >> 4));
-	} 
-	
-	fseek(file, nDatalen, SEEK_SET);
-	nChainStart += (nDatalen >> 4);
+    MPI_Finalize();
 
-	index = nDatalen >> 4;
-
-	cwc.SetChainInfo(chainLen, chainCount);
-	
-	TimeStamp::StartTime();
-
-	for(;index < chainCount;index++)
-	{
-		chain.nStartKey = cwc.GetRandomKey();
-
-		int nPos;
-		for(nPos = 0;nPos < chainLen;nPos++)
-		{
-			cwc.KeyToCipher();
-			cwc.KeyReduction(nPos);
-		}
-
-		chain.nEndKey = cwc.GetKey();
-
-		if(fwrite((char*)&chain, sizeof(RainbowChain), 1, file) != 1)
-		{
-			printf("disk write error\n");
-			break;
-		}
-
-		if((index + 1)%10000 == 0||index + 1 == chainCount)
-		{
-			sprintf(str,"Generate: nChains: %lld, chainLen: %lld: total time:", index, chainLen);
-			TimeStamp::StopTime(str);
-			TimeStamp::StartTime();
-		}
-	}
-	fclose(file);
 	return 0;
 }

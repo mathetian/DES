@@ -14,8 +14,6 @@ uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 20) - 1;
 *//**
 	for 32 bit(100 M), 2^11 * 2^21'
 **/
-/*uint64_t   ChainWalkContext::m_keySpaceTotalT = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24) - 15;		
-*/
 uint64_t     ChainWalkContext::m_keySpaceTotalT = (1ull << /*36*/ 40) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24) - (1ull<<32) - (1ull<<33)- (1ull<<34)- (1ull<<35);
 uint64_t   ChainWalkContext::m_chainLen;
 uint64_t   ChainWalkContext::m_chainCount;
