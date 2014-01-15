@@ -21,7 +21,7 @@ typedef pair<RainbowChain, int> PPR;
 
 struct cmp
 {
-    bool operator()(PPR a,PPR b){
+    int operator()(PPR a,PPR b){
     	RainbowChain  r1 = a.first;
     	RainbowChain  r2 = b.first;
     	if(r1.nEndKey < r2.nEndKey)
@@ -32,7 +32,7 @@ struct cmp
     }
 };
 
-int QuickSort(RainbowChain * pChain, uint64_t length)
+void QuickSort(RainbowChain * pChain, uint64_t length)
 { sort(pChain, pChain + length); }
 
 void ExternalSort(FILE * file, vector <FILE*> tmpFiles)

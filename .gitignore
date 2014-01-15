@@ -9,3 +9,5 @@ test2
 test.out
 test2.out
 *.txt
+*exe
+*obj

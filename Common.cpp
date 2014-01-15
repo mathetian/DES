@@ -1,5 +1,4 @@
 #include "Common.h"
-#include <sys/sysinfo.h>
 #include <string>
 using namespace std;
 
@@ -29,9 +28,16 @@ unsigned int GetFileLen(FILE * file)
 
 unsigned int GetAvailPhysMemorySize()
 {   
+#ifdef _WIN32
+    MEMORYSTATUSEX statex;
+    statex.dwLength = sizeof (statex);
+    GlobalMemoryStatusEx (&statex);
+    return statex.ullAvailPhys;
+#else
     struct sysinfo info;
     sysinfo(&info);
     return info.freeram;
+#endif
 }
 
 void U56ToArr7(const uint64_t & key56, unsigned char * key_56)
@@ -58,7 +64,7 @@ void Arr7ToU56(const unsigned char * key_56, uint64_t & key56)
 
 void SetupDESKey(const uint64_t & key56,des_key_schedule & ks)
 {
-	des_cblock key, key_56;
+	des_cblock key_56;
 	
 	U56ToArr7(key56, key_56);
 

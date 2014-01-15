@@ -7,8 +7,33 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <sys/time.h>
 #include <openssl/des.h>
+
+#include <sstream>
+#include <iostream>
+using namespace std;
+
+#ifdef _WIN32
+    #pragma warning(disable : 4786)
+    #pragma warning(disable : 4996)
+    #pragma warning(disable : 4267)
+    #pragma warning(disable : 4244)
+    #include <Windows.h>        
+#else
+    #include <sys/sysinfo.h>
+    #include <sys/time.h>
+#endif
+
+#ifdef _WIN32
+    inline uint64_t atoll(const char * str)
+    {
+            uint64_t rs;
+            istringstream ist(str);
+            ist >> rs;
+
+            return rs;
+    }
+#endif
 
 class RainbowChain{
 public:

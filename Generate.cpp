@@ -1,5 +1,3 @@
-#include <mpi.h>
-
 #include "Common.h"
 #include "TimeStamp.h"
 #include "ChainWalkContext.h"
@@ -140,7 +138,7 @@ void clear(unsigned char * key, int type)
 	}
 	else if(type == 26)
 	{
-		unsigned char rkey[8];
+		//unsigned char rkey[8];
 	}
 	else if(type == 28)
 	{
@@ -242,8 +240,23 @@ void TestCaseGenerator()
 	fclose(file);
 }
 
-void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, int rank, int numproc)
+typedef struct{
+	char szFileName[256];
+	uint64_t chainLen;
+	uint64_t chainCount;
+	int rank;
+	int numproc;
+}DATA;
+
+DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 {
+	DATA * data = (DATA*)lpParam;
+	const char * szFileName = data -> szFileName;
+	uint64_t chainLen = data -> chainLen;
+	uint64_t totalChainCount = data -> chainCount;
+	int rank = data -> rank;
+	int numproc =  data -> numproc;
+
 	FILE * file; ChainWalkContext cwc; char str[256];
 
 	uint64_t nDatalen, index, nChainStart;
@@ -255,8 +268,8 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
 
 	if((file = fopen(szFileName,"a+")) == NULL)
 	{
-		printf("rank %d of %d, failed to create %s\n",rank, numproc, szFileName);
-		return;
+		printf("rank %d of %d, failed to create %s\n", rank, numproc, szFileName);
+		return 0;
 	}
 
 	nDatalen = GetFileLen(file);
@@ -265,7 +278,7 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
 	if(nDatalen == (chainCount << 4))
 	{
 		printf("rank %d of %d, precompute has finised\n",rank, numproc);
-		return;
+		return 0;
 	}
 
 	if(nDatalen > 0)
@@ -276,7 +289,7 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
 	
 	fseek(file, nDatalen, SEEK_SET);
 
-	nChainStart += (nDatalen >> 4);
+	nChainStart = (nDatalen >> 4);
 
 	index = nDatalen >> 4;
 
@@ -300,7 +313,7 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
 		if(fwrite((char*)&chain, sizeof(RainbowChain), 1, file) != 1)
 		{
 			printf("rank %d of %d, disk write error\n", rank, numproc);
-			break;
+			return 0;
 		}
 
 		if((index + 1)%10000 == 0||index + 1 == chainCount)
@@ -311,14 +324,19 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
 		}
 	}
 	fclose(file);
+	return 0;
 }
+
+
+
 
 int main(int argc,char * argv[])
 {
-	long long chainLen, chainCount, index;
-	char suffix[256], szFileName[256];
-	
-	int numproc,rank;
+	//long long chainLen, chainCount, index;
+	uint64_t chainLen, chainCount;
+	//char suffix[256], szFileName[256];
+	char suffix[256];
+	//int numproc,rank;
     
         if(argc == 2)
 	{
@@ -353,15 +371,19 @@ int main(int argc,char * argv[])
 	chainCount = atoll(argv[2]);
 
 	memcpy(suffix, argv[3], sizeof(argv[3]));
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &numproc);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    sprintf(szFileName,"DES_%lld-%lld_%s_%d", chainLen, chainCount, suffix, rank);
+    DATA datas[8];  HANDLE  hThreadArray[8]; DWORD   dwThreadIdArray[8];
+    for(int i = 0;i < 8;i++)
+    {	
+    	sprintf(datas[i].szFileName,"DES_%lld-%lld_%s_%d", chainLen, chainCount, suffix, i);
+    	datas[i].chainLen = chainLen;
+    	datas[i].chainCount = chainCount;
+    	datas[i].rank = i;
+    	datas[i].numproc = 4;
+    	hThreadArray[i] = CreateThread( NULL,0, MyThreadFunction, &datas[i],0,&dwThreadIdArray[i]);
+    }
 
-    Generator(szFileName, chainLen, chainCount, rank, numproc);
-
-    MPI_Finalize();
+   	WaitForMultipleObjects(8, hThreadArray, TRUE, INFINITE);
 
 	return 0;
 }
