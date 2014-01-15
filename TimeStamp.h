@@ -1,20 +1,43 @@
 #ifndef _TIME_STAMP_H
 #define _TIME_STAMP_H
 
-#include <sys/time.h>
 #include <time.h>
 #include <stdio.h>
+
+#ifdef _WIN32
+    #pragma warning(disable : 4786)
+	#pragma warning(disable : 4996)
+	#include <Windows.h>	
+#else
+	#include <sys/time.h>
+#endif
+
+struct timeval DW2time(int dur)
+{
+	struct timeval rs;
+	rs.tv_sec  = dur / 1000;
+	rs.tv_usec = (dur % 1000) * 1000;
+	return rs;
+}
 
 class TimeStamp{
 public:
 	static void StartTime()
 	{
+	#ifdef _WIN32
+		starttime = DW2time(GetTickCount());
+	#else
 		gettimeofday(&starttime, NULL);
+	#endif
 	}
 
 	static void StopTime()
 	{
+	#ifdef _WIN32
+		curtime = DW2time(GetTickCount());
+	#else
 		gettimeofday(&curtime, NULL);
+	#endif
 	}
 
 	static void StopTime(const char * str)

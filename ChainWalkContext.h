@@ -3,7 +3,6 @@
 
 
 #include <openssl/rand.h>
-#include <stdint.h>
 #include <string>
 using namespace std;
 

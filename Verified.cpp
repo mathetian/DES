@@ -30,7 +30,7 @@ int main(int argc,char*argv[])
 
 	fseek(file, 0, SEEK_SET);
 
-	chainLen = atoll(argv[2]);
+	chainLen = atoi(argv[2]);
 	fileLen  = GetFileLen(file);
 	
 	if(fileLen % 16 != 0)

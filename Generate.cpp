@@ -138,14 +138,14 @@ void clear(unsigned char * key, int type)
 	}
 	else if(type == 26)
 	{
-		unsigned char rkey[8];
+		//unsigned char rkey[8];
 	}
 	else if(type == 28)
 	{
-		int index   = 3;
+		/*int index   = 3;
 		key[index] &= 15;
 		for(index++;index < 8;index++)
-			key[index] = 0;
+			key[index] = 0;*/
 	}
 }
 
@@ -179,7 +179,7 @@ void TestNativeRandom()
 		return;
 	}
 	
-	int type = 20; srand(time(0));
+	int type = 20; srand((uint32_t)time(0));
 	for(int index = 0;index < (1<<10);index++)
 	{
 		Generate(key,20);
@@ -224,7 +224,7 @@ void TestCaseGenerator()
 {
 	FILE * file; RainbowChain chain;
 	ChainWalkContext cwc;
-	srand(time(0));
+	srand((uint32_t)time(0));
 
 	file = fopen("TestCaseGenerator.txt","w");
 	
@@ -280,8 +280,8 @@ int main(int argc,char*argv[])
 		return 0;
 	}
 	
-	chainLen   = atoll(argv[1]);
-	chainCount = atoll(argv[2]);
+	chainLen   = atoi(argv[1]);
+	chainCount = atoi(argv[2]);
 
 	memcpy(suffix, argv[3], sizeof(argv[3]));
 	sprintf(szFileName,"DES_%lld-%lld_%s", chainLen, chainCount,suffix);
@@ -307,8 +307,8 @@ int main(int argc,char*argv[])
 		printf("have computed %lld chains\n", (ll)(nDatalen >> 4));
 	} 
 	
-	fseek(file, nDatalen, SEEK_SET);
-	nChainStart += (nDatalen >> 4);
+	fseek(file, (long)nDatalen, SEEK_SET);
+	nChainStart = (nDatalen >> 4);
 
 	index = nDatalen >> 4;
 

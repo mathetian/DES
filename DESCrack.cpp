@@ -19,7 +19,6 @@ void Usage()
 int main(int argc,char*argv[])
 {
 	int keyNum, index;
-	const char * fileName;
 	CrackEngine  ce;
 	CipherSet  * p_cs = CipherSet::GetInstance();
 
@@ -46,7 +45,7 @@ int main(int argc,char*argv[])
 	{
 		keyNum = argc - 3;
 		for(index = 0;index < keyNum;index++)
-			p_cs -> AddKey(atoll(argv[index+3]));
+			p_cs -> AddKey(atoi(argv[index+3]));
 	}
 	else
 	{

@@ -15,13 +15,13 @@ void Usage()
 	printf("example 2: sort distinct DES_100_100_test\n\n");
 }
 
-int QuickSort(RainbowChain * pChain,int length)
+void QuickSort(RainbowChain * pChain,int length)
 { sort(pChain,pChain+length); }
 
 void ExternalSort(FILE*file,const char * tmpfileName)
 {
-	FILE*tmpFile;int nAvailPhys, chainCount;
-    int memoryCount, segNums, lastCount, fileLen;
+	FILE*tmpFile;uint64_t nAvailPhys, chainCount;
+    uint64_t memoryCount, segNums, lastCount, fileLen;
     vector<SortedSegment*> svec; int index;
 	priority_queue<pair<RainbowChain*,int> > chainPQ;
 
@@ -145,7 +145,7 @@ void Distinct(const char * sPathName)
 
 int main(int argc,char*argv[])
 {
-	const char * sPathName; FILE * file, * file2;
+	const char * sPathName; FILE * file;
 	long long fileLen, nAvailPhys;
 	char str[256];
 
