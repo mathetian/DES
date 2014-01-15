@@ -58,7 +58,7 @@ int main(int argc,char*argv[])
 		if(cwc.GetKey() != chain.nEndKey)
 			printf("warning: integrity check fail, index: %lld \n",index);
 		
-		if(index % 10000 == 0)
+		if(index % 5000 == 0)
 			printf("Have check %lld chains\n",index + 1);
 
 	}

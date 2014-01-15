@@ -17,7 +17,7 @@ crack: DESCrack.cpp Common.cpp ChainWalkContext.cpp CipherSet.cpp CrackEngine.cp
 	g++ $^ -o $@ ${LIB}
 
 rungen:
-	mpirun -np 4 ./generator 2000 2000000 test
+	mpirun -np 4 ./generator 8192 8388608 test
 
 clean:
 	rm -f ${PROGS} DES_* *.txt
