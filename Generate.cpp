@@ -269,7 +269,7 @@ int main(int argc,char*argv[])
 	else if(argc == 3)
 	{
 		if(strcmp(argv[1],"single") == 0)
-			Single(atoi(argv[2]));
+			Single(atoll(argv[2]));
 		else Usage();
 		return 0;
 	}
@@ -280,8 +280,8 @@ int main(int argc,char*argv[])
 		return 0;
 	}
 	
-	chainLen   = atoi(argv[1]);
-	chainCount = atoi(argv[2]);
+	chainLen   = atoll(argv[1]);
+	chainCount = atoll(argv[2]);
 
 	memcpy(suffix, argv[3], sizeof(argv[3]));
 	sprintf(szFileName,"DES_%lld-%lld_%s", chainLen, chainCount,suffix);
@@ -319,7 +319,7 @@ int main(int argc,char*argv[])
 	for(;index < chainCount;index++)
 	{
 		chain.nStartKey = cwc.GetRandomKey();
-
+		cout << chain.nStartKey << endl;
 		int nPos;
 		for(nPos = 0;nPos < chainLen;nPos++)
 		{
@@ -328,7 +328,7 @@ int main(int argc,char*argv[])
 		}
 
 		chain.nEndKey = cwc.GetKey();
-
+		cout << sizeof(RainbowChain) <<endl;
 		if(fwrite((char*)&chain, sizeof(RainbowChain), 1, file) != 1)
 		{
 			printf("disk write error\n");

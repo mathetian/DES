@@ -6,6 +6,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <iostream>
+#include <sstream>
+using namespace std;
+
 #include <openssl/des.h>
 
 #ifdef _WIN32
@@ -69,5 +73,16 @@ private:
 	int offset, length, curOffset;
 	RainbowChain chains[CHAIN_IN_MEMORY_MAX];
 };
+
+#ifdef _WIN32
+	inline uint64_t atoll(const char * str)
+	{
+		uint64_t rs;
+		istringstream ist(str);
+		ist >> rs;
+
+		return rs;
+	}
+#endif
 
 #endif

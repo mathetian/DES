@@ -44,14 +44,14 @@ void U56ToArr7(const uint64_t & key56, unsigned char * key_56)
 {	
 	int mask = (1<<8) - 1;
 	
-	key_56[0] = (unsigned char)(key56 & mask);
-	key_56[1] = (unsigned char)((key56 >>  8) & mask);
-	key_56[2] = (unsigned char)((key56 >> 16) & mask);
-	key_56[3] = (unsigned char)((key56 >> 24) & mask);
-	key_56[4] = (unsigned char)((key56 >> 32) & mask);
-	key_56[5] = (unsigned char)((key56 >> 40) & mask);
-	key_56[6] = (unsigned char)((key56 >> 48) & mask);
-	key_56[7] = (unsigned char)((key56 >> 56) & mask);
+	key_56[0] = (key56 & mask);
+	key_56[1] = ((key56 >>  8) & mask);
+	key_56[2] = ((key56 >> 16) & mask);
+	key_56[3] = ((key56 >> 24) & mask);
+	key_56[4] = ((key56 >> 32) & mask);
+	key_56[5] = ((key56 >> 40) & mask);
+	key_56[6] = ((key56 >> 48) & mask);
+	key_56[7] = ((key56 >> 56) & mask);
 }
 
 /**
@@ -79,11 +79,16 @@ bool AnylysisFileName(const char * filename, uint64_t & chainLen, uint64_t & cha
 	for(i = 4;i< len;i++) if(filename[i] == '-') break;
 	if(i == len || i == 3) return false;
 	memcpy(str,filename + 4, i - 4);
-	chainLen = atoi(str); memset(str, 0, sizeof(str));
+	
+	chainLen = atoll(str); 
+
+	memset(str, 0, sizeof(str));
 	for(j = i + 1;j < len;j++) if(filename[j] == '_') break;
 	if(j == len || j == i+1) return false;
 	memcpy(str,filename + i + 1,j - i - 1);
-	chainCount = atoi(str);
+	
+	chainCount = atoll(str);
+	
 	return true;
 }
 
