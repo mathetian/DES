@@ -38,18 +38,19 @@ void Benchmark()
 
 	cwc.GetRandomKey();
 	
-	TimeStamp::StartTime();
+	TimeStamp tmps;
+	tmps.StartTime();
 
 	for(index = 0;index < nLoop;index++) 
 		cwc.KeyToCipher();
 
 	sprintf(str, "Benchmark: nLoop %d: keyToHash time:", nLoop);
 
-	TimeStamp::StopTime(str);
+	tmps.StopTime(str);
 	
 	cwc.GetRandomKey();
 
-	TimeStamp::StartTime();
+	tmps.StartTime();
 
 	for(index = 0;index < nLoop;index++)
 	{
@@ -58,7 +59,7 @@ void Benchmark()
 	}
 
 	sprintf(str, "Benchmark: nLoop %d: total time:    ", nLoop);
-	TimeStamp::StopTime(str);
+	tmps.StopTime(str);
 }
 
 void Single(int startKey)
@@ -256,7 +257,7 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 	uint64_t totalChainCount = data -> chainCount;
 	int rank = data -> rank;
 	int numproc =  data -> numproc;
-
+	srand(rank);
 	FILE * file; ChainWalkContext cwc; char str[256];
 
 	uint64_t nDatalen, index, nChainStart;
@@ -295,7 +296,8 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 
 	cwc.SetChainInfo(chainLen, chainCount);
 	
-	TimeStamp::StartTime();
+	TimeStamp tmps;
+	tmps.StartTime();
 
 	for(;index < chainCount;index++)
 	{
@@ -315,12 +317,12 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 			printf("rank %d of %d, disk write error\n", rank, numproc);
 			return 0;
 		}
-
+		fflush(file);
 		if((index + 1)%10000 == 0||index + 1 == chainCount)
 		{
 			sprintf(str,"rank %d of %d, generate: nChains: %lld, chainLen: %lld: total time:", rank, numproc, (long long)index, (long long)chainLen);
-			TimeStamp::StopTime(str);
-			TimeStamp::StartTime();
+			tmps.StopTime(str);
+			tmps.StartTime();
 		}
 	}
 	fclose(file);
@@ -379,7 +381,7 @@ int main(int argc,char * argv[])
     	datas[i].chainLen = chainLen;
     	datas[i].chainCount = chainCount;
     	datas[i].rank = i;
-    	datas[i].numproc = 4;
+    	datas[i].numproc = 8;
     	hThreadArray[i] = CreateThread( NULL,0, MyThreadFunction, &datas[i],0,&dwThreadIdArray[i]);
     }
 

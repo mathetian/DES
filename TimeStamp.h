@@ -22,7 +22,7 @@ struct timeval DW2time(int dur)
 
 class TimeStamp{
 public:
-	static void StartTime()
+	void StartTime()
 	{
 	#ifdef _WIN32
             starttime = DW2time(GetTickCount());
@@ -31,7 +31,7 @@ public:
     #endif
 	}
 
-	static void StopTime()
+	void StopTime()
 	{
   	#ifdef _WIN32
             curtime = DW2time(GetTickCount());
@@ -40,19 +40,19 @@ public:
     #endif
 	}
 
-	static void StopTime(const char * str)
+	void StopTime(const char * str)
 	{
 		StopTime();
 		ElapseTime(str);
 	}
 
-	static void ElapseTime(const char * str)
+	void ElapseTime(const char * str)
 	{
 		timeval_subtract(&difference,&curtime,&starttime);
 		printf("%s %lld s, %lld us\n", str, (long long)difference.tv_sec, (long long)difference.tv_usec);
 	}	
 
-	static void AddTime(struct timeval & totalTime)
+	void AddTime(struct timeval & totalTime)
 	{
 		totalTime.tv_sec  += difference.tv_sec;
 		totalTime.tv_usec += difference.tv_usec;
@@ -64,7 +64,7 @@ public:
 	}
 
 private:
-	static int timeval_subtract (struct timeval *result, struct timeval *x, struct timeval *y) 
+	int timeval_subtract (struct timeval *result, struct timeval *x, struct timeval *y) 
 	{
 	  if (x->tv_usec < y->tv_usec) 
 	  {
@@ -86,11 +86,11 @@ private:
 	}
 
 private:
-	static struct timeval starttime,curtime,difference;
+	struct timeval starttime,curtime,difference;
 };
 
-struct timeval TimeStamp::starttime;
+/*struct timeval TimeStamp::starttime;
 struct timeval TimeStamp::curtime;
-struct timeval TimeStamp::difference;
+struct timeval TimeStamp::difference;*/
 
 #endif

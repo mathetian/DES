@@ -106,8 +106,8 @@ void CrackEngine::SearchRainbowTable(const char * fileName)
 	while(true)
 	{
 		if(ftell(file) == fileLen) break;
-
-		TimeStamp::StartTime();
+		TimeStamp tmps;
+		tmps.StartTime();
 		
 		nDataRead = fread(pChain,1, nAllocateSize,file);
 		if(nDataRead != nAllocateSize)
@@ -116,16 +116,16 @@ void CrackEngine::SearchRainbowTable(const char * fileName)
 		}
 
 		sprintf(str,"%lld bytes read, disk access time:", (long long)nAllocateSize);
-		TimeStamp::StopTime(str);
-		TimeStamp::AddTime(m_diskTime);
+		tmps.StopTime(str);
+		tmps.AddTime(m_diskTime);
 
-		TimeStamp::StartTime();
+		tmps.StartTime();
 		
 		SearchTableChunk(pChain, nDataRead >> 4);		
     	
     	sprintf(str,"cryptanalysis time: ");
-    	TimeStamp::StopTime(str);
-    	TimeStamp::AddTime(m_totalTime);
+    	tmps.StopTime(str);
+    	tmps.AddTime(m_totalTime);
 		
 		if(p_cs -> Solved()) break;
 	}
@@ -185,9 +185,10 @@ void CrackEngine::Run(const char * fileName)
 	{
 		printf("-------------------------------------------------------\n");
 		printf("Time: %d, key: %lld\n\n",index++,(long long)p_cs -> GetLeftKey());
-		TimeStamp::StartTime();
+		TimeStamp tmps;
+		tmps.StartTime();
 		InitEndKeys(p_cs -> GetLeftKey());
-		TimeStamp::StopTime("Init Time: ");
+		tmps.StopTime("Init Time: ");
 		SearchRainbowTable(fileName);
 		
 		printf("-------------------------------------------------------\n");

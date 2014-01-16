@@ -36,7 +36,13 @@ void ChainWalkContext::SetChainInfo(uint64_t chainLen, uint64_t chainCount)
 
 uint64_t ChainWalkContext::GetRandomKey()
 {
-	RAND_bytes((unsigned char*)&m_nIndex,8);
+	for(int i = 0;i < 8;i++)
+	{
+		uint64_t r = rand() % 256;
+		m_nIndex |= (r << (i * 8));
+	}
+	//RAND_bytes((unsigned char*)&m_nIndex,8);
+	
 	m_nIndex = m_nIndex & m_keySpaceTotalT;
 	return m_nIndex;
 }
