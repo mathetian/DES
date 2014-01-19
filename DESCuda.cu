@@ -17,8 +17,7 @@ using namespace std;
 		des_skb[5][((d>> 7L)&0x03)|((d>> 8L)&0x3c)]|\
 		des_skb[6][ (d>>15L)&0x3f                ]|\
 		des_skb[7][((d>>21L)&0x0f)|((d>>22L)&0x30)];\
-	
-	t2 = ((t<<16L)|(s&0x0000ffffL))&0xffffffffL;\
+	t2=((t<<16L)|(s&0x0000ffffL))&0xffffffffL;\
 	store[S]  = ROTATE(t2,30)&0xffffffffL;\
 	t2=((s>>16L)|(t&0xffff0000L));\
 	store[S] |= ((ROTATE(t2,26)&0xffffffffL) << 32);\
@@ -36,7 +35,6 @@ using namespace std;
 		des_skb[5][((d>> 7L)&0x03)|((d>> 8L)&0x3c)]|\
 		des_skb[6][ (d>>15L)&0x3f                ]|\
 		des_skb[7][((d>>21L)&0x0f)|((d>>22L)&0x30)];\
-	
 	t2=((t<<16L)|(s&0x0000ffffL))&0xffffffffL;\
 	store[S]  = ROTATE(t2,30)&0xffffffffL;\
 	t2=((s>>16L)|(t&0xffff0000L));\
@@ -94,7 +92,7 @@ __device__ uint64_t DESOneTime(uint64_t * roundKeys)
 
 	FP(right, left);
 
-	rs = (left << 32)|right;
+	rs = (((uint64_t)left) << 32)|right;
 	
 	return rs;
 }
@@ -160,7 +158,7 @@ void DESCrypt()
 		gettimeofday(&tstart, NULL);
 
 	    FF(i, ALL) keys[i] = rand64();
-	    FF(i, ALL) fprintf(f1,"%ull",(uint64_t)keys[i]);
+	    FF(i, ALL) fprintf(f1,"%lld",(long long)keys[i]);
 	    	    
 	    _CUDA(cudaMemcpy(deviceKeyIn, keys, size, cudaMemcpyHostToDevice));
 
@@ -168,11 +166,11 @@ void DESCrypt()
 
 		_CUDA(cudaMemcpy(keys, deviceKeyOut, size, cudaMemcpyDeviceToHost));
 		
-		FF(i, ALL) fprintf(f2,"%ull\n", keys[i]);
+		FF(i, ALL) fprintf(f2,"%lld\n", (long long)keys[i]);
 
 		gettimeofday(&tend, NULL);
 
-		int64 uses=1000000*(tend.tv_sec-tstart.tv_sec)+(tend.tv_usec-tstart.tv_usec);
+		long long uses=1000000*(tend.tv_sec-tstart.tv_sec)+(tend.tv_usec-tstart.tv_usec);
 		
 		printf("round time: %lld us\n", uses);
 		fprintf(f1,"round time: %lld us\n",uses);
