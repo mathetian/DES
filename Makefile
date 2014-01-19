@@ -1,6 +1,6 @@
 PROGS = generator verified sort crack
 
-LIB = -lrt -lssl -lcrypto -ldl -O0 -g
+LIB = -lrt -lssl -lcrypto -ldl -O0 -g -lcurand
 
 all: ${PROGS}
 
@@ -15,6 +15,13 @@ sort: SortPreCalculate.cpp Common.cpp
 	
 crack: DESCrack.cpp Common.cpp ChainWalkContext.cpp CipherSet.cpp CrackEngine.cpp MemoryPool.cpp
 	g++ $^ -o $@ ${LIB}
-	
+
+nv = nvcc
+
+rainbow: DESCuda.cu
+	$(nv) $^ -o $@ ${flags} 
+
+
+
 clean:
 	rm -f ${PROGS} DES_* *.txt
