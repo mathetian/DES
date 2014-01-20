@@ -12,8 +12,8 @@ void Usage()
 int main(int argc,char*argv[])
 {
 	FILE * file;
-	long long chainLen, chainCount, fileLen;
-	RainbowChain chain; long long index;
+	uint64_t chainLen, chainCount, fileLen;
+	RainbowChain chain; uint64_t index;
 	ChainWalkContext cwc;
 
 	if(argc != 3)

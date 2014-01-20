@@ -19,7 +19,6 @@ void Usage()
 int main(int argc,char*argv[])
 {
 	int keyNum, index;
-	//const char * fileName;
 	CrackEngine  ce;
 	CipherSet  * p_cs = CipherSet::GetInstance();
 

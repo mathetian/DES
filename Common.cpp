@@ -16,17 +16,18 @@ void Logo()
 	printf("DESRainbowCrack 1.0\n 	Make an implementation of DES Time-and-Memory Tradeoff Technology\n 	By Tian Yulong(mathetian@gmail.com)\n\n");
 }
 
-unsigned int GetFileLen(FILE * file)
+
+uint64_t GetFileLen(FILE* file)
 {
     unsigned int pos = ftell(file);
     fseek(file, 0, SEEK_END);
-    unsigned int len = ftell(file);
+    uint64_t len = ftell(file);
     fseek(file, pos, SEEK_SET);
 
     return len;
 }
 
-unsigned int GetAvailPhysMemorySize()
+uint64_t GetAvailPhysMemorySize()
 {   
 #ifdef _WIN32
     MEMORYSTATUSEX statex;
@@ -44,14 +45,14 @@ void U56ToArr7(const uint64_t & key56, unsigned char * key_56)
 {	
 	int mask = (1<<8) - 1;
 	
-	key_56[0] =         key56 & mask;
-	key_56[1] = (key56 >>  8) & mask;
-	key_56[2] = (key56 >> 16) & mask;
-	key_56[3] = (key56 >> 24) & mask;
-	key_56[4] = (key56 >> 32) & mask;
-	key_56[5] = (key56 >> 40) & mask;
-	key_56[6] = (key56 >> 48) & mask;
-	key_56[7] = (key56 >> 56) & mask;
+	key_56[0] = (key56 & mask);
+	key_56[1] = ((key56 >>  8) & mask);
+	key_56[2] = ((key56 >> 16) & mask);
+	key_56[3] = ((key56 >> 24) & mask);
+	key_56[4] = ((key56 >> 32) & mask);
+	key_56[5] = ((key56 >> 40) & mask);
+	key_56[6] = ((key56 >> 48) & mask);
+	key_56[7] = ((key56 >> 56) & mask);
 }
 
 /**
@@ -79,11 +80,16 @@ bool AnylysisFileName(const char * filename, uint64_t & chainLen, uint64_t & cha
 	for(i = 4;i< len;i++) if(filename[i] == '-') break;
 	if(i == len || i == 3) return false;
 	memcpy(str,filename + 4, i - 4);
-	chainLen = atoll(str); memset(str, 0, sizeof(str));
+	
+	chainLen = atoll(str); 
+
+	memset(str, 0, sizeof(str));
 	for(j = i + 1;j < len;j++) if(filename[j] == '_') break;
 	if(j == len || j == i+1) return false;
 	memcpy(str,filename + i + 1,j - i - 1);
+	
 	chainCount = atoll(str);
+	
 	return true;
 }
 
@@ -131,4 +137,5 @@ RainbowChain * SortedSegment::getNext()
 		exit(0);
 	}
 	curOffset+=sizeof(RainbowChain);
+<<<<<<< HEAD
 }*/

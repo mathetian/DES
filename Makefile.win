@@ -21,6 +21,6 @@ sort:
 crack:
         cl $(CFLAGS) $(HEADER) DESCrack.cpp Common.cpp ChainWalkContext.cpp CipherSet.cpp CrackEngine.cpp MemoryPool.cpp        \
         /link $(LDFLAGS) /out:crack.exe
-                
+
 clean:
         del *.obj DES_* *.txt *.exe

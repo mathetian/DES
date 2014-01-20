@@ -25,10 +25,9 @@ struct cmp
     	RainbowChain  r1 = a.first;
     	RainbowChain  r2 = b.first;
     	if(r1.nEndKey < r2.nEndKey)
-    		return -1;
+    		return 1;
     	else if(r1.nEndKey == r2.nEndKey)
     		return 0;
-    	return 1;
     }
 };
 
@@ -187,7 +186,8 @@ void Distinct(const char * fileName)
 
 void SortFiles(vector <string> fileNames, vector <FILE*> files, const char * prefix)
 {
-	int index = 0; uint64_t nAvailPhys; char str[256];
+	uint64_t nAvailPhys; int index = 0;
+	char str[256];
 
 	vector <uint64_t> fileLens(fileNames.size(), 0);	
 

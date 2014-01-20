@@ -143,10 +143,10 @@ void clear(unsigned char * key, int type)
 	}
 	else if(type == 28)
 	{
-		int index   = 3;
+		/*int index   = 3;
 		key[index] &= 15;
 		for(index++;index < 8;index++)
-			key[index] = 0;
+			key[index] = 0;*/
 	}
 }
 
@@ -180,7 +180,7 @@ void TestNativeRandom()
 		return;
 	}
 	
-	int type = 20; srand(time(0));
+	int type = 20; srand((uint32_t)time(0));
 	for(int index = 0;index < (1<<10);index++)
 	{
 		Generate(key,20);
@@ -225,7 +225,7 @@ void TestCaseGenerator()
 {
 	FILE * file; RainbowChain chain;
 	ChainWalkContext cwc;
-	srand(time(0));
+	srand((uint32_t)time(0));
 
 	file = fopen("TestCaseGenerator.txt","w");
 	
@@ -266,7 +266,6 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 
 	uint64_t chainCount = totalChainCount / numproc;
 
-
 	if((file = fopen(szFileName,"a+")) == NULL)
 	{
 		printf("rank %d of %d, failed to create %s\n", rank, numproc, szFileName);
@@ -288,8 +287,7 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 		printf("have computed %lld chains\n", (ll)(nDatalen >> 4));
 	} 
 	
-	fseek(file, nDatalen, SEEK_SET);
-
+	fseek(file, (long)nDatalen, SEEK_SET);
 	nChainStart = (nDatalen >> 4);
 
 	index = nDatalen >> 4;
@@ -302,7 +300,7 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 	for(;index < chainCount;index++)
 	{
 		chain.nStartKey = cwc.GetRandomKey();
-
+		cout << chain.nStartKey << endl;
 		int nPos;
 		for(nPos = 0;nPos < chainLen;nPos++)
 		{
@@ -311,7 +309,7 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 		}
 
 		chain.nEndKey = cwc.GetKey();
-
+		cout << sizeof(RainbowChain) <<endl;
 		if(fwrite((char*)&chain, sizeof(RainbowChain), 1, file) != 1)
 		{
 			printf("rank %d of %d, disk write error\n", rank, numproc);
