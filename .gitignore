@@ -11,3 +11,4 @@ test2.out
 *.txt
 *exe
 *obj
+data*

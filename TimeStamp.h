@@ -89,8 +89,4 @@ private:
 	struct timeval starttime,curtime,difference;
 };
 
-/*struct timeval TimeStamp::starttime;
-struct timeval TimeStamp::curtime;
-struct timeval TimeStamp::difference;*/
-
 #endif

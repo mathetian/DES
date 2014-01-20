@@ -5,13 +5,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
+
 
 #include <openssl/des.h>
 
 #include <sstream>
 #include <iostream>
 using namespace std;
+
+typedef unsigned long long uint64_t;
+typedef unsigned int uint32_t;
+
 
 #ifdef _WIN32
     #pragma warning(disable : 4786)
@@ -34,6 +38,7 @@ using namespace std;
             return rs;
     }
 #endif
+
 
 class RainbowChain{
 public:

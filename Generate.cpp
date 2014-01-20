@@ -300,22 +300,22 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 	for(;index < chainCount;index++)
 	{
 		chain.nStartKey = cwc.GetRandomKey();
-		cout << chain.nStartKey << endl;
-		int nPos;
-		for(nPos = 0;nPos < chainLen;nPos++)
+
+		for(int nPos = 0;nPos < chainLen;nPos++)
 		{
 			cwc.KeyToCipher();
 			cwc.KeyReduction(nPos);
 		}
 
 		chain.nEndKey = cwc.GetKey();
-		cout << sizeof(RainbowChain) <<endl;
-		if(fwrite((char*)&chain, sizeof(RainbowChain), 1, file) != 1)
+		cout << chain.nStartKey << " "<<chain.nEndKey <<endl;
+		fwrite((char*)&chain.nStartKey,sizeof(uint64_t),1,file);
+		fwrite((char*)&chain.nEndKey,sizeof(uint64_t),1,file);
+		/*if(fwrite((char*)&chain, sizeof(RainbowChain), 1, file) != 1)
 		{
 			printf("rank %d of %d, disk write error\n", rank, numproc);
 			return 0;
-		}
-		fflush(file);
+		}*/
 		if((index + 1)%10000 == 0||index + 1 == chainCount)
 		{
 			sprintf(str,"rank %d of %d, generate: nChains: %lld, chainLen: %lld: total time:", rank, numproc, (long long)index, (long long)chainLen);
@@ -373,7 +373,7 @@ int main(int argc,char * argv[])
 	memcpy(suffix, argv[3], sizeof(argv[3]));
 
     DATA datas[8];  HANDLE  hThreadArray[8]; DWORD   dwThreadIdArray[8];
-    for(int i = 0;i < 8;i++)
+    for(int i = 0;i < 1;i++)
     {	
     	sprintf(datas[i].szFileName,"DES_%lld-%lld_%s_%d", chainLen, chainCount, suffix, i);
     	datas[i].chainLen = chainLen;
@@ -383,7 +383,7 @@ int main(int argc,char * argv[])
     	hThreadArray[i] = CreateThread( NULL,0, MyThreadFunction, &datas[i],0,&dwThreadIdArray[i]);
     }
 
-   	WaitForMultipleObjects(8, hThreadArray, TRUE, INFINITE);
+   	WaitForMultipleObjects(1, hThreadArray, TRUE, INFINITE);
 
 	return 0;
 }

@@ -1,4 +1,6 @@
 #include "ChainWalkContext.h"
+#include <iostream>
+using namespace std;
 
 uint64_t   ChainWalkContext::m_plainText     = 0x305532286D6F295A;
 uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 20) - 1;
@@ -12,7 +14,7 @@ uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 20) - 1;
 **/
 //uint64_t   ChainWalkContext::m_keySpaceTotalT = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24) -(1ull << 32);
 
-uint64_t     ChainWalkContext::m_keySpaceTotalT = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24) - (1ull<<32) - (1ull<<33)- (1ull<<34)- (1ull<<35);
+uint64_t   ChainWalkContext::m_keySpaceTotalT = (1ull << 24) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 17);
 uint64_t   ChainWalkContext::m_chainLen;
 uint64_t   ChainWalkContext::m_chainCount;
 unsigned char ChainWalkContext::m_dplainText[8] = {0x6B,0x05,0x6E,0x18,0x75,0x9F,0x5C,0xCA};
@@ -33,6 +35,7 @@ void ChainWalkContext::SetChainInfo(uint64_t chainLen, uint64_t chainCount)
 
 uint64_t ChainWalkContext::GetRandomKey()
 {
+	m_nIndex = 0;
 	for(int i = 0;i < 8;i++)
 	{
 		uint64_t r = rand() % 256;
@@ -41,6 +44,9 @@ uint64_t ChainWalkContext::GetRandomKey()
 	//RAND_bytes((unsigned char*)&m_nIndex,8);
 	
 	m_nIndex = m_nIndex & m_keySpaceTotalT;
+
+	if(m_nIndex > 16580000) 
+		cout <<"Notice:"<<m_keySpaceTotalT<<" "<<m_nIndex<<endl;
 	return m_nIndex;
 }
 
