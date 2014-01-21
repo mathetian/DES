@@ -10,9 +10,29 @@
 #include <openssl/des.h>
 #include <cuda_runtime_api.h>
 
+#include <iostream>
+using namespace std;
+
+#include <assert.h>
+
+/**
+	The Macro below shows the basic configurtion setting
+	
+	Chain Len, 1024. Each time, the gpu will compute 2^18 chains.
+
+	For example, if we want to compute 2^35, setting like that
+
+	#define CHAINLEN 2048
+	#define CHAINCOUNT 2^23
+	
+	Therefore, #define TIME 2^5 
+**/
+
 #define BLOCK_LENGTH        1024
 #define MAX_THREAD			256
 #define ALL                 1024*256
+#define CHAINLEN            1024
+#define CHAINCOUNT          1024
 
 #ifndef TX
 	#if (__CUDA_ARCH__ < 200)
@@ -29,6 +49,9 @@ cudaError_t cudaerrno;
 		fprintf(stderr, "Cuda error %d in file '%s' in line %i: %s.\n",cudaerrno,__FILE__,__LINE__,cudaGetErrorString(cudaerrno));	\
 		exit(EXIT_FAILURE);                                                  											\
     } }
+
+
+
 
 __device__ uint32_t des_d_sp_c[8][64]={
 	{
@@ -377,5 +400,43 @@ __device__ int shifts2[16]={0,0,1,1,1,1,1,1,0,1,1,1,1,1,1,0};
 
 __device__ uint32_t plRight = 0x30553228;
 __device__ uint32_t plLeft  = 0x6D6F295A;
+
+__device__ uint64_t totalSpace = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24) - (1ull<<32) - (1ull<<33)- (1ull<<34)- (1ull<<35);
+uint64_t totalSpaceT = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24) - (1ull<<32) - (1ull<<33)- (1ull<<34)- (1ull<<35);
+#define RoundKey0(S) { \
+	c=((c>>1L)|(c<<27L)); d=((d>>1L)|(d<<27L));\
+	c&=0x0fffffffL;d&=0x0fffffffL;\
+	s=	des_skb[0][ (c    )&0x3f                ]|\
+		des_skb[1][((c>> 6L)&0x03)|((c>> 7L)&0x3c)]|\
+		des_skb[2][((c>>13L)&0x0f)|((c>>14L)&0x30)]|\
+		des_skb[3][((c>>20L)&0x01)|((c>>21L)&0x06) |\
+					  ((c>>22L)&0x38)];\
+	t=	des_skb[4][ (d    )&0x3f                ]|\
+		des_skb[5][((d>> 7L)&0x03)|((d>> 8L)&0x3c)]|\
+		des_skb[6][ (d>>15L)&0x3f                ]|\
+		des_skb[7][((d>>21L)&0x0f)|((d>>22L)&0x30)];\
+	t2=((t<<16L)|(s&0x0000ffffL))&0xffffffffL;\
+	store[S]  = ROTATE(t2,30)&0xffffffffL;\
+	t2=((s>>16L)|(t&0xffff0000L));\
+	store[S] |= ((ROTATE(t2,26)&0xffffffffL) << 32);\
+}
+
+#define RoundKey1(S) { \
+	c=((c>>2L)|(c<<26L)); d=((d>>2L)|(d<<26L));\
+	c&=0x0fffffffL;d&=0x0fffffffL;\
+	s=	des_skb[0][ (c    )&0x3f                ]|\
+		des_skb[1][((c>> 6L)&0x03)|((c>> 7L)&0x3c)]|\
+		des_skb[2][((c>>13L)&0x0f)|((c>>14L)&0x30)]|\
+		des_skb[3][((c>>20L)&0x01)|((c>>21L)&0x06) |\
+					  ((c>>22L)&0x38)];\
+	t=	des_skb[4][ (d    )&0x3f                ]|\
+		des_skb[5][((d>> 7L)&0x03)|((d>> 8L)&0x3c)]|\
+		des_skb[6][ (d>>15L)&0x3f                ]|\
+		des_skb[7][((d>>21L)&0x0f)|((d>>22L)&0x30)];\
+	t2=((t<<16L)|(s&0x0000ffffL))&0xffffffffL;\
+	store[S]  = ROTATE(t2,30)&0xffffffffL;\
+	t2=((s>>16L)|(t&0xffff0000L));\
+	store[S] |= ((ROTATE(t2,26)&0xffffffffL) << 32);\
+}
 
 #endif

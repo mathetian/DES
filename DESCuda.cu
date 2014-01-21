@@ -1,45 +1,6 @@
 #include "DESCuda.h"
 
-#include <iostream>
-using namespace std;
-
-#include <assert.h>
-
-#define RoundKey0(S) { \
-	c=((c>>1L)|(c<<27L)); d=((d>>1L)|(d<<27L));\
-	c&=0x0fffffffL;d&=0x0fffffffL;\
-	s=	des_skb[0][ (c    )&0x3f                ]|\
-		des_skb[1][((c>> 6L)&0x03)|((c>> 7L)&0x3c)]|\
-		des_skb[2][((c>>13L)&0x0f)|((c>>14L)&0x30)]|\
-		des_skb[3][((c>>20L)&0x01)|((c>>21L)&0x06) |\
-					  ((c>>22L)&0x38)];\
-	t=	des_skb[4][ (d    )&0x3f                ]|\
-		des_skb[5][((d>> 7L)&0x03)|((d>> 8L)&0x3c)]|\
-		des_skb[6][ (d>>15L)&0x3f                ]|\
-		des_skb[7][((d>>21L)&0x0f)|((d>>22L)&0x30)];\
-	t2=((t<<16L)|(s&0x0000ffffL))&0xffffffffL;\
-	store[S]  = ROTATE(t2,30)&0xffffffffL;\
-	t2=((s>>16L)|(t&0xffff0000L));\
-	store[S] |= ((ROTATE(t2,26)&0xffffffffL) << 32);\
-}
-
-#define RoundKey1(S) { \
-	c=((c>>2L)|(c<<26L)); d=((d>>2L)|(d<<26L));\
-	c&=0x0fffffffL;d&=0x0fffffffL;\
-	s=	des_skb[0][ (c    )&0x3f                ]|\
-		des_skb[1][((c>> 6L)&0x03)|((c>> 7L)&0x3c)]|\
-		des_skb[2][((c>>13L)&0x0f)|((c>>14L)&0x30)]|\
-		des_skb[3][((c>>20L)&0x01)|((c>>21L)&0x06) |\
-					  ((c>>22L)&0x38)];\
-	t=	des_skb[4][ (d    )&0x3f                ]|\
-		des_skb[5][((d>> 7L)&0x03)|((d>> 8L)&0x3c)]|\
-		des_skb[6][ (d>>15L)&0x3f                ]|\
-		des_skb[7][((d>>21L)&0x0f)|((d>>22L)&0x30)];\
-	t2=((t<<16L)|(s&0x0000ffffL))&0xffffffffL;\
-	store[S]  = ROTATE(t2,30)&0xffffffffL;\
-	t2=((s>>16L)|(t&0xffff0000L));\
-	store[S] |= ((ROTATE(t2,26)&0xffffffffL) << 32);\
-}
+#include <openssl/rand.h>
 
 __device__ int GenerateKey(uint64_t key, uint64_t * store)
 {
@@ -97,6 +58,9 @@ __device__ uint64_t DESOneTime(uint64_t * roundKeys)
 	return rs;
 }
 
+/**
+	DESEncrypt was used to conduct basic experiment
+**/
 __global__ void DESEncrypt(uint64_t *data) 
 {
 	/**Don't know why should use it.**/
@@ -115,8 +79,50 @@ __global__ void DESEncrypt(uint64_t *data)
 		GenerateKey(key,roundKeys);
 		key = DESOneTime(roundKeys);
 	}
+
 	data[TX]=key;
+
+	__syncthreads();
 }
+
+/**
+	DESGeneratorCUDA, the really entrance function
+**/
+__global__ void  DESGeneratorCUDA(uint64_t * data)
+{
+	/**Don't know why should use it.**/
+	((uint64_t *)des_SP)[threadIdx.x] = ((uint64_t *)des_d_sp_c)[threadIdx.x];
+	#if MAX_THREAD == 128
+		((uint64_t *)des_SP)[threadIdx.x+128] = ((uint64_t *)des_d_sp_c)[threadIdx.x+128];
+	#endif
+
+	__syncthreads();
+
+	register uint64_t m_nIndex = data[TX]; uint64_t roundKeys[16];
+	
+	/**
+		Sorry, I didn't find how to change the device 
+		value in general CODE, so centainly for each time
+	**/
+	for(int nPos = 0;nPos < CHAINLEN;nPos++)
+	{	
+		/**First Step(Cipher Function)**/
+		GenerateKey(m_nIndex,roundKeys);
+		m_nIndex = DESOneTime(roundKeys);
+
+		/**Second Step(Reduction Function)**/
+		m_nIndex &= totalSpace;
+		m_nIndex = (m_nIndex + nPos) & totalSpace;	
+		m_nIndex = (m_nIndex + (nPos << 8)) & totalSpace;
+		m_nIndex = (m_nIndex + ((nPos << 8) << 8)) & totalSpace;
+
+	}
+
+	data[TX] = m_nIndex;
+
+	__syncthreads();
+}
+
 
 uint64_t rand64()
 {
@@ -128,6 +134,9 @@ uint64_t rand64()
 
 #define FF(i, n) for(i = 0;i < n;i++)
 
+/**
+	Combined with DESEncrypt to conduct simple performance test
+**/
 void DESCrypt() 
 {
 	struct timeval tstart, tend;
@@ -137,8 +146,9 @@ void DESCrypt()
 
 	int round = 0, size; FILE * f1; FILE * f2;
 
-	f1 = fopen("start.in","w");
-	f2 = fopen("end.in","w");
+	f1 = fopen("start.in" ,"w");
+	f2 = fopen("end.in"   ,"w");
+
 	assert(f1 && f2);
 
 	printf("Starting DES kernel\n");
@@ -146,7 +156,7 @@ void DESCrypt()
 	size = ALL * sizeof(uint64_t);
 
     _CUDA(cudaMalloc((void**)&deviceKeyIn , size));
-	_CUDA(cudaMalloc((void**)&deviceKeyOut, size));	
+	_CUDA(cudaMalloc((void**)&deviceKeyOut, size));
 	
 	while(1)
 	{
@@ -161,7 +171,6 @@ void DESCrypt()
 	    FF(i, ALL) fprintf(f1,"%lld",(long long)keys[i]);
 	    	    
 	    _CUDA(cudaMemcpy(deviceKeyIn, keys, size, cudaMemcpyHostToDevice));
-
 		DESEncrypt<<<BLOCK_LENGTH, MAX_THREAD>>>(deviceKeyIn);
 
 		_CUDA(cudaMemcpy(keys, deviceKeyOut, size, cudaMemcpyDeviceToHost));
@@ -188,7 +197,127 @@ void DESCrypt()
 	printf("Ending DES kernel\n");
 }
 
-int main()
+/**
+Combined with DESGeneratorCUDA to generate data
+**/
+
+void Logo()
 {
+	printf("DESRainbowCrack 1.0\n 	Make an implementation of DES Time-and-Memory Tradeoff Technology\n 	By Tian Yulong(mathetian@gmail.com)\n\n");
+}
+
+void Usage()
+{
+	Logo();
+	printf("Usage: gencuda   chainLen chainCount suffix\n");
+	printf("                 benchmark\n\n");
+
+	printf("example 1: gencuda 1000 10000 suffix\n");
+	printf("example 2: gencuda benchmark\n");
+}
+
+struct RainbowChain_t
+{
+	uint64_t nStartKey;
+	uint64_t nEndKey;
+};	
+
+typedef struct RainbowChain_t RainbowChain;
+
+uint64_t GetFileLen(FILE* file)
+{
+    unsigned int pos = ftell(file);
+    fseek(file, 0, SEEK_END);
+    uint64_t len = ftell(file);
+    fseek(file, pos, SEEK_SET);
+
+    return len;
+}
+
+void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
+{
+	char fileName[100];
+
+	sprintf(fileName,"DES_%lld-%lld_%s-start", (long long)chainLen, (long long)chainCount,suffix);
+
+	FILE * file = fopen(fileName, "a+");
+	
+	assert(file);
+
+	uint64_t nDatalen = GetFileLen(file);
+	
+	assert((nDatalen & ((1 << 4) - 1)) == 0);
+
+	int remainCount =  chainCount - (nDatalen >> 4);
+	
+	int time1 = remainCount/ALL;
+	if(remainCount % ALL != 0) time1++;
+
+	/**Start Preparation**/
+	
+	uint64_t size = sizeof(uint64_t)*ALL;
+
+	uint64_t * cudaIn;
+	uint64_t starts[ALL], ends[ALL];
+	
+	_CUDA(cudaMalloc((void**)&cudaIn , size));
+
+	/**End Preparation**/
+	printf("Need to compute %d rounds\n", time1);
+	
+	for(int round = 0;round < time1;round++)
+	{
+		printf("Begin compute the %d round\n", round+1);
+		for(uint64_t i = 0;i < ALL;i++)
+		{
+			RAND_bytes((unsigned char*)&(starts[i]),sizeof(uint64_t));
+			starts[i] &= totalSpaceT;
+		}
+		/**Belong to CUDA logic**/
+		_CUDA(cudaMemcpy(cudaIn,starts,size,cudaMemcpyHostToDevice));
+
+		DESEncrypt<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
+
+		_CUDA(cudaMemcpy(ends,cudaIn,size,cudaMemcpyDeviceToHost));
+		/**End of CUDA logic**/
+		
+		for(uint64_t i = 0;i < ALL;i++)
+		{
+			/**Soooory for the sad expression**/
+			int flag1 = fwrite((char*)&starts,sizeof(uint64_t),1,file);
+			int flag2 = fwrite((char*)&ends,sizeof(uint64_t),1,file);
+			assert((flag1 == 1) && (flag2 == 1));
+		}
+
+		printf("End compute the %d round\n", round+1);
+	}
+}	
+
+int main(int argc, char * argv[])
+{
+	if(argc != 2 && argc != 4)
+	{
+		Usage();
+		return 1;
+	}
+
+	if(argc == 2)
+	{
+		if(strcmp(argv[1],"benchmark") == 0)
+			DESCrypt();
+		else Usage();
+		return 1;
+	}
+
+	uint64_t chainLen, chainCount; 
+	char suffix[100]; 
+	
+	memset(suffix,0,sizeof(suffix));
+
+	chainLen   = atoll(argv[1]);
+	chainCount = atoll(argv[2]);
+	memcpy(suffix,argv[3],strlen(argv[3]));
+
+	DESGenerator(chainLen, chainCount, suffix);
 	return 0;
 }
