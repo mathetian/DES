@@ -34,3 +34,7 @@ Todo List,
 
 2. Distributed Crack tool
 
+----------------------------------------------------
+Windows version has been checked in.
+
+Passed 20/31(32) bit tests, successful probability is very high. However, I found when I use parallel, the single process performance will becom bad

@@ -21,13 +21,13 @@ typedef pair<RainbowChain, int> PPR;
 
 struct cmp
 {
+	/**Need Mininum heap**/
     int operator()(PPR a,PPR b){
     	RainbowChain  r1 = a.first;
     	RainbowChain  r2 = b.first;
     	if(r1.nEndKey < r2.nEndKey)
-    		return 1;
-    	else if(r1.nEndKey == r2.nEndKey)
     		return 0;
+    	return 1;
     }
 };
 
@@ -60,7 +60,7 @@ void ExternalSort(FILE * file, vector <FILE*> tmpFiles)
 	{
 		chain = chainPQ.top().first;
 		index = chainPQ.top().second;
-		
+		//cout << chain.nEndKey << endl;
 		chainPQ.pop();
 
 		fwrite((char*)&chain, sizeof(RainbowChain), 1, file);
@@ -107,7 +107,7 @@ void ExternalSort(FILE * file)
 	for(;index < tmpNum;index++)
 	{
 		sprintf(str,"tmpFiles-%d",index);
-		tmpFiles[index] = fopen(str, "w");
+		tmpFiles[index] = fopen(str, "wb");
 		assert(tmpFiles[index] &&("tmpFiles fopen error\n"));
 		if(index < tmpNum - 1)
 		{
@@ -143,7 +143,7 @@ void Distinct(const char * fileName)
 {
 	FILE * file; uint64_t fileLen;
 	
-	if((file = fopen(fileName, "r")) == NULL)
+	if((file = fopen(fileName, "rb")) == NULL)
 	{
 		printf("Failed to open: %s\n",fileName);
 		return;
@@ -240,10 +240,10 @@ void SortFiles(vector <string> fileNames, vector <FILE*> files, const char * pre
 		else ExternalSort(files[index]);
 	}
 
-	targetFile = fopen(prefix,"w");
+	targetFile = fopen(prefix,"wb");
 	fclose(targetFile);
 
-	targetFile = fopen(prefix,"r+");
+	targetFile = fopen(prefix,"rb+");
 	assert(targetFile && ("targetFile fopen error\n"));
 
 	printf("Begin Actually ExternalSort\n");
@@ -285,7 +285,7 @@ int main(int argc,char*argv[])
 			fileNames[index] = argv[3];
 			fileNames[index] +=  "_";
 			fileNames[index].push_back(index + '0');
-			files[index] = fopen(fileNames[index].c_str(),"r+");
+			files[index] = fopen(fileNames[index].c_str(),"rb+");
 			assert(files[index] && "fopen error\n");
 		}	
 

@@ -84,7 +84,7 @@ void TestRandom()
 	
 	FILE * file;
 
-	if((file = fopen("TestRandom.txt","w")) == NULL)
+	if((file = fopen("TestRandom.txt","wb")) == NULL)
 	{
 		fprintf(stderr,"TestRandom.txt open error\n");
 		return;
@@ -174,7 +174,7 @@ void TestNativeRandom()
 	unsigned char key[8], out[8]; des_key_schedule ks;
 	RainbowChain chain; FILE * file;
 
-	if((file = fopen("TestNativeRandom.txt","w")) == NULL)
+	if((file = fopen("TestNativeRandom.txt","wb")) == NULL)
 	{
 		printf("TestNativeRandom open error\n");
 		return;
@@ -227,7 +227,7 @@ void TestCaseGenerator()
 	ChainWalkContext cwc;
 	srand((uint32_t)time(0));
 
-	file = fopen("TestCaseGenerator.txt","w");
+	file = fopen("TestCaseGenerator.txt","wb");
 	
 	assert(file && "TestCaseGenerator fopen error\n");
 
@@ -255,9 +255,12 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 	const char * szFileName = data -> szFileName;
 	uint64_t chainLen = data -> chainLen;
 	uint64_t totalChainCount = data -> chainCount;
+	
 	int rank = data -> rank;
 	int numproc =  data -> numproc;
+	
 	srand(rank);
+	
 	FILE * file; ChainWalkContext cwc; char str[256];
 
 	uint64_t nDatalen, index, nChainStart;
@@ -266,7 +269,7 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 
 	uint64_t chainCount = totalChainCount / numproc;
 
-	if((file = fopen(szFileName,"a+")) == NULL)
+	if((file = fopen(szFileName,"ab+")) == NULL)
 	{
 		printf("rank %d of %d, failed to create %s\n", rank, numproc, szFileName);
 		return 0;
@@ -296,7 +299,7 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 	
 	TimeStamp tmps;
 	tmps.StartTime();
-
+	
 	for(;index < chainCount;index++)
 	{
 		chain.nStartKey = cwc.GetRandomKey();
@@ -308,14 +311,11 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 		}
 
 		chain.nEndKey = cwc.GetKey();
-		cout << chain.nStartKey << " "<<chain.nEndKey <<endl;
-		fwrite((char*)&chain.nStartKey,sizeof(uint64_t),1,file);
-		fwrite((char*)&chain.nEndKey,sizeof(uint64_t),1,file);
-		/*if(fwrite((char*)&chain, sizeof(RainbowChain), 1, file) != 1)
+		if(fwrite((char*)&chain, sizeof(RainbowChain), 1, file) != 1)
 		{
 			printf("rank %d of %d, disk write error\n", rank, numproc);
 			return 0;
-		}*/
+		}
 		if((index + 1)%10000 == 0||index + 1 == chainCount)
 		{
 			sprintf(str,"rank %d of %d, generate: nChains: %lld, chainLen: %lld: total time:", rank, numproc, (long long)index, (long long)chainLen);
@@ -373,13 +373,14 @@ int main(int argc,char * argv[])
 	memcpy(suffix, argv[3], sizeof(argv[3]));
 
     DATA datas[8];  HANDLE  hThreadArray[8]; DWORD   dwThreadIdArray[8];
+    
     for(int i = 0;i < 1;i++)
     {	
     	sprintf(datas[i].szFileName,"DES_%lld-%lld_%s_%d", chainLen, chainCount, suffix, i);
-    	datas[i].chainLen = chainLen;
-    	datas[i].chainCount = chainCount;
-    	datas[i].rank = i;
-    	datas[i].numproc = 8;
+    	
+    	datas[i].chainLen = chainLen; datas[i].chainCount = chainCount;
+    	datas[i].rank = i; datas[i].numproc = 8;
+    	
     	hThreadArray[i] = CreateThread( NULL,0, MyThreadFunction, &datas[i],0,&dwThreadIdArray[i]);
     }
 

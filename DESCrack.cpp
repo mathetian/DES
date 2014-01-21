@@ -33,7 +33,7 @@ int main(int argc,char*argv[])
 		{
 			Usage();return 0;
 		}
-		FILE * file = fopen(argv[3],"r");
+		FILE * file = fopen(argv[3],"rb");
 		assert(file && "main fopen error\n");
 		RainbowChain chain;
 		while(fread((char*)&chain, sizeof(RainbowChain), 1, file))
