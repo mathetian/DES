@@ -25,4 +25,4 @@ gencuda: DESCuda.cu
 test5: test5.cpp
 	g++ $^ -o $@ ${LIB}
 clean:
-	rm -f ${PROGS} DES_* *.txt
+	rm -f ${PROGS} DES_* *.txt test3 test4 test5 gencuda

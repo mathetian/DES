@@ -35,6 +35,12 @@ __device__ int GenerateKey(uint64_t key, uint64_t * store)
 	return 0;
 }
 
+__global__ void Gee(uint64_t * store)
+{
+	uint64_t key=0x0E0E0E0E0E0E0E02;
+	GenerateKey(key,store);
+}
+
 __device__ uint64_t DESOneTime(uint64_t * roundKeys)
 {
 	uint64_t rs;
@@ -134,7 +140,7 @@ __global__ void OneTime(uint64_t * roundKeys)
 
 	//uint64_t plain = 0x305532286D6F295A;
 	//uint64_t key   = 0xF1F1F1F1F1F1F1F1;
-	uint64_t key = 0xFEFEFEFEFEFEFEFE;
+	uint64_t key = 0x0E0E0E0E0E0E0E01;
 	GenerateKey(key, roundKeys);
 }
 
@@ -335,6 +341,20 @@ void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
 	}
 }	
 
+void KeyTest()
+{
+	//uint64_t key=0xFEFEFEFEFEFEFEFE;
+	uint64_t key=0x0E0E0E0E0E0E0E01;
+	uint64_t * cudaIn; uint64_t starts[16];
+	_CUDA(cudaMalloc((void**)&cudaIn , sizeof(uint64_t)*16));
+	Gee<<<1, 1>>>(cudaIn); cout << "hello" << endl;
+	_CUDA(cudaMemcpy(starts,cudaIn,sizeof(uint64_t)*16,cudaMemcpyDeviceToHost));
+	for(int i=0;i<16;i++)
+	{
+		cout<<starts[i]<<endl;
+	}
+}
+
 int main(int argc, char * argv[])
 {
 	if(argc != 2 && argc != 4)
@@ -349,6 +369,8 @@ int main(int argc, char * argv[])
 			DESCrypt();
 		else if(strcmp(argv[1],"onetimetest") == 0)
 			OneTimeTest();
+		else if(strcmp(argv[1],"keystest")==0)
+			KeyTest();
 		else Usage();
 		return 1;
 	}
