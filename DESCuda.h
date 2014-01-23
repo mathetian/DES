@@ -30,7 +30,7 @@ using namespace std;
 
 #define BLOCK_LENGTH        1024
 #define MAX_THREAD			256
-#define ALL                 1024*256
+#define ALL                 (1024*256)
 #define CHAINLEN            1024
 #define CHAINCOUNT          1024
 
@@ -418,7 +418,8 @@ uint64_t totalSpaceT = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 
 	t2=((t<<16L)|(s&0x0000ffffL))&0xffffffffL;\
 	store[S]  = ROTATE(t2,30)&0xffffffffL;\
 	t2=((s>>16L)|(t&0xffff0000L));\
-	store[S] |= ((ROTATE(t2,26)&0xffffffffL) << 32);\
+	tmp=(ROTATE(t2,26)&0xffffffffL);\
+	store[S] |= (tmp << 32);\
 }
 
 #define RoundKey1(S) { \
@@ -436,7 +437,8 @@ uint64_t totalSpaceT = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 
 	t2=((t<<16L)|(s&0x0000ffffL))&0xffffffffL;\
 	store[S]  = ROTATE(t2,30)&0xffffffffL;\
 	t2=((s>>16L)|(t&0xffff0000L));\
-	store[S] |= ((ROTATE(t2,26)&0xffffffffL) << 32);\
+	tmp=(ROTATE(t2,26)&0xffffffffL);\
+	store[S] |= (tmp << 32);\
 }
 
 #endif

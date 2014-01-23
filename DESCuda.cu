@@ -1,13 +1,18 @@
 #include "DESCuda.h"
 
 #include <openssl/rand.h>
+#include <openssl/des.h>
+
+#include <iostream>
+using namespace std;
+
 
 __device__ int GenerateKey(uint64_t key, uint64_t * store)
 {
 	uint32_t c, d, t, s, t2;
-
+	uint64_t tmp;
 	/**c: low 32 bits, d high 32 bits**/
-	c = (1ull << 32) & key; d = (key >> 32);
+	c = ((1ull << 32) - 1) & key; d = (key >> 32);
 	
 	PERM_OP (d,c,t,4,0x0f0f0f0fL);
 	HPERM_OP(c,t, -2,0xcccc0000L);
@@ -104,7 +109,7 @@ __global__ void  DESGeneratorCUDA(uint64_t * data)
 		Sorry, I didn't find how to change the device 
 		value in general CODE, so centainly for each time
 	**/
-	for(int nPos = 0;nPos < CHAINLEN;nPos++)
+	for(int nPos = 0;nPos < 1;nPos++)
 	{	
 		/**First Step(Cipher Function)**/
 		GenerateKey(m_nIndex,roundKeys);
@@ -123,6 +128,42 @@ __global__ void  DESGeneratorCUDA(uint64_t * data)
 	__syncthreads();
 }
 
+__global__ void OneTime(uint64_t * roundKeys)
+{
+	__syncthreads();
+
+	//uint64_t plain = 0x305532286D6F295A;
+	//uint64_t key   = 0xF1F1F1F1F1F1F1F1;
+	uint64_t key = 0xFEFEFEFEFEFEFEFE;
+	GenerateKey(key, roundKeys);
+}
+
+void OneTimeTest()
+{
+	uint64_t incuda[16];
+
+	_CUDA(cudaMalloc((void**)&incuda , sizeof(uint64_t)*16));
+	DESEncrypt<<<1,1>>>(incuda);
+
+	FILE*file=fopen("OneTimeTest.txt","wb");
+	assert(file);
+	for(int i = 0;i<16;i++)
+	{
+		fwrite((char*)&(incuda[i]),sizeof(uint64_t),1,file);
+	}
+	//assert(fwrite((char*)incuda,sizeof(uint64_t),16,file) == 16);
+	//fclose(file);
+
+	des_key_schedule ks;//const uint64_t key   = 0xF1F1F1F1F1F1F1F1;
+	const_DES_cblock key = {0xF1,0xF1,0xF1,0xF1,0xF1,0xF1,0xF1,0xF1};
+
+	DES_set_key_unchecked(&key,&ks);
+
+	for(int i = 0;i< 16;i++)
+	{
+		fwrite((char*)&(ks.ks[i].cblock),sizeof(uint64_t),1,file);
+	}
+}
 
 uint64_t rand64()
 {
@@ -192,9 +233,9 @@ void DESCrypt()
 		round++;
 	}
 
-	fclose(f1);fclose(f2);
+	//fclose(f1);fclose(f2);
 	
-	printf("Ending DES kernel\n");
+	//printf("Ending DES kernel\n");
 }
 
 /**
@@ -210,7 +251,8 @@ void Usage()
 {
 	Logo();
 	printf("Usage: gencuda   chainLen chainCount suffix\n");
-	printf("                 benchmark\n\n");
+	printf("                 benchmark\n");
+	printf("                 onetimetest");
 
 	printf("example 1: gencuda 1000 10000 suffix\n");
 	printf("example 2: gencuda benchmark\n");
@@ -238,7 +280,7 @@ void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
 {
 	char fileName[100];
 
-	sprintf(fileName,"DES_%lld-%lld_%s-start", (long long)chainLen, (long long)chainCount,suffix);
+	sprintf(fileName,"DES_%lld-%lld_%s-cuda", (long long)chainLen, (long long)chainCount,suffix);
 
 	FILE * file = fopen(fileName, "a+");
 	
@@ -263,20 +305,20 @@ void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
 	_CUDA(cudaMalloc((void**)&cudaIn , size));
 
 	/**End Preparation**/
-	printf("Need to compute %d rounds\n", time1);
+	printf("Need to compute %d rounds %lld\n", time1, (long long)remainCount);
 	
 	for(int round = 0;round < time1;round++)
 	{
 		printf("Begin compute the %d round\n", round+1);
 		for(uint64_t i = 0;i < ALL;i++)
 		{
-			RAND_bytes((unsigned char*)&(starts[i]),sizeof(uint64_t));
+			RAND_bytes((unsigned char*)(&(starts[i])),sizeof(uint64_t));
 			starts[i] &= totalSpaceT;
 		}
 		/**Belong to CUDA logic**/
 		_CUDA(cudaMemcpy(cudaIn,starts,size,cudaMemcpyHostToDevice));
 
-		DESEncrypt<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
+		DESGeneratorCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
 
 		_CUDA(cudaMemcpy(ends,cudaIn,size,cudaMemcpyDeviceToHost));
 		/**End of CUDA logic**/
@@ -284,8 +326,8 @@ void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
 		for(uint64_t i = 0;i < ALL;i++)
 		{
 			/**Soooory for the sad expression**/
-			int flag1 = fwrite((char*)&starts,sizeof(uint64_t),1,file);
-			int flag2 = fwrite((char*)&ends,sizeof(uint64_t),1,file);
+			int flag1 = fwrite((char*)&(starts[i]),sizeof(uint64_t),1,file);
+			int flag2 = fwrite((char*)&(ends[i]),sizeof(uint64_t),1,file);
 			assert((flag1 == 1) && (flag2 == 1));
 		}
 
@@ -305,6 +347,8 @@ int main(int argc, char * argv[])
 	{
 		if(strcmp(argv[1],"benchmark") == 0)
 			DESCrypt();
+		else if(strcmp(argv[1],"onetimetest") == 0)
+			OneTimeTest();
 		else Usage();
 		return 1;
 	}

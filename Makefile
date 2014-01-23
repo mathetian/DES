@@ -1,6 +1,6 @@
-PROGS = generator verified sort crack
+PROGS = generator verified sort crack gencuda
 
-LIB = -lrt -lssl -lcrypto -ldl -O0 -g -lcurand
+LIB = -lrt -lssl -lcrypto -ldl -O0 -g
 
 
 all: ${PROGS}
@@ -22,5 +22,7 @@ nv = nvcc
 gencuda: DESCuda.cu
 	$(nv) $^ -o $@  ${LIB}
 
+test5: test5.cpp
+	g++ $^ -o $@ ${LIB}
 clean:
 	rm -f ${PROGS} DES_* *.txt
