@@ -6,6 +6,7 @@
 #include <iostream>
 using namespace std;
 
+#include <TimeStamp.h>
 
 __device__ int GenerateKey(uint64_t key, uint64_t * store)
 {
@@ -102,12 +103,10 @@ __global__ void DESEncrypt(uint64_t *data)
 **/
 __global__ void  DESGeneratorCUDA(uint64_t * data)
 {
-	/**Don't know why should use it.**/
-	((uint64_t *)des_SP)[threadIdx.x] = ((uint64_t *)des_d_sp_c)[threadIdx.x];
-	#if MAX_THREAD == 128
-		((uint64_t *)des_SP)[threadIdx.x+128] = ((uint64_t *)des_d_sp_c)[threadIdx.x+128];
-	#endif
-
+	for(int i=0;i<256;i++)
+	{
+		((uint64_t *)des_SP)[i] = ((uint64_t *)des_d_sp_c)[i];
+	}
 	__syncthreads();
 
 	register uint64_t m_nIndex = data[TX]; uint64_t roundKeys[16];
@@ -116,7 +115,7 @@ __global__ void  DESGeneratorCUDA(uint64_t * data)
 		Sorry, I didn't find how to change the device 
 		value in general CODE, so centainly for each time
 	**/
-	for(int nPos = 0;nPos < 1;nPos++)
+	for(int nPos = 0;nPos < 4096;nPos++)
 	{	
 		/**First Step(Cipher Function)**/
 		GenerateKey(m_nIndex,roundKeys);
@@ -127,14 +126,12 @@ __global__ void  DESGeneratorCUDA(uint64_t * data)
 		m_nIndex = (m_nIndex + nPos) & totalSpace;	
 		m_nIndex = (m_nIndex + (nPos << 8)) & totalSpace;
 		m_nIndex = (m_nIndex + ((nPos << 8) << 8)) & totalSpace;
-
 	}
 
 	data[TX] = m_nIndex;
 
 	__syncthreads();
 }
-
 
 __global__ void OneTimeForTotal(uint64_t * in)
 {
@@ -339,10 +336,14 @@ void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
 
 	/**End Preparation**/
 	printf("Need to compute %d rounds %lld\n", time1, (long long)remainCount);
-	
+
+
 	for(int round = 0;round < time1;round++)
 	{
 		printf("Begin compute the %d round\n", round+1);
+		
+		TimeStamp::StartTime();
+
 		for(uint64_t i = 0;i < ALL;i++)
 		{
 			RAND_bytes((unsigned char*)(&(starts[i])),sizeof(uint64_t));
@@ -365,13 +366,14 @@ void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
 		}
 
 		printf("End compute the %d round\n", round+1);
+		TimeStamp::StopTime("StopTime: ");
 	}
 }	
 
 void KeyTest()
 {
 	//uint64_t key=0xFEFEFEFEFEFEFEFE;
-	uint64_t key=0x0E0E0E0E0E0E0E02;
+	//uint64_t key=0x0E0E0E0E0E0E0E02; /**which can't be accessed by the device(GPU), SAD**/
 	uint64_t * cudaIn; uint64_t starts[16];
 	_CUDA(cudaMalloc((void**)&cudaIn , sizeof(uint64_t)*16));
 	Gee<<<1, 1>>>(cudaIn); cout << "hello" << endl;
