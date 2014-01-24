@@ -40,7 +40,7 @@ __global__ void Gee(uint64_t * store)
 	//14969965219234971648 0xcfc0000d78740000L
 	//14897907633854087168 0xcec0000f7c740000L
 	//uint64_t key=0x0E0E0E0E0E0E0E02;
-	uint64_t key=0x02080E0E0E0E0E0E;
+	uint64_t key=0x020E0E0E0E0E0E0E;
 	GenerateKey(key,store);
 }
 
@@ -51,7 +51,7 @@ __device__ uint64_t DESOneTime(uint64_t * roundKeys)
 
 	IP(right, left);
 	
-	left  = ROTATE(left,29); right = ROTATE(right,29);
+	left  = ROTATE(left,29)&0xffffffffL; right = ROTATE(right,29)&0xffffffffL;
 
 	D_ENCRYPT(left,right, 0); D_ENCRYPT(right,left, 1);
 	D_ENCRYPT(left,right, 2); D_ENCRYPT(right,left, 3);
@@ -61,14 +61,12 @@ __device__ uint64_t DESOneTime(uint64_t * roundKeys)
 	D_ENCRYPT(left,right,10); D_ENCRYPT(right,left,11);
 	D_ENCRYPT(left,right,12); D_ENCRYPT(right,left,13);
 	D_ENCRYPT(left,right,14); D_ENCRYPT(right,left,15);
-	D_ENCRYPT(right,left,15);
 
-	left  = ROTATE(left,3); right = ROTATE(right,3);
+	left  = ROTATE(left,3)&0xffffffffL; right = ROTATE(right,3)&0xffffffffL;
 
 	FP(right, left);
 
-	rs = (((uint64_t)left) << 32)|right;
-	
+	rs=(((uint64_t)right)<<32)|left; //why, who can explain it
 	return rs;
 }
 
@@ -137,14 +135,38 @@ __global__ void  DESGeneratorCUDA(uint64_t * data)
 	__syncthreads();
 }
 
-__global__ void OneTime(uint64_t * roundKeys)
-{
-	__syncthreads();
 
-	//uint64_t plain = 0x305532286D6F295A;
-	//uint64_t key   = 0xF1F1F1F1F1F1F1F1;
-	uint64_t key = 0x0E0E0E0E0E0E0E02;
+__global__ void OneTimeForTotal(uint64_t * in)
+{
+
+	for(int i=0;i<256;i++)
+	{
+		((uint64_t *)des_SP)[i] = ((uint64_t *)des_d_sp_c)[i];
+	}
+	uint64_t roundKeys[16], key = 0x020E0E0E0E0E0E0E;
 	GenerateKey(key, roundKeys);
+
+	in[TX]=DESOneTime(roundKeys);
+}
+
+void KeyTest();
+
+void OneTimeTestForTotal()
+{
+	
+	KeyTest();
+
+	uint64_t * cudaIn; uint64_t starts[1];
+	_CUDA(cudaMalloc((void**)&cudaIn , sizeof(uint64_t)*1));
+	OneTimeForTotal<<<1, 1>>>(cudaIn); cout << "hello" << endl;
+	cudaerrno=cudaGetLastError();
+	if(cudaSuccess!=cudaerrno) {                    
+		fprintf(stderr, "Cuda error %d in file '%s' in line %i: %s\n",cudaerrno,__FILE__,__LINE__,cudaGetErrorString(cudaerrno));
+		exit(EXIT_FAILURE);
+	} 
+
+	_CUDA(cudaMemcpy(starts,cudaIn,sizeof(uint64_t)*1,cudaMemcpyDeviceToHost));
+	cout<<starts[0]<<endl;
 }
 
 void OneTimeTest()
@@ -262,7 +284,9 @@ void Usage()
 	printf("Usage: gencuda   chainLen chainCount suffix\n");
 	printf("                 benchmark\n");
 	printf("                 onetimetest\n");
-	printf("                 keystest\n\n");
+	printf("                 keystest\n");
+	printf("                 onetimefortotal\n\n");
+	
 	printf("example 1: gencuda 1000 10000 suffix\n");
 	printf("example 2: gencuda benchmark\n");
 }
@@ -374,6 +398,8 @@ int main(int argc, char * argv[])
 			OneTimeTest();
 		else if(strcmp(argv[1],"keystest")==0)
 			KeyTest();
+		else if(strcmp(argv[1],"onetimefortotal")==0)
+			OneTimeTestForTotal();
 		else Usage();
 		return 1;
 	}

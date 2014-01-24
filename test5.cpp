@@ -1,7 +1,10 @@
-#include <stdio.h>
-#include <openssl/des.h>
 #include <iostream>
 using namespace std;
+
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <openssl/des.h>
 
 /*typedef unsigned int DES_LONG;
 
@@ -32,4 +35,16 @@ int main()
 		unsigned long a = *((unsigned long*)&(sch.ks[i].cblock));
 		cout<<a<<endl;
 	}
+
+	uint64_t plain=0x6D6F295A30553228;
+	//unsigned char * in = (unsigned char*)&plain;
+	//unsigned char in[8] = {0x28,0x32,0x55,0x30,0x5A,0x29,0x6F,0x6D};
+	//unsigned char in[8] = {0x5A,0x29,0x6F,0x6D,0x5A,0x29,0x6F,0x6D};
+	unsigned char in[8] = {0x28,0x32,0x55,0x30,0xFF,0xFF,0xFF,0xFF};
+	unsigned char out[8];
+	memset(out,0,8);
+	des_ecb_encrypt(&in,&out,sch,DES_ENCRYPT);
+	uint64_t ci=*(uint64_t*)out;
+	uint64_t ci2=*(uint64_t*)in;
+	cout<<ci<<" "<<ci2<<endl;
 }
