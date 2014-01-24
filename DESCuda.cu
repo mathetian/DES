@@ -37,7 +37,10 @@ __device__ int GenerateKey(uint64_t key, uint64_t * store)
 
 __global__ void Gee(uint64_t * store)
 {
-	uint64_t key=0x0E0E0E0E0E0E0E02;
+	//14969965219234971648 0xcfc0000d78740000L
+	//14897907633854087168 0xcec0000f7c740000L
+	//uint64_t key=0x0E0E0E0E0E0E0E02;
+	uint64_t key=0x02080E0E0E0E0E0E;
 	GenerateKey(key,store);
 }
 
@@ -140,7 +143,7 @@ __global__ void OneTime(uint64_t * roundKeys)
 
 	//uint64_t plain = 0x305532286D6F295A;
 	//uint64_t key   = 0xF1F1F1F1F1F1F1F1;
-	uint64_t key = 0x0E0E0E0E0E0E0E01;
+	uint64_t key = 0x0E0E0E0E0E0E0E02;
 	GenerateKey(key, roundKeys);
 }
 
@@ -258,8 +261,8 @@ void Usage()
 	Logo();
 	printf("Usage: gencuda   chainLen chainCount suffix\n");
 	printf("                 benchmark\n");
-	printf("                 onetimetest");
-
+	printf("                 onetimetest\n");
+	printf("                 keystest\n\n");
 	printf("example 1: gencuda 1000 10000 suffix\n");
 	printf("example 2: gencuda benchmark\n");
 }
@@ -344,7 +347,7 @@ void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
 void KeyTest()
 {
 	//uint64_t key=0xFEFEFEFEFEFEFEFE;
-	uint64_t key=0x0E0E0E0E0E0E0E01;
+	uint64_t key=0x0E0E0E0E0E0E0E02;
 	uint64_t * cudaIn; uint64_t starts[16];
 	_CUDA(cudaMalloc((void**)&cudaIn , sizeof(uint64_t)*16));
 	Gee<<<1, 1>>>(cudaIn); cout << "hello" << endl;

@@ -51,8 +51,6 @@ cudaError_t cudaerrno;
     } }
 
 
-
-
 __device__ uint32_t des_d_sp_c[8][64]={
 	{
 		/* nibble 0 */
