@@ -104,12 +104,12 @@ __global__ void DESEncrypt(uint64_t *data)
 **/
 __global__ void  DESGeneratorCUDA(uint64_t * data)
 {
-/*	for(int i=0;i<256;i++)
+	for(int i=0;i<256;i++)
 	{
 		((uint64_t *)des_SP)[i] = ((uint64_t *)des_d_sp_c)[i];
 	}
-*/
-	((uint64_t *)des_SP)[threadIdx.x] = ((uint64_t *)des_d_sp_c)[threadIdx.x];
+
+	/*((uint64_t *)des_SP)[threadIdx.x] = ((uint64_t *)des_d_sp_c)[threadIdx.x];*/
 	
 	__syncthreads();
 
@@ -316,11 +316,10 @@ void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
 {
 	char fileName[100];
 	memset(fileName, 0, 100);
-
-	sprintf(fileName,"DES_%lld-%lld_%s-cuda", (long long)chainLen, (long long)chainCount,suffix);
-
-	FILE * file = fopen(fileName, "ab+");
 	
+	sprintf(fileName,"DES_%lld-%lld_%s-cuda", (long long)chainLen, (long long)chainCount,suffix);
+	
+	FILE * file = fopen(fileName, "ab+");
 	assert(file);
 
 	uint64_t nDatalen = GetFileLen(file);
@@ -328,10 +327,8 @@ void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
 	assert((nDatalen & ((1 << 4) - 1)) == 0);
 
 	int remainCount =  chainCount - (nDatalen >> 4);
-	
-	int time1 = remainCount/ALL;
-	if(remainCount % ALL != 0) time1++;
 
+	int time1 = (remainCount + ALL - 1)/ALL;
 	/**Start Preparation**/
 	
 	uint64_t size = sizeof(uint64_t)*ALL;
@@ -433,7 +430,8 @@ int main(int argc, char * argv[])
 	chainLen   = atoll(argv[1]);
 	chainCount = atoll(argv[2]);
 	memcpy(suffix,argv[3],strlen(argv[3]));
-	cout<<"here1"<<endl;
+
 	DESGenerator(chainLen, chainCount, suffix);
+	
 	return 0;
 }

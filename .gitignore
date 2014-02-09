@@ -15,3 +15,5 @@ data*
 *.exe
 *.obj
 gencuda
+*exp
+*lib

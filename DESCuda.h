@@ -31,9 +31,15 @@ using namespace std;
 	Therefore, #define TIME 2^5 
 **/
 
-#define BLOCK_LENGTH        1024
+/*#define BLOCK_LENGTH        1024
 #define MAX_THREAD			256
 #define ALL                 (1024*256)
+#define CHAINLEN            1024
+#define CHAINCOUNT          1024*/
+
+#define BLOCK_LENGTH        64
+#define MAX_THREAD			128
+#define ALL                 (128*64)
 #define CHAINLEN            1024
 #define CHAINCOUNT          1024
 
