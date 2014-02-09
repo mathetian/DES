@@ -89,6 +89,7 @@ void CrackEngine::SearchRainbowTable(const char * fileName)
 
 	assert(fileLen % 16 == 0);
 	cout<<ChainWalkContext::m_chainCount<<" "<<fileLen<<endl;
+	
 	if(fileLen % 16 != 0 || ChainWalkContext::m_chainCount*16 != fileLen)
 	{
 		printf("file length check error\n");

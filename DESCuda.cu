@@ -345,7 +345,8 @@ void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
 	{
 		printf("Begin compute the %d round\n", round+1);
 		
-		TimeStamp::StartTime();
+		TimeStamp tms;
+		tms.StartTime();
 
 		for(uint64_t i = 0;i < ALL;i++)
 		{
@@ -369,7 +370,7 @@ void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
 		}
 
 		printf("End compute the %d round\n", round+1);
-		TimeStamp::StopTime("StopTime: ");
+		tms.StopTime("StopTime: ");
 	}
 }	
 
