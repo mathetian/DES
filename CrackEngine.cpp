@@ -185,8 +185,9 @@ void CrackEngine::Run(const char * fileName)
 	{
 		printf("-------------------------------------------------------\n");
 		printf("Time: %d, key: %lld\n\n",index++,(long long)p_cs -> GetLeftKey());
-		
+		TimeStamp::StartTime();
 		InitEndKeys(p_cs -> GetLeftKey());
+		TimeStamp::StopTime("Init Time: ");
 		SearchRainbowTable(fileName);
 		
 		printf("-------------------------------------------------------\n");

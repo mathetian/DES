@@ -2,9 +2,6 @@
 #include <string>
 using namespace std;
 
-FILE * SortedSegment::file;
-FILE * SortedSegment::tmpFile;
-
 bool RainbowChain::operator < (const RainbowChain &m) const 
 {
     //return nStartKey < m.nStartKey;
@@ -90,59 +87,4 @@ bool AnylysisFileName(const char * filename, uint64_t & chainLen, uint64_t & cha
 	chainCount = atoll(str);
 	
 	return true;
-}
-
-SortedSegment::SortedSegment()
-{
-}
-
-SortedSegment::~SortedSegment()
-{
-}
-
-void SortedSegment::setProperty(int offset,int length,int curOffset)
-{
-	this -> offset 	  = offset;
-	this -> length 	  = length;
-	this -> curOffset = curOffset;
-}
-
-int SortedSegment::getLength()
-{
-	return length;
-}
-
-RainbowChain * SortedSegment::getFirst()
-{
-	fseek(file,offset+curOffset,SEEK_SET);
-	if((fread(chains,sizeof(RainbowChain),1,file)) != sizeof(RainbowChain))
-	{
-		printf("Error length\n");
-		exit(0);
-	}
-	return chains;
-}
-
-RainbowChain * SortedSegment::getAll()
-{
-	fseek(file,offset,SEEK_SET);
-	if((fread(chains,sizeof(RainbowChain),length,file)) != sizeof(RainbowChain) * length)
-	{
-		printf("Error length\n");
-		exit(0);
-	}
-	return chains;
-}
-
-RainbowChain * SortedSegment::getNext()
-{
-	if(curOffset==length*sizeof(RainbowChain))
-		return NULL;
-	if((fread(chains,sizeof(RainbowChain),1,tmpFile)) != sizeof(RainbowChain))
-	{
-		printf("Error length\n");
-		exit(0);
-	}
-	curOffset+=sizeof(RainbowChain);
-	return chains;
 }
