@@ -5,7 +5,10 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include <sys/time.h>
+/*#ifndef _WIN
+	#include <sys/time.h>
+#endif
+*/
 #include <openssl/evp.h>
 #include <openssl/des.h>
 #include <cuda_runtime_api.h>

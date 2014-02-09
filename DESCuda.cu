@@ -4,6 +4,7 @@
 #include <openssl/des.h>
 
 #include <iostream>
+#include <sstream>
 using namespace std;
 
 #include <TimeStamp.h>
@@ -211,7 +212,7 @@ uint64_t rand64()
 **/
 void DESCrypt() 
 {
-	struct timeval tstart, tend;
+	/**struct timeval tstart, tend;**/
 
 	uint64_t * deviceKeyIn, *deviceKeyOut;
 	uint64_t   keys[ALL]; int i;
@@ -236,8 +237,10 @@ void DESCrypt()
 		
 		fprintf(f1,"Begin Round: %d\n",round);
 		fprintf(f2,"Begin Round: %d\n",round);
+		
+		/**Need further modification to make it os-independent.**/
 
-		gettimeofday(&tstart, NULL);
+		/**gettimeofday(&tstart, NULL);**/
 
 	    FF(i, ALL) keys[i] = rand64();
 	    FF(i, ALL) fprintf(f1,"%lld",(long long)keys[i]);
@@ -249,14 +252,14 @@ void DESCrypt()
 		
 		FF(i, ALL) fprintf(f2,"%lld\n", (long long)keys[i]);
 
-		gettimeofday(&tend, NULL);
+		/**gettimeofday(&tend, NULL);
 
 		long long uses=1000000*(tend.tv_sec-tstart.tv_sec)+(tend.tv_usec-tstart.tv_usec);
 		
 		printf("round time: %lld us\n", uses);
 		fprintf(f1,"round time: %lld us\n",uses);
 		fprintf(f2,"round time: %lld us\n",uses);
-		
+		**/
 		printf("End Round: %d\n",round);
 		fprintf(f1,"End Round: %d\n",round);
 		fprintf(f2,"End Round: %d\n",round);
@@ -312,6 +315,7 @@ uint64_t GetFileLen(FILE* file)
 void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
 {
 	char fileName[100];
+	memset(fileName, 0, 100);
 
 	sprintf(fileName,"DES_%lld-%lld_%s-cuda", (long long)chainLen, (long long)chainCount,suffix);
 
@@ -388,6 +392,17 @@ void KeyTest()
 	}
 }
 
+#ifdef _WIN32
+	inline uint64_t atoll(const char * str)
+	{
+		uint64_t rs;
+		istringstream ist(str);
+		ist >> rs;
+
+		return rs;
+	}
+#endif
+
 int main(int argc, char * argv[])
 {
 	if(argc != 2 && argc != 4)
@@ -418,7 +433,7 @@ int main(int argc, char * argv[])
 	chainLen   = atoll(argv[1]);
 	chainCount = atoll(argv[2]);
 	memcpy(suffix,argv[3],strlen(argv[3]));
-
+	cout<<"here1"<<endl;
 	DESGenerator(chainLen, chainCount, suffix);
 	return 0;
 }
