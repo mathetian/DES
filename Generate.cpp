@@ -286,7 +286,6 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
 	for(;index < chainCount;index++)
 	{
 		chain.nStartKey = cwc.GetRandomKey();
-		cout << chain.nStartKey << endl;
 		int nPos;
 		for(nPos = 0;nPos < chainLen;nPos++)
 		{
@@ -295,7 +294,6 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
 		}
 
 		chain.nEndKey = cwc.GetKey();
-		cout << sizeof(RainbowChain) <<endl;
 		if(fwrite((char*)&chain, sizeof(RainbowChain), 1, file) != 1)
 		{
 			printf("rank %d of %d, disk write error\n", rank, numproc);
