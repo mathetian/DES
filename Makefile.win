@@ -1,6 +1,13 @@
 CFLAGS = /nologo /MT /W3 /EHsc /O2 
-HEADER = -I "C:\usr\local\ssl\include"
-LDFLAGS = kernel32.lib gdi32.lib lib\libeay32.lib /nologo /subsystem:console
+
+SSLDIR = "C:\usr\local\ssl\"
+
+INDIR   = "C:\usr\local\ssl\include"
+EAYDIR  = "C:\usr\local\ssl\lib\libeay32.lib"
+EAY2DIR = "C:\usr\local\ssl\lib\ssleay32.lib"
+
+HEADER = -I $(INDIR)
+LDFLAGS = kernel32.lib gdi32.lib $(EAYDIR) $(EAY2DIR) /nologo /subsystem:console
 
 PROGS = generator verified sort crack
 

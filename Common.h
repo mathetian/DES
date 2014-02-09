@@ -28,17 +28,6 @@ typedef unsigned int uint32_t;
     #include <sys/time.h>
 #endif
 
-#ifdef _WIN32
-    inline uint64_t atoll(const char * str)
-    {
-            uint64_t rs;
-            istringstream ist(str);
-            ist >> rs;
-
-            return rs;
-    }
-#endif
-
 
 class RainbowChain{
 public:

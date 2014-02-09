@@ -5,7 +5,7 @@ typedef unsigned long long uint64_t;
 
 int main()
 {
-	FILE * file = fopen("tt.txt","w");
+	FILE * file = fopen("tt.txt","wb");
 	int a = 1000;
 	const char str[4] = {0x01,0x02,0x03,0x04};
 	a = *(int*)str;

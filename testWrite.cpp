@@ -29,4 +29,10 @@ int main()
 		fwrite((unsigned char*)&b1,sizeof(uint32_t),1,file2);
 		fwrite((unsigned char*)&b2,sizeof(uint32_t),1,file2);
 	}
+
+	char szFileName[256]; uint64_t chainLen = 1024, chainCount = 250000; 
+	const char suffix[245] = "test"; int i = 0;
+
+	sprintf(szFileName,"DES_%lld-%lld_%s_%d", (long long)chainLen, (long long)chainCount, suffix, i);
+	cout<<szFileName<<endl;
 }

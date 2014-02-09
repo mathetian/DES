@@ -18,20 +18,20 @@ void Usage()
 }
 
 typedef pair<RainbowChain, int> PPR;
+
+/**fix cmp bug**/
 struct cmp
 {
     bool operator()(PPR a,PPR b){
     	RainbowChain  r1 = a.first;
     	RainbowChain  r2 = b.first;
     	if(r1.nEndKey < r2.nEndKey)
-    		return -1;
-    	else if(r1.nEndKey == r2.nEndKey)
-    		return 0;
-    	return 1;
+    		return true;
+    	return false;
     }
 };
 
-int QuickSort(RainbowChain * pChain, uint64_t length)
+void QuickSort(RainbowChain * pChain, uint64_t length)
 { sort(pChain, pChain + length); }
 
 void ExternalSort(FILE * file, vector <FILE*> tmpFiles)
@@ -42,7 +42,9 @@ void ExternalSort(FILE * file, vector <FILE*> tmpFiles)
 
 	vector <uint64_t> tmpLens(tmpFiles.size(), 0);
 
-	for(;index < tmpFiles.size();index++)
+	int ss = (int)tmpFiles.size();
+
+	for(;index < ss;index++)
 	{
 		fseek(tmpFiles[index], 0, SEEK_SET);
 		tmpLens[index] = GetFileLen(tmpFiles[index]) >> 4;
@@ -50,7 +52,7 @@ void ExternalSort(FILE * file, vector <FILE*> tmpFiles)
 
 	priority_queue<PPR, vector<PPR>, cmp> chainPQ;
 
-	for(index = 0;index < tmpFiles.size();index++)
+	for(index = 0;index < ss;index++)
 	{
 		fread((char*)&chain,sizeof(RainbowChain),1,tmpFiles[index]);
 		chainPQ.push(make_pair(chain,index));
@@ -107,7 +109,7 @@ void ExternalSort(FILE * file)
 	for(;index < tmpNum;index++)
 	{
 		sprintf(str,"tmpFiles-%d",index);
-		tmpFiles[index] = fopen(str, "w");
+		tmpFiles[index] = fopen(str, "wb");
 		assert(tmpFiles[index] &&("tmpFiles fopen error\n"));
 		if(index < tmpNum - 1)
 		{
@@ -198,7 +200,9 @@ void SortFiles(vector <string> fileNames, vector <FILE*> files, const char * pre
 	sprintf(str, "Available free physical memory: ");
 	printMemory(str, nAvailPhys);
 
-	for(;index < fileNames.size();index++)
+	int ss = (int)fileNames.size();
+
+	for(;index < ss;index++)
 	{
 
 		uint64_t & fileLen = fileLens[index];
@@ -253,7 +257,7 @@ void SortFiles(vector <string> fileNames, vector <FILE*> files, const char * pre
 	fclose(targetFile);
 
 ABORT:
-	for(index = 0;index < fileNames.size();index++)
+	for(index = 0;index < ss;index++)
 		fclose(files[index]);
 	
 }

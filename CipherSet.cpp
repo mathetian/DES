@@ -63,8 +63,8 @@ int CipherSet::GetKeyFoundNum()
 
 void CipherSet::PrintAllFound()
 {
-	int index = 0;
-	for(;index < m_vFound.size();index++)
+	int index = 0; int ss = m_vFound.size();
+	for(;index < ss;index++)
 	{
 		unsigned int high1 = (m_vFound.at(index).first >> 32);
 		unsigned int low1  = (m_vFound.at(index).first & ((1ull << 32) - 1));

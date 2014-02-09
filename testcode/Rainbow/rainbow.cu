@@ -87,12 +87,12 @@ void desCrypt()
 	uint64_t keys[ALL];struct timeval tstart, tend;
 	int round,size;FILE*f1,*f2;
 	round=0;
-	if((f1=fopen("start.in","w"))==NULL)
+	if((f1=fopen("start.in","wb"))==NULL)
 	{
 		printf("desCrypt: fopen start.in error\n");
 		exit(0);
 	}
-	if((f2=fopen("end.in","w"))==NULL)
+	if((f2=fopen("end.in","wb"))==NULL)
 	{
 		printf("desCrypt: fopen end.out error\n");
 		exit(0);

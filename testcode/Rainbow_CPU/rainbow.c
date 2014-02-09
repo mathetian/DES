@@ -25,13 +25,13 @@ void desCrypt(int rank, int numproc)
     int round;FILE*f1,*f2;int i,j;char str[30];
     round=0;srand(rank);char fileName[30];
     sprintf(fileName,"start-%d.in",rank);
-    if((f1=fopen(fileName,"w"))==NULL)
+    if((f1=fopen(fileName,"wb"))==NULL)
     {
         printf("desCrypt: fopen start.in error\n");
         exit(0);
     }
     sprintf(fileName,"end-%d.in",rank);
-    if((f2=fopen(fileName,"w"))==NULL)
+    if((f2=fopen(fileName,"wb"))==NULL)
     {
         printf("desCrypt: fopen end.out error\n");
         exit(0);

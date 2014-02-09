@@ -218,8 +218,8 @@ void DESCrypt()
 
 	int round = 0, size; FILE * f1; FILE * f2;
 
-	f1 = fopen("start.in" ,"w");
-	f2 = fopen("end.in"   ,"w");
+	f1 = fopen("start.in" ,"wb");
+	f2 = fopen("end.in"   ,"wb");
 
 	assert(f1 && f2);
 
@@ -315,7 +315,7 @@ void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
 
 	sprintf(fileName,"DES_%lld-%lld_%s-cuda", (long long)chainLen, (long long)chainCount,suffix);
 
-	FILE * file = fopen(fileName, "a+");
+	FILE * file = fopen(fileName, "ab+");
 	
 	assert(file);
 

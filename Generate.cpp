@@ -330,13 +330,10 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 
 int main(int argc,char * argv[])
 {
-	//long long chainLen, chainCount, index;
 	uint64_t chainLen, chainCount;
-	//char suffix[256], szFileName[256];
-	char suffix[256];
-	//int numproc,rank;
+	char suffix[256];    
     
-        if(argc == 2)
+    if(argc == 2)
 	{
 		if(strcmp(argv[1],"benchmark") == 0)
 			Benchmark();
@@ -368,21 +365,23 @@ int main(int argc,char * argv[])
 	chainLen   = atoll(argv[1]);
 	chainCount = atoll(argv[2]);
 
-	memcpy(suffix, argv[3], sizeof(argv[3]));
+	memset(suffix, 0, 256);
+	memcpy(suffix, argv[3], strlen(argv[3]));
 
-    DATA datas[8];  HANDLE  hThreadArray[8]; DWORD   dwThreadIdArray[8];
+#define THRNUM 2
     
-    for(int i = 0;i < 1;i++)
+    DATA datas[THRNUM];  HANDLE  hThreadArray[THRNUM]; DWORD   dwThreadIdArray[THRNUM];
+    
+    for(int i = 0;i < THRNUM;i++)
     {	
-    	sprintf(datas[i].szFileName,"DES_%lld-%lld_%s_%d", chainLen, chainCount, suffix, i);
-    	
+    	sprintf(datas[i].szFileName,"DES_%lld-%lld_%s_%d", (long long)chainLen, (long long)chainCount, suffix, i);
     	datas[i].chainLen = chainLen; datas[i].chainCount = chainCount;
-    	datas[i].rank = i; datas[i].numproc = 8;
+    	datas[i].rank = i; datas[i].numproc = THRNUM;
     	
     	hThreadArray[i] = CreateThread( NULL,0, MyThreadFunction, &datas[i],0,&dwThreadIdArray[i]);
     }
 
-   	WaitForMultipleObjects(1, hThreadArray, TRUE, INFINITE);
+   	WaitForMultipleObjects(THRNUM, hThreadArray, TRUE, INFINITE);
 
 	return 0;
 }

@@ -22,7 +22,7 @@ int main(int argc,char*argv[])
 		return 0;
 	}
 
-	if((file  = fopen(argv[1],"r")) == NULL)
+	if((file  = fopen(argv[1],"rb")) == NULL)
 	{
 		printf("fopen error\n");
 		return 0;
