@@ -1,4 +1,4 @@
-PROGS = generator verified sort crack
+PROGS = generator verified sort crack gencuda
 
 LIB = -lrt -lssl -lcrypto -ldl -O0 -g
 
@@ -19,5 +19,10 @@ crack: DESCrack.cpp Common.cpp ChainWalkContext.cpp CipherSet.cpp CrackEngine.cp
 rungen:
 	mpirun -np 4 ./generator 8192 8388608 test
 
+nv = nvcc
+
+gencuda: DESCuda.cu
+	$(nv) $^ -o $@  ${LIB}
+
 clean:
-	rm -f ${PROGS} DES_* *.txt
+	rm -f ${PROGS} DES_* *.txt test3 test4 test5 gencuda

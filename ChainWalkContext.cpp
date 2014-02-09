@@ -1,16 +1,22 @@
 #include "ChainWalkContext.h"
-#include <iostream>
-using namespace std;
 
 uint64_t   ChainWalkContext::m_plainText     = 0x305532286D6F295A;
 uint64_t   ChainWalkContext::m_keySpaceTotal = (1ull << 20) - 1;
-/**20bit, 2^10 * 2^10**/
-// uint64_t   ChainWalkContext::m_keySpaceTotalT = (1ull << 24) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 17);
-/**32 bit, 2^11 * 2^21**/
-uint64_t   ChainWalkContext::m_keySpaceTotalT = (1ull << 36) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24);
+/**20 bit, 2^10 * 2^11**/
+/*uint64_t   ChainWalkContext::m_keySpaceTotalT = (1ull << 24) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 17); */
+
+/**28 bit, 2^10 * 2^18**/
+uint64_t   ChainWalkContext::m_keySpaceTotalT = (1ull << 32) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24); 
+
+/**32 bit(100 M), 2^11 * 2^21**/
+/*uint64_t   ChainWalkContext::m_keySpaceTotalT = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24) - 1;*/
+
+/**35 bit(100M), 2^13 * 2^23 **/
+/*uint64_t   ChainWalkContext::m_keySpaceTotalT = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24) -(1ull << 32);*/
+
 uint64_t   ChainWalkContext::m_chainLen;
 uint64_t   ChainWalkContext::m_chainCount;
-unsigned char ChainWalkContext::m_dplainText[8] = {0x6B,0x05,0x6E,0x18,0x75,0x9F,0x5C,0xCA};
+unsigned char ChainWalkContext::m_dplainText[8] = {0x6D,0x6F,0x29,0x5A,0x30,0x55,0x32,0x28};
 
 ChainWalkContext::ChainWalkContext()
 {
@@ -28,11 +34,13 @@ void ChainWalkContext::SetChainInfo(uint64_t chainLen, uint64_t chainCount)
 
 uint64_t ChainWalkContext::GetRandomKey()
 {
+	/**Need rewrite it with custom-random generator**/
 	RAND_bytes((unsigned char*)&m_nIndex,8);
+	
 	m_nIndex = m_nIndex & m_keySpaceTotalT;
 	return m_nIndex;
 }
-
+ 
 /**
     des_cblock: typedef unsigned char DES_cblock[8];
 **/

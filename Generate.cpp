@@ -255,12 +255,12 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 	const char * szFileName = data -> szFileName;
 	uint64_t chainLen = data -> chainLen;
 	uint64_t totalChainCount = data -> chainCount;
-	
+
 	int rank = data -> rank;
 	int numproc =  data -> numproc;
-	
+
 	srand(rank);
-	
+
 	FILE * file; ChainWalkContext cwc; char str[256];
 
 	uint64_t nDatalen, index, nChainStart;
@@ -289,17 +289,17 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 		printf("rank %d of %d, continuing from interrupted precomputing, ", rank, numproc);
 		printf("have computed %lld chains\n", (ll)(nDatalen >> 4));
 	} 
-	
+
 	fseek(file, (long)nDatalen, SEEK_SET);
 	nChainStart = (nDatalen >> 4);
 
 	index = nDatalen >> 4;
 
 	cwc.SetChainInfo(chainLen, chainCount);
-	
+
 	TimeStamp tmps;
 	tmps.StartTime();
-	
+
 	for(;index < chainCount;index++)
 	{
 		chain.nStartKey = cwc.GetRandomKey();
@@ -326,8 +326,6 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 	fclose(file);
 	return 0;
 }
-
-
 
 
 int main(int argc,char * argv[])

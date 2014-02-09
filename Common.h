@@ -67,24 +67,15 @@ extern bool AnylysisFileName(const char * filename, uint64_t & chainLen, uint64_
 
 #define CHAIN_IN_MEMORY_MAX 1024 
 
-/*class SortedSegment{
-public:
-	SortedSegment();
-	virtual ~ SortedSegment();
+#ifdef _WIN32
+	inline uint64_t atoll(const char * str)
+	{
+		uint64_t rs;
+		istringstream ist(str);
+		ist >> rs;
 
-public:
-	RainbowChain * getAll();
-	RainbowChain * getNext();
-	void setProperty(int offset,int length,int curOffset);
-	int  getLength();
-
-public:
-	FILE * tmpFile;
-
-private:
-	int offset, length, curOffset;
-	RainbowChain chains[CHAIN_IN_MEMORY_MAX];
-};
-<<<<<<< HEAD
-*/
+		return rs;
+	}
+#endif
+	
 #endif

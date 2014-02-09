@@ -12,3 +12,6 @@ test2.out
 *exe
 *obj
 data*
+*.exe
+*.obj
+gencuda
