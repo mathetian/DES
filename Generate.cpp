@@ -242,6 +242,9 @@ void TestCaseGenerator()
 	fclose(file);
 }
 
+/**
+	Exist one bug in CPUParallel, not enough random 
+**/
 void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, int rank, int numproc)
 {
 	FILE * file; ChainWalkContext cwc; char str[256];

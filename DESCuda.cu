@@ -118,7 +118,7 @@ __global__ void  DESGeneratorCUDA(uint64_t * data)
 		Sorry, I didn't find how to change the device 
 		value in general CODE, so centainly for each time
 	**/
-	for(int nPos = 0;nPos < 4096;nPos++)
+	for(int nPos = 0;nPos < CHAINLEN;nPos++)
 	{	
 		/**First Step(Cipher Function)**/
 		GenerateKey(m_nIndex,roundKeys);
