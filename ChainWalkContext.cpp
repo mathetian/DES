@@ -43,7 +43,7 @@ uint64_t ChainWalkContext::GetRandomKey()
 	m_nIndex = m_nIndex & m_keySpaceTotalT;
 	return m_nIndex;
 }
-
+ 
 /**
     des_cblock: typedef unsigned char DES_cblock[8];
 **/
