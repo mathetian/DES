@@ -401,6 +401,7 @@ __device__ uint32_t plRight = 0x5A296F6D;
 __device__ uint32_t plLeft  = 0x28325530;
 
 __device__ uint64_t totalSpace = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24) - (1ull<<32) - (1ull<<33)- (1ull<<34)- (1ull<<35);
+
 uint64_t totalSpaceT = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24) - (1ull<<32) - (1ull<<33)- (1ull<<34)- (1ull<<35);
 #define RoundKey0(S) { \
 	c=((c>>1L)|(c<<27L)); d=((d>>1L)|(d<<27L));\

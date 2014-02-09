@@ -103,10 +103,13 @@ __global__ void DESEncrypt(uint64_t *data)
 **/
 __global__ void  DESGeneratorCUDA(uint64_t * data)
 {
-	for(int i=0;i<256;i++)
+/*	for(int i=0;i<256;i++)
 	{
 		((uint64_t *)des_SP)[i] = ((uint64_t *)des_d_sp_c)[i];
 	}
+*/
+	((uint64_t *)des_SP)[threadIdx.x] = ((uint64_t *)des_d_sp_c)[threadIdx.x];
+	
 	__syncthreads();
 
 	register uint64_t m_nIndex = data[TX]; uint64_t roundKeys[16];
