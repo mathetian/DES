@@ -181,6 +181,8 @@ void Distinct(const char * fileName)
 	assert(file2 && "fopen error");
 	printf("End Distinct\n");
 	fwrite((char*)tmpChain, sizeof(RainbowChain), num, file2);
+		
+	cout<<GetFileLen(file2)<<" "<<GetFileLen(file2)/16<<endl;
 	fclose(file2);
 }
 
@@ -256,6 +258,59 @@ ABORT:
 	
 }
 
+void SortOneFile(const char * prefix)
+{
+	uint64_t nAvailPhys; char str[256];
+
+	FILE * targetFile; uint64_t fileLen;
+
+	nAvailPhys = GetAvailPhysMemorySize();	
+	sprintf(str, "Available free physical memory: ");
+	printMemory(str, nAvailPhys);
+
+	targetFile = fopen(prefix,"rb+");
+	assert(targetFile && "fopen error\n");
+
+	fileLen = GetFileLen(targetFile);
+
+	assert((fileLen % 16 ==0) && ("Rainbow table size check failed\n"));
+
+	printf("%s FileLen %lld bytes\n", prefix, (long long)fileLen);
+
+	if(nAvailPhys > fileLen)
+	{
+		uint64_t nRainbowChainCount = fileLen >> 4;
+	
+		RainbowChain * pChain = (RainbowChain*)new unsigned char[fileLen];
+		
+		if(pChain != NULL)
+		{			
+			fseek(targetFile, 0, SEEK_SET);
+
+			if(fread(pChain, 1, fileLen, targetFile) != fileLen)
+			{
+				printf("disk read fail\n");
+				goto ABORT;
+			}
+
+			printf("Sorting the rainbow table...\n");
+			
+			QuickSort(pChain, nRainbowChainCount);
+
+			printf("Writing sorted rainbow table...\n");
+			
+			fseek(targetFile, 0, SEEK_SET);								
+			fwrite(pChain, 1, fileLen, targetFile);
+			
+			delete [] pChain;
+		}
+	}
+	else ExternalSort(targetFile);
+
+ABORT:
+	fclose(targetFile);
+}
+
 int main(int argc,char*argv[])
 {
 	if(argc != 4)
@@ -274,23 +329,32 @@ int main(int argc,char*argv[])
 	{
 		int num =  atoi(argv[2]);
 
-		assert((num < 9) && ("sorry number must be less than ten\n"));
+		assert((num < 9) && (num >= 1) && ("sorry number must be less than ten and more than zero\n"));
 
-		vector <string> fileNames(num, "");
-		vector <FILE*>  files(num, NULL);
-
-		for(int index = 0;index < num;index++)
+		if(num == 1)
 		{
-			fileNames[index] = argv[3];
-			fileNames[index] +=  "_";
-			fileNames[index].push_back(index + '0');
-			files[index] = fopen(fileNames[index].c_str(),"rb+");
-			assert(files[index] && "fopen error\n");
-		}	
+			printf("Begin Sort One File\n");
+			SortOneFile(argv[3]);
+			printf("End Sort One File\n");
+		}
+		else
+		{
+			vector <string> fileNames(num, "");
+			vector <FILE*>  files(num, NULL);
 
-		printf("Begin SortFiles\n");
-		SortFiles(fileNames, files, argv[3]);
-		printf("End SortFiles\n");
+			for(int index = 0;index < num;index++)
+			{
+				fileNames[index] = argv[3];
+				fileNames[index] +=  "_";
+				fileNames[index].push_back(index + '0');
+				files[index] = fopen(fileNames[index].c_str(),"rb+");
+				assert(files[index] && "fopen error\n");
+			}
+
+			printf("Begin SortFiles\n");
+			SortFiles(fileNames, files, argv[3]);
+			printf("End SortFiles\n");
+		}
 	}
 	else Usage();
 

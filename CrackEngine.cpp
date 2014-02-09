@@ -4,6 +4,8 @@
 #include <iostream>
 using namespace std;
 
+#include <assert.h>
+
 MemoryPool CrackEngine::mp;
 
 CrackEngine::CrackEngine() : m_totalChains(0), m_falseAlarms(0)			
@@ -85,6 +87,8 @@ void CrackEngine::SearchRainbowTable(const char * fileName)
 
 	fileLen = GetFileLen(file);
 
+	assert(fileLen % 16 == 0);
+	cout<<ChainWalkContext::m_chainCount<<" "<<fileLen<<endl;
 	if(fileLen % 16 != 0 || ChainWalkContext::m_chainCount*16 != fileLen)
 	{
 		printf("file length check error\n");

@@ -69,3 +69,6 @@ As we can use mmap or read large blocks of files, can they be put into GPU(or pa
 3. The method of use GPU to find collision.
 
 4. Further experiments(like find the problem of core/thread and optimization of CUDA<which can be asked in stackoverflow><like different parameter, different prefix>)
+
+----------------------------------------
+Todo bugs, recompute chain number
