@@ -16,19 +16,19 @@ CUDALIB = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\lib\Win32"
 all: $(PROGS)
 
 generator: 
-        cl $(CFLAGS) $(HEADER) Generate.cpp Common.cpp ChainWalkContext.cpp        \
+        cl $(CFLAGS) $(HEADER) Generate.cpp DESCommon.cpp DESChainWalkContext.cpp        \
         /link $(LDFLAGS) /out:generator.exe
 
 verified: 
-        cl $(CFLAGS) $(HEADER) Verified.cpp Common.cpp ChainWalkContext.cpp        \
+        cl $(CFLAGS) $(HEADER) Verified.cpp DESCommon.cpp DESChainWalkContext.cpp        \
         /link $(LDFLAGS) /out:verified.exe
 
 sort:
-        cl $(CFLAGS) $(HEADER) SortPreCalculate.cpp Common.cpp        \
+        cl $(CFLAGS) $(HEADER) SortPreCalculate.cpp DESCommon.cpp        \
         /link $(LDFLAGS) /out:sort.exe
 
 crack:
-        cl $(CFLAGS) $(HEADER) DESCrack.cpp Common.cpp ChainWalkContext.cpp CipherSet.cpp CrackEngine.cpp MemoryPool.cpp        \
+        cl $(CFLAGS) $(HEADER) DESCrack.cpp DESCommon.cpp DESChainWalkContext.cpp DESCipherSet.cpp DESCrackEngine.cpp MemoryPool.cpp        \
         /link $(LDFLAGS) /out:crack.exe
 
 gencuda:    

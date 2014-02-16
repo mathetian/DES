@@ -6,39 +6,37 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 #include <openssl/des.h>
 
+#include <string>
 #include <sstream>
 #include <iostream>
 using namespace std;
 
-typedef unsigned long long uint64_t;
-typedef unsigned int uint32_t;
-
+#include <stdint.h>
 
 #ifdef _WIN32
-    #pragma warning(disable : 4786)
-    #pragma warning(disable : 4996)
-    #pragma warning(disable : 4267)
-    #pragma warning(disable : 4244)
-    #include <Windows.h>        
+#pragma warning(disable : 4786)
+#pragma warning(disable : 4996)
+#pragma warning(disable : 4267)
+#pragma warning(disable : 4244)
+#include <Windows.h>
 #else
-    #include <sys/sysinfo.h>
-    #include <sys/time.h>
+#include <sys/sysinfo.h>
+#include <sys/time.h>
 #endif
 
 
-class RainbowChain{
+class RainbowChain
+{
 public:
-	uint64_t nStartKey, nEndKey;
-	bool operator < (const RainbowChain &m) const;
+    uint64_t nStartKey, nEndKey;
+    bool operator < (const RainbowChain &m) const;
 };
 
 extern uint64_t GetFileLen(FILE*file);
 
 extern void Logo();
-
 
 extern uint64_t GetAvailPhysMemorySize();
 
@@ -54,17 +52,17 @@ extern void SetupDESKey(const uint64_t&key56, des_key_schedule &ks);
 
 extern bool AnylysisFileName(const char * filename, uint64_t & chainLen, uint64_t & chainCount);
 
-#define CHAIN_IN_MEMORY_MAX 1024 
+#define CHAIN_IN_MEMORY_MAX 1024
 
 #ifdef _WIN32
-	inline uint64_t atoll(const char * str)
-	{
-		uint64_t rs;
-		istringstream ist(str);
-		ist >> rs;
+inline uint64_t atoll(const char * str)
+{
+    uint64_t rs;
+    istringstream ist(str);
+    ist >> rs;
 
-		return rs;
-	}
+    return rs;
+}
 #endif
-	
+
 #endif

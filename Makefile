@@ -56,5 +56,8 @@ rungen: generator
 runcuda: gencuda
 	./$^ 1024 250000 test
 
+astyle:
+	astyle --style=allman */*.cpp
+
 clean:
 	rm -f ${ALL} *.o DES_* *.a
