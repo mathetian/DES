@@ -1,28 +1,60 @@
-PROGS = generator verified sort crack gencuda
+CXX      = g++
+CXXFLAGS = -Wall -fPIC -O -g
 
-LIB = -lrt -lssl -lcrypto -ldl -O0 -g
+MPICXX   = mpic++
+NVCC     = nvcc
+NVFLAGS  = -O -g
 
-all: ${PROGS}
+AR	     = ar
+LIBMISC	 = libdescrypt.so
+RANLIB   = ranlib
+RM       = rm
+MV       = mv
+CP       = cp
 
-generator: Generate.cpp Common.cpp ChainWalkContext.cpp
-	mpic++ $^ -o $@ ${LIB} 
+SOURCES = Common/*.cpp
+HEADER  = -I./Include
+BINARY  = Binary
 
-verified: Verified.cpp Common.cpp ChainWalkContext.cpp
-	g++ $^ -o $@ ${LIB}
+LIB = -lrt -lssl -lcrypto -ldl -L. -ldescrypt
+LIB1 = -lrt -lssl -lcrypto -ldl
+ALL = generator verified sort crack gencuda
 
-sort: SortPreCalculate.cpp Common.cpp
-	g++ $^ -o $@ ${LIB}
-	
-crack: DESCrack.cpp Common.cpp ChainWalkContext.cpp CipherSet.cpp CrackEngine.cpp MemoryPool.cpp
-	g++ $^ -o $@ ${LIB}
+lib: compile
+	${CXX} -shared *.o ${LIB1} -o ${LIBMISC}
+	${CP}  ${LIBMISC} ${BINARY}
+	${RM} *.o
 
-rungen:
-	mpirun -np 4 ./generator 8192 8388608 test
+compile:
+	${CXX} ${CXXFLAGS} ${HEADER} -c ${SOURCES}
 
-nv = nvcc
+all : ${ALL}
 
-gencuda: DESCuda.cu
-	$(nv) $^ -o $@  ${LIB}
+generator: Interface/DESGenerator.cpp
+	${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB} 
+	${CP} $@  ${BINARY}
+
+verified: Interface/DESVerified.cpp
+	${CXX} ${CXXFLAGS} ${HEADER} ${LIB} $^ -o $@ ${LIB}
+	${CP} $@  ${BINARY}
+
+sort: Interface/DESSort.cpp
+	${CXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	${CP} $@  ${BINARY}
+
+crack: Interface/DESCrack.cpp
+	${CXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	${CP} $@  ${BINARY}
+
+gencuda: Interface/DESCuda.cu
+	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	${CP} $@  ${BINARY}
+
+rungen: generator
+	mpirun -np 4 ./$^ 8192 8388608 test
+
+runcuda: gencuda
+	./$^ 1024 250000 test
 
 clean:
-	rm -f ${PROGS} DES_* *.txt test3 test4 test5 gencuda
+	rm -f ${ALL} *.o DES_* *.a

@@ -1,7 +1,6 @@
 #ifndef _CHAIN_WALK_CONTEXT_H
 #define _CHAIN_WALK_CONTEXT_H
 
-
 #include <openssl/rand.h>
 #include <string>
 using namespace std;

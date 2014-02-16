@@ -28,7 +28,7 @@ private:
 
 	vector<uint64_t> m_vKeys;
 	vector<pair<uint64_t,uint64_t> > m_vFound;
-	int index;
+	uint32_t index;
 	int solve;
 };
 

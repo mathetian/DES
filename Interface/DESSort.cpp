@@ -54,7 +54,7 @@ void ExternalSort(FILE * file, vector <FILE*> tmpFiles)
 
 	for(index = 0;index < ss;index++)
 	{
-		fread((char*)&chain,sizeof(RainbowChain),1,tmpFiles[index]);
+		assert(fread((char*)&chain,sizeof(RainbowChain),1,tmpFiles[index]) == 1);
 		chainPQ.push(make_pair(chain,index));
 	}
 
@@ -68,7 +68,7 @@ void ExternalSort(FILE * file, vector <FILE*> tmpFiles)
 		fwrite((char*)&chain, sizeof(RainbowChain), 1, file);
 		tmpLens[index]--;
 		if(tmpLens[index] == 0) continue;
-		fread((char*)&chain, sizeof(RainbowChain), 1, tmpFiles[index]);
+		assert(fread((char*)&chain, sizeof(RainbowChain), 1, tmpFiles[index]) == 1);
 
 		chainPQ.push(make_pair(chain, index));
 	}
@@ -76,7 +76,7 @@ void ExternalSort(FILE * file, vector <FILE*> tmpFiles)
 
 void ExternalSort(FILE * file)
 {
-	uint64_t nAvailPhys, fileLen, chainCount;
+	uint64_t nAvailPhys, fileLen;
 
 	uint64_t memoryCount; int tmpNum; int index = 0;
 
@@ -85,8 +85,6 @@ void ExternalSort(FILE * file)
 	nAvailPhys = GetAvailPhysMemorySize();
 
 	fileLen    = GetFileLen(file); 
-
-	chainCount  = fileLen >> 4;
 	
 	memoryCount = nAvailPhys >> 4;
 	
@@ -113,13 +111,13 @@ void ExternalSort(FILE * file)
 		assert(tmpFiles[index] &&("tmpFiles fopen error\n"));
 		if(index < tmpNum - 1)
 		{
-			fread((char*)chains, sizeof(RainbowChain), memoryCount, file);
+			assert(fread((char*)chains, sizeof(RainbowChain), memoryCount, file) == memoryCount);
 			QuickSort(chains, memoryCount);
 			fwrite((char*)chains, sizeof(RainbowChain), memoryCount, tmpFiles[index]);
 		}
 		else
 		{
-			fread((char*)chains, lastLen, 1, file);
+			assert(fread((char*)chains, lastLen, 1, file) == 1);
 			assert((lastLen % 16 == 0) && ("Error lastLen"));
 			QuickSort(chains, lastLen >> 4);
 			fwrite((char*)&chains, lastLen, 1, tmpFiles[index]);

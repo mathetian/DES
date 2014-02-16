@@ -1,6 +1,8 @@
 #include "Common.h"
 #include "ChainWalkContext.h"
 
+#include <assert.h>
+
 void Usage()
 {
 	Logo();
@@ -47,10 +49,10 @@ int main(int argc,char*argv[])
 	
 	for(index = 0;index < chainCount;index++)
 	{
-		fread(&chain, sizeof(RainbowChain), 1, file);
+		assert(fread(&chain, sizeof(RainbowChain), 1, file) == 1);
 
 		cwc.SetKey(chain.nStartKey);
-		for(int j = 0;j < chainLen;j++)
+		for(uint32_t j = 0;j < chainLen;j++)
 		{
 			cwc.KeyToCipher();
 			cwc.KeyReduction(j);

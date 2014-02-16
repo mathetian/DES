@@ -435,7 +435,7 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
 	for(;index < chainCount;index++)
 	{
 		chain.nStartKey = cwc.GetRandomKey();
-		int nPos;
+		uint32_t nPos;
 		for(nPos = 0;nPos < chainLen;nPos++)
 		{
 			cwc.KeyToCipher();
@@ -463,7 +463,7 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
 
 int main(int argc,char * argv[])
 {
-	long long chainLen, chainCount, index;
+	long long chainLen, chainCount;
 	char suffix[256], szFileName[256];
 
 	int numproc,rank;
