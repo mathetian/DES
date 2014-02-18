@@ -55,6 +55,7 @@ public:
 
     void AddTime(struct timeval & totalTime)
     {
+        timeval_subtract(&difference,&curtime,&starttime);
         totalTime.tv_sec  += difference.tv_sec;
         totalTime.tv_usec += difference.tv_usec;
         if(totalTime.tv_usec >= 1000000)

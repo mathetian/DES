@@ -6,6 +6,9 @@
 using namespace std;
 
 #include "DESCommon.h"
+#include "TimeStamp.h"
+#include "DESChainWalkContext.h"
+
 #include <assert.h>
 
 void Usage()
@@ -298,11 +301,11 @@ void SortOneFile(const char * prefix)
 
         if(pChain != NULL)
         {
-            fseek(targetFile, 0, SEEK_SET);
+            _fseeki64(targetFile, 0, SEEK_SET);
 
             if(fread(pChain, 1, fileLen, targetFile) != fileLen)
             {
-                printf("disk read fail\n");
+                printf("disk read fail %d\n");
                 goto ABORT;
             }
 
@@ -312,8 +315,8 @@ void SortOneFile(const char * prefix)
 
             printf("Writing sorted rainbow table...\n");
 
-            fseek(targetFile, 0, SEEK_SET);
-            fwrite(pChain, 1, fileLen, targetFile);
+            _fseeki64(targetFile, 0, SEEK_SET);
+            assert(fwrite(pChain, 1, fileLen, targetFile)==fileLen);
 
             delete [] pChain;
         }
@@ -324,14 +327,234 @@ ABORT:
     fclose(targetFile);
 }
 
+void SortLargeFile(const char * prefix)
+{
+    char str[256];
+
+    FILE * file;
+    uint64_t fileLen, nAvailPhys;
+
+    nAvailPhys = GetAvailPhysMemorySize();
+    sprintf(str, "Available free physical memory: ");
+    printMemory(str, nAvailPhys);
+
+    file = fopen(prefix,"rb+");
+    assert(file && "fopen error\n");
+
+    fileLen = GetFileLen(file);
+
+    uint64_t memoryCount;
+    int tmpNum;
+    int index = 0;
+
+    memoryCount = nAvailPhys >> 4;
+
+    uint64_t eachLen = memoryCount << 4;
+    uint64_t lastLen = fileLen % eachLen;
+    if(lastLen == 0) lastLen = eachLen;
+
+    tmpNum      = fileLen/nAvailPhys;
+
+    if(fileLen % nAvailPhys != 0) tmpNum++;
+
+    assert((nAvailPhys <= fileLen) && "Error ExternalSort type\n");
+
+    RainbowChain * chains =  (RainbowChain*)new unsigned char[eachLen];
+
+    fseek(file, 0, SEEK_SET);
+
+    vector <FILE*> tmpFiles(tmpNum, NULL);
+
+    for(; index < tmpNum; index++)
+    {
+        sprintf(str,"tmpFiles-%d",index);
+        tmpFiles[index] = fopen(str, "wb");
+        assert(tmpFiles[index] &&("tmpFiles fopen error\n"));
+        if(index < tmpNum - 1)
+        {
+            assert(fread((char*)chains, sizeof(RainbowChain), memoryCount, file) == memoryCount);
+            QuickSort(chains, memoryCount);
+            fwrite((char*)chains, sizeof(RainbowChain), memoryCount, tmpFiles[index]);
+        }
+        else
+        {
+            assert(fread((char*)chains, lastLen, 1, file) == 1);
+            assert((lastLen % 16 == 0) && ("Error lastLen"));
+            QuickSort(chains, lastLen >> 4);
+            fwrite((char*)&chains, lastLen, 1, tmpFiles[index]);
+        }
+    }
+
+    ExternalSort(file, tmpFiles);
+
+    for(index = 0; index < tmpNum; index++)
+    {
+        fclose(tmpFiles[index]);
+    }
+}
+
+#define TTWO (1048576*32)
+
+void verifiedSorted(const char *fileName)
+{
+    FILE *file = fopen(fileName,"rb+");
+    _fseeki64(file, 0, SEEK_SET);
+    assert(_ftelli64(file) == 0);
+
+    RainbowChain chains[TTWO];TimeStamp tms1;
+    TimeStamp tms;struct timeval totalTime; totalTime.tv_sec = 0;
+    totalTime.tv_usec = 0; char str[256];tms1.StartTime();
+    for(uint64_t i=0;i<4;i++)
+    {  
+        tms.StartTime();
+        assert(fread((char*)&chains, sizeof(RainbowChain), TTWO, file) == TTWO);
+        assert(_ftelli64(file) == TTWO*(i+1)*16);
+        sprintf(str,"round%d: ", (int)i);
+        tms.StopTime(str);
+
+        tms.StartTime();
+        QuickSort(chains, TTWO);
+        tms.StopTime();
+        sprintf(str, "round-%d.data",i);
+        tms.StopTime(str);
+        tms.StartTime();
+        FILE *file1 = fopen(str,"wb+"); 
+        assert(file1);
+        assert(fwrite((char*)&chains[0],  sizeof(RainbowChain), TTWO, file1) == TTWO);
+        fclose(file1);
+        tms.StopTime("write time: ");
+       //tms.AddTime(totalTime);
+        // for(uint64_t j=0;j<TTWO - 1;j++)
+        // {
+        //     assert(chains[i*TTWO+j].nEndKey < chains[i*TTWO+j+1].nEndKey);
+        // }
+    }
+    tms1.StopTime("totalTime: ");
+}
+
+uint64_t BinarySearch(RainbowChain * pChain, uint64_t pChainCount, uint64_t nIndex)
+{
+    long long low=0, high=pChainCount;
+    while(low<high)
+    {
+        long long mid = (low+high)/2;
+        if(pChain[mid].nEndKey == nIndex) return mid;
+        else if(pChain[mid].nEndKey < nIndex) low = mid + 1;
+        else high=mid;
+    }
+    return low;
+}
+
+int TestCollision()
+{
+    char str[256]; RainbowChain chains[TTWO];
+    uint64_t i, m_nIndex;
+    RAND_bytes((unsigned char*)&m_nIndex,5);
+    printf("%lld \n",(long long)m_nIndex);
+    TimeStamp tms; TimeStamp tms1;
+    tms.StartTime();
+    for(i = 0;i < 4;i++)
+    {
+        sprintf(str,"round-%d.data",(int)i);
+        printf("Begin read file: %s\n", str);
+        tms1.StartTime();
+        FILE *file = fopen(str,"rb+");
+        assert(file);
+        _fseeki64(file, 0, SEEK_SET);
+        assert(_ftelli64(file) == 0);
+        assert(fread((char*)&chains[0], sizeof(RainbowChain), TTWO, file) == TTWO);
+        fclose(file);
+        tms1.StopTime("Read time: ");
+        tms1.StartTime();
+        uint64_t rs = BinarySearch(chains, TTWO, m_nIndex);
+        tms1.StopTime("BinarySearch time: ");
+        if(chains[rs].nEndKey == m_nIndex)
+        {
+            printf("found in file %s\n",str);
+            break;
+        }
+    }
+   tms.StopTime("totalTime: ");
+    if(i==4) return 0;
+    return 1;
+}   
+
+int TestCollision2()
+{
+    char str[256]; 
+    RainbowChain chains[TTWO];
+    uint64_t chain2[TTWO];
+    TimeStamp tms; TimeStamp tms1;
+
+    uint64_t i, j, m_nIndex;
+
+    tms.StartTime();
+    for(i = 0;i<TTWO;i++)
+    {
+        RAND_bytes((unsigned char*)&m_nIndex,5);
+        chain2[i] = m_nIndex;
+    }
+    tms.StopTime("Generate time: ");
+
+    tms.StartTime();
+    for(i = 0;i < 4;i++)
+    {
+        sprintf(str,"round-%d.data",(int)i);
+        printf("Begin read file: %s\n", str);
+        tms1.StartTime();
+        FILE *file = fopen(str,"rb+");
+        assert(file);
+        _fseeki64(file, 0, SEEK_SET);
+        assert(_ftelli64(file) == 0);
+        assert(fread((char*)&chains[0], sizeof(RainbowChain), TTWO, file) == TTWO);
+        fclose(file);
+        tms1.StopTime("Read time: ");
+        tms1.StartTime();int times = 0;
+        for(j=0;j<TTWO;j++)
+        {
+            uint64_t rs = BinarySearch(chains, TTWO, chain2[j]);
+            if(chains[rs].nEndKey == chain2[j])
+            {
+                times++;
+                if(times%100 == 0) cout<<"found:"<<j<<"time"<<times<<endl;
+               // printf("found in file %s %d %lld\n",str,(int)j,(long long)chain2[j]);
+            }
+        }
+        tms1.StopTime("BinarySearch time: ");
+    }
+   tms.StopTime("totalTime: ");
+    if(i==4) return 0;
+    return 1;
+}   
+
+
 int main(int argc,char*argv[])
 {
+    // {
+    //     verifiedSorted(argv[1]);
+    //     return 0;
+    // }
+    // {
+    //     for(uint64_t index = 0;index < 10;index++)
+    //     {
+    //         if(TestCollision() ==1) 
+    //         {
+    //             printf("index %d\n",index);
+    //         }
+    //         if(index %10==0)
+    //             printf("round %d\n",(int)index);
+    //     }
+    //     return 0;
+    // }
+    // {
+    //     TestCollision2();
+    // }
     if(argc != 4)
     {
         Usage();
         return 0;
     }
-
+    
     if(strcmp(argv[1],"distinct") == 0)
     {
         int num = atoi(argv[2]);

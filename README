@@ -79,3 +79,16 @@ Todo bugs,
 1. recompute chain number(linux parallel)
 2. chainlen(as computed much chains than needed)(cuda) 
 
+-----------------------------------------
+In i7, spend time 1.3s/2^20(random + write)
+read, 0.17s/2^25
+sort, 7s/2^25
+write, 4s/2^25. (not cache time!sad).
+
+Thus, total time 12s/2^25.
+-----------------------------------------
+Generater 2^25, spend time 21s?
+For 2^25*2^25 binary search(maxinum, can have huge optimization), spend time 45s.(4k collision for 2^25/2^27/2^40.).
+
+
+Need external sort to get better result.

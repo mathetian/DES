@@ -7,3 +7,5 @@ gencuda
 *.orig
 *.exe
 *.obj
+round*
+DEMO*

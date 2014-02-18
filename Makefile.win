@@ -1,7 +1,7 @@
 CFLAGS = /nologo /MT /W3 /EHsc /O2 
 
-INDIR   = "C:\usr\local\ssl\include"
-SSLLIB  = "C:\usr\local\ssl\lib"
+INDIR   = "C:\some\openssl\dir\include"
+SSLLIB  = "C:\some\openssl\dir\lib"
 
 HEADER = -I$(INDIR) -I"Include"
 LDFLAGS = /DYNAMICBASE "libeay32.lib" "ssleay32.lib" "kernel32.lib" "user32.lib" "gdi32.lib"  "advapi32.lib" 
@@ -14,7 +14,7 @@ all: $(PROGS)
 
 generator: Interface\DESGenerator.cpp Common\DESCommon.cpp Common\DESChainWalkContext.cpp 
         cl $(CFLAGS) $(HEADER)  $**      \
-        /link $(LDFLAGS) /LIBPATH:$(SSLLIB) /out:$@.exe
+        /link $(LDFLAGS) /LIBPATH:$(SSLLIB) /STACK:"1000000000" /out:$@.exe
 
 verified: Interface\DESVerified.cpp Common\DESCommon.cpp Common\DESChainWalkContext.cpp 
         cl $(CFLAGS) $(HEADER)  $**     \
@@ -22,7 +22,7 @@ verified: Interface\DESVerified.cpp Common\DESCommon.cpp Common\DESChainWalkCont
 
 sort:    Interface\DESSort.cpp Common\DESCommon.cpp
         cl $(CFLAGS) $(HEADER)  $**      \
-        /link $(LDFLAGS) /LIBPATH:$(SSLLIB) /out:$@.exe
+        /link $(LDFLAGS) /LIBPATH:$(SSLLIB) /STACK:"1000000000" /out:$@.exe
 
 crack:  Interface/DESCrack.cpp Common/DESCommon.cpp Common/DESChainWalkContext.cpp Common/DESCipherSet.cpp Common/DESCrackEngine.cpp 
         cl $(CFLAGS) $(HEADER) $**      \

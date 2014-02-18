@@ -251,6 +251,40 @@ void TestCaseGenerator()
     fclose(file);
 }
 
+#define TTWO (1048576*32)
+
+void GenerateRandomData()
+{
+    RainbowChain chains[TTWO];
+    FILE *file = fopen("DEMO.data","wb+");
+    assert(file);
+    TimeStamp tms; TimeStamp eats;
+    tms.StartTime();TimeStamp tms2;
+    for(int i=0;i<4;i++)
+    {
+        uint64_t m_nIndex;
+        printf("round %d\n",i);
+        eats.StartTime();
+        for(int j=0;j<TTWO;j++)
+        {
+            RAND_bytes((unsigned char*)&m_nIndex,5);
+            chains[j].nStartKey = m_nIndex;
+            RAND_bytes((unsigned char*)&m_nIndex,5);
+            chains[j].nEndKey   = m_nIndex;
+        }
+        tms2.StartTime();
+        assert(fwrite((char*)&chains[0], sizeof(RainbowChain), TTWO, file) == TTWO);
+        char str[256];
+        sprintf(str, "round %d, spend time: ", i);
+        eats.StopTime(str);
+        tms2.StopTime("write time :");
+    }
+
+    fflush(file);
+    fclose(file);
+    tms.StopTime("Total Time:");
+}
+
 #ifdef _WIN32
 typedef struct
 {
@@ -359,6 +393,8 @@ int main(int argc,char * argv[])
             TestKeySchedule();
         else if(strcmp(argv[1],"testcasegenerator") == 0)
             TestCaseGenerator();
+        else if(strcmp(argv[1],"generaterandomdata") == 0)
+            GenerateRandomData();
         else  Usage();
         return 0;
     }
