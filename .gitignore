@@ -5,3 +5,5 @@ crack
 verified
 gencuda
 *.orig
+*.exe
+*.obj
