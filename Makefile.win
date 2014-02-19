@@ -3,6 +3,9 @@ CFLAGS = /nologo /MT /W3 /EHsc /O2
 INDIR   = "C:\some\openssl\dir\include"
 SSLLIB  = "C:\some\openssl\dir\lib"
 
+#INDIR   = "C:\some\openssl\dir\include"
+#SSLLIB  = "C:\some\openssl\dir\lib"
+
 HEADER = -I$(INDIR) -I"Include"
 LDFLAGS = /DYNAMICBASE "libeay32.lib" "ssleay32.lib" "kernel32.lib" "user32.lib" "gdi32.lib"  "advapi32.lib" 
 

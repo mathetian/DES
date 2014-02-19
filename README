@@ -87,8 +87,13 @@ write, 4s/2^25. (not cache time!sad).
 
 Thus, total time 12s/2^25.
 -----------------------------------------
-Generater 2^25, spend time 21s?
-For 2^25*2^25 binary search(maxinum, can have huge optimization), spend time 45s.(4k collision for 2^25/2^27/2^40.).
-
+Generater 2^25, spend time 21s?(45s? for 2^25*2(start & end))
+For 2^25*2^27 binary search(maxinum, can have huge optimization), spend time 45s.(4k collision for 2^25/2^27/2^40.).
 
 Need external sort to get better result.
+External sort time, 27s/2^27 chains.
+-------------------------------------------
+So, 2^20*2^36 = 45s/32 * 2^9 = 2^10s(20min), collision.
+Read, 2^11*0.17 = 2^10s(20min).
+
+sort, 7*2^11 + 2^9*27 = 2^15...

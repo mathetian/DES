@@ -260,12 +260,12 @@ void GenerateRandomData()
     assert(file);
     TimeStamp tms; TimeStamp eats;
     tms.StartTime();TimeStamp tms2;
-    for(int i=0;i<4;i++)
+    for(int i=0;i<4;i++) //2^20*2^5*2^2 chains * 2^4 = 2G
     {
         uint64_t m_nIndex;
         printf("round %d\n",i);
         eats.StartTime();
-        for(int j=0;j<TTWO;j++)
+        for(int j=0;j<TTWO;j++) 
         {
             RAND_bytes((unsigned char*)&m_nIndex,5);
             chains[j].nStartKey = m_nIndex;

@@ -14,7 +14,6 @@ uint64_t GetFileLen(FILE* file)
 {
     uint64_t pos = _ftelli64(file);
     _fseeki64(file, 0, SEEK_END);
-    cout<<pos<<endl;
     uint64_t len = _ftelli64(file);
     
     _fseeki64(file, pos, SEEK_SET);

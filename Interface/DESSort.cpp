@@ -25,11 +25,11 @@ typedef pair<RainbowChain, int> PPR;
 /**fix cmp bug**/
 struct cmp
 {
-    bool operator()(PPR a,PPR b)
+    bool operator()(const PPR &a, const PPR &b)
     {
         RainbowChain  r1 = a.first;
         RainbowChain  r2 = b.first;
-        if(r1.nEndKey < r2.nEndKey)
+        if(r1.nEndKey > r2.nEndKey)
             return true;
         return false;
     }
@@ -327,69 +327,123 @@ ABORT:
     fclose(targetFile);
 }
 
+#define AA 536870912
+#define BB 33554432
+// #define AA 268435456
+// #define BB 16777216
+
 void SortLargeFile(const char * prefix)
 {
-    char str[256];
-
     FILE * file;
-    uint64_t fileLen, nAvailPhys;
-
-    nAvailPhys = GetAvailPhysMemorySize();
-    sprintf(str, "Available free physical memory: ");
-    printMemory(str, nAvailPhys);
+    uint64_t fileLen;
 
     file = fopen(prefix,"rb+");
     assert(file && "fopen error\n");
 
     fileLen = GetFileLen(file);
 
-    uint64_t memoryCount;
-    int tmpNum;
-    int index = 0;
-
-    memoryCount = nAvailPhys >> 4;
-
-    uint64_t eachLen = memoryCount << 4;
-    uint64_t lastLen = fileLen % eachLen;
-    if(lastLen == 0) lastLen = eachLen;
-
-    tmpNum      = fileLen/nAvailPhys;
-
-    if(fileLen % nAvailPhys != 0) tmpNum++;
-
-    assert((nAvailPhys <= fileLen) && "Error ExternalSort type\n");
-
-    RainbowChain * chains =  (RainbowChain*)new unsigned char[eachLen];
-
-    fseek(file, 0, SEEK_SET);
-
-    vector <FILE*> tmpFiles(tmpNum, NULL);
-
-    for(; index < tmpNum; index++)
+    if(fileLen > AA)
     {
-        sprintf(str,"tmpFiles-%d",index);
-        tmpFiles[index] = fopen(str, "wb");
-        assert(tmpFiles[index] &&("tmpFiles fopen error\n"));
-        if(index < tmpNum - 1)
-        {
-            assert(fread((char*)chains, sizeof(RainbowChain), memoryCount, file) == memoryCount);
-            QuickSort(chains, memoryCount);
-            fwrite((char*)chains, sizeof(RainbowChain), memoryCount, tmpFiles[index]);
-        }
-        else
-        {
-            assert(fread((char*)chains, lastLen, 1, file) == 1);
-            assert((lastLen % 16 == 0) && ("Error lastLen"));
-            QuickSort(chains, lastLen >> 4);
-            fwrite((char*)&chains, lastLen, 1, tmpFiles[index]);
-        }
-    }
+        assert(fileLen % AA == 0);//512M == 2^25 chains * 2^4
 
-    ExternalSort(file, tmpFiles);
+        uint64_t round = fileLen / AA;
+        
+        RainbowChain chains[BB]; //2^25
 
-    for(index = 0; index < tmpNum; index++)
-    {
-        fclose(tmpFiles[index]);
+        char str[256];FILE *tmpfile; TimeStamp m_tms;
+        for(uint64_t i = 0;i < round;i++)
+        {
+            sprintf(str,"LargeFile-%d.data", (int)i);
+            printf("%s\n",str);
+            m_tms.StartTime();
+            assert(fread((char*)&chains, sizeof(RainbowChain), BB, file) == BB);
+            assert(_ftelli64(file) == AA*(i+1));
+            m_tms.StopTime("Read Time: ");
+
+            m_tms.StartTime();
+            QuickSort(chains, BB);
+            m_tms.StopTime("Sort Time: ");
+
+            m_tms.StartTime();
+            tmpfile = fopen(str,"wb+");
+            assert(tmpfile);
+            assert(fwrite((char*)&chains, sizeof(RainbowChain), BB, tmpfile) == BB);
+            fclose(tmpfile);
+            m_tms.StopTime("Write Time: ");
+        }
+
+        vector<FILE*> tmpFiles(round, NULL);
+
+        for(uint64_t i = 0;i < round;i++)
+        {
+            sprintf(str,"LargeFile-%d.data", (int)i);
+            tmpFiles[i] = fopen(str, "rb+");
+            assert(tmpFiles[i]);
+        }
+        
+        RainbowChain chain;
+
+        _fseeki64(file, 0, SEEK_SET);
+        assert(_ftelli64(file) == 0);
+        vector <uint64_t> tmpLens(round, 0);
+
+        int ss    = tmpFiles.size();
+        int index = 0;
+
+        for(;index < ss; index++)
+        {
+            _fseeki64(tmpFiles[index], 0, SEEK_SET);
+            tmpLens[index] = GetFileLen(tmpFiles[index]) >> 4;
+        }
+
+        priority_queue<PPR, vector<PPR>, cmp> chainPQ;
+
+        for(index = 0; index < ss; index++)
+        {
+            assert(_ftelli64(tmpFiles[index]) == 0);
+            assert(fread((char*)&chain, sizeof(RainbowChain), 1, tmpFiles[index]) == 1);
+            chainPQ.push(make_pair(chain,index));
+        }
+        m_tms.StartTime();
+        uint64_t ticks=0;
+        while(!chainPQ.empty())
+        {
+            chain = chainPQ.top().first;
+            index = chainPQ.top().second;
+            if(ticks++%10000000 == 0) 
+                cout<<"ticks"<<ticks<<" index:"<<index<<" "<<chain.nEndKey<<endl;
+
+            chainPQ.pop();
+
+            fwrite((char*)&chain, sizeof(RainbowChain), 1, file);
+            tmpLens[index]--;
+            if(tmpLens[index] == 0) continue;
+            assert(fread((char*)&chain, sizeof(RainbowChain), 1, tmpFiles[index]) == 1);
+
+            chainPQ.push(make_pair(chain, index));
+        }
+        m_tms.StopTime("ExternalSort Time:");
+
+        assert(fileLen == _ftelli64(file));
+
+        _fseeki64(file, 0, SEEK_SET);
+        assert(_ftelli64(file) == 0);
+
+        for(uint64_t i = 0;i < round;i++)
+        {
+            sprintf(str,"LargeFile-%d.data", (int)i);
+            printf("%s\n",str);
+            _fseeki64(tmpFiles.at(i), 0, SEEK_SET);
+            assert(_ftelli64(tmpFiles.at(i)) == 0);
+            m_tms.StartTime();
+            assert(fread((char*)&chains, sizeof(RainbowChain), BB, file) == BB);
+            assert(_ftelli64(file) == AA*(i+1));
+            m_tms.StopTime("Read Time: ");
+
+            m_tms.StartTime();
+            assert(fwrite((char*)&chains, sizeof(RainbowChain), BB, tmpFiles.at(i)) == BB);
+            m_tms.StopTime("Write Time: ");
+        }
     }
 }
 
@@ -423,11 +477,6 @@ void verifiedSorted(const char *fileName)
         assert(fwrite((char*)&chains[0],  sizeof(RainbowChain), TTWO, file1) == TTWO);
         fclose(file1);
         tms.StopTime("write time: ");
-       //tms.AddTime(totalTime);
-        // for(uint64_t j=0;j<TTWO - 1;j++)
-        // {
-        //     assert(chains[i*TTWO+j].nEndKey < chains[i*TTWO+j+1].nEndKey);
-        // }
     }
     tms1.StopTime("totalTime: ");
 }
@@ -435,6 +484,9 @@ void verifiedSorted(const char *fileName)
 uint64_t BinarySearch(RainbowChain * pChain, uint64_t pChainCount, uint64_t nIndex)
 {
     long long low=0, high=pChainCount;
+    if(pChain[low].nEndKey > nIndex) return low;
+    else if(pChain[high-1].nEndKey < nIndex) return low;
+    
     while(low<high)
     {
         long long mid = (low+high)/2;
@@ -484,6 +536,7 @@ int TestCollision2()
     char str[256]; 
     RainbowChain chains[TTWO];
     uint64_t chain2[TTWO];
+    bool     flags[TTWO];
     TimeStamp tms; TimeStamp tms1;
 
     uint64_t i, j, m_nIndex;
@@ -493,13 +546,14 @@ int TestCollision2()
     {
         RAND_bytes((unsigned char*)&m_nIndex,5);
         chain2[i] = m_nIndex;
+        flags[i] = 0;
     }
     tms.StopTime("Generate time: ");
 
     tms.StartTime();
     for(i = 0;i < 4;i++)
     {
-        sprintf(str,"round-%d.data",(int)i);
+        sprintf(str,"LargeFile-%d.data",(int)i);
         printf("Begin read file: %s\n", str);
         tms1.StartTime();
         FILE *file = fopen(str,"rb+");
@@ -512,12 +566,12 @@ int TestCollision2()
         tms1.StartTime();int times = 0;
         for(j=0;j<TTWO;j++)
         {
+            if(flags[j] == 1) continue;
             uint64_t rs = BinarySearch(chains, TTWO, chain2[j]);
             if(chains[rs].nEndKey == chain2[j])
             {
-                times++;
-                if(times%100 == 0) cout<<"found:"<<j<<"time"<<times<<endl;
-               // printf("found in file %s %d %lld\n",str,(int)j,(long long)chain2[j]);
+                times++;flags[j]=1;
+                if(times%100 == 0) cout<<"found:"<<chain2[j]<<"time"<<times<<endl;
             }
         }
         tms1.StopTime("BinarySearch time: ");
@@ -549,6 +603,9 @@ int main(int argc,char*argv[])
     // {
     //     TestCollision2();
     // }
+    {
+        SortLargeFile("DEMO.data");
+    }
     if(argc != 4)
     {
         Usage();
