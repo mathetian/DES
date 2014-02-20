@@ -322,7 +322,7 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
         printf("rank %d of %d, failed to create %s\n", rank, numproc, szFileName);
         return 0;
     }
-
+    printf("open successfully\n");
     nDatalen = GetFileLen(file);
     nDatalen = (nDatalen >> 4) << 4;
 
@@ -345,9 +345,8 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 
     cwc.SetChainInfo(chainLen, chainCount);
 
-    TimeStamp tmps;
+    TimeStamp tmps, parts;
     tmps.StartTime();
-
     for(; index < chainCount; index++)
     {
         chain.nStartKey = cwc.GetRandomKey();
@@ -359,11 +358,14 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
         }
 
         chain.nEndKey = cwc.GetKey();
+        parts.StartTime();
         if(fwrite((char*)&chain, sizeof(RainbowChain), 1, file) != 1)
         {
             printf("rank %d of %d, disk write error\n", rank, numproc);
             return 0;
         }
+        parts.StopTime();
+        parts.AddTime(m_disktime);
         if((index + 1)%10000 == 0||index + 1 == chainCount)
         {
             sprintf(str,"rank %d of %d, generate: nChains: %lld, chainLen: %lld: total time:", rank, numproc, (long long)index, (long long)chainLen);
@@ -374,7 +376,6 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
     fclose(file);
     return 0;
 }
-
 
 int main(int argc,char * argv[])
 {
@@ -418,8 +419,7 @@ int main(int argc,char * argv[])
     memset(suffix, 0, 256);
     memcpy(suffix, argv[3], strlen(argv[3]));
 
-#define THRNUM 2
-
+#define THRNUM 8
     DATA datas[THRNUM];
     HANDLE  hThreadArray[THRNUM];
     DWORD   dwThreadIdArray[THRNUM];
@@ -431,12 +431,10 @@ int main(int argc,char * argv[])
         datas[i].chainCount = chainCount;
         datas[i].rank = i;
         datas[i].numproc = THRNUM;
-
         hThreadArray[i] = CreateThread( NULL,0, MyThreadFunction, &datas[i],0,&dwThreadIdArray[i]);
+        assert(hThreadArray[i]);
     }
-
     WaitForMultipleObjects(THRNUM, hThreadArray, TRUE, INFINITE);
-
     return 0;
 }
 #else

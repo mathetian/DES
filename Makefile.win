@@ -17,7 +17,7 @@ all: $(PROGS)
 
 generator: Interface\DESGenerator.cpp Common\DESCommon.cpp Common\DESChainWalkContext.cpp 
         cl $(CFLAGS) $(HEADER)  $**      \
-        /link $(LDFLAGS) /LIBPATH:$(SSLLIB) /STACK:"1000000000" /out:$@.exe
+        /link $(LDFLAGS) /LIBPATH:$(SSLLIB) /STACK:"100000000" /out:$@.exe
 
 verified: Interface\DESVerified.cpp Common\DESCommon.cpp Common\DESChainWalkContext.cpp 
         cl $(CFLAGS) $(HEADER)  $**     \

@@ -97,3 +97,8 @@ So, 2^20*2^36 = 45s/32 * 2^9 = 2^10s(20min), collision.
 Read, 2^11*0.17 = 2^10s(20min).
 
 sort, 7*2^11 + 2^9*27 = 2^15...
+-------------------------------------------
+In i7 2600, each core 2^21.6.
+Using hyper-threading, each core(two logic cores) 2^21.8
+
+Same with E5 1620, maybe even better.
