@@ -1,13 +1,13 @@
 CFLAGS = /nologo /MT /W3 /EHsc /O2 
 
-SSLDIR = "C:\usr\local\ssl\"
+INDIR   = "C:\some\openssl\dir\include"
+SSLLIB  = "C:\some\openssl\dir\lib"
 
-INDIR   = "C:\usr\local\ssl\include"
-EAYDIR  = "C:\usr\local\ssl\lib\libeay32.lib"
-EAY2DIR = "C:\usr\local\ssl\lib\ssleay32.lib"
+#INDIR   = "C:\some\openssl\dir\include"
+#SSLLIB  = "C:\some\openssl\dir\lib"
 
-HEADER = -I$(INDIR)
-LDFLAGS = kernel32.lib gdi32.lib $(EAYDIR) $(EAY2DIR) /nologo /subsystem:console
+HEADER = -I$(INDIR) -I"Include"
+LDFLAGS = /DYNAMICBASE "libeay32.lib" "ssleay32.lib" "kernel32.lib" "user32.lib" "gdi32.lib"  "advapi32.lib" 
 
 PROGS = generator verified sort crack
 
@@ -15,25 +15,25 @@ CUDALIB = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\lib\Win32"
 
 all: $(PROGS)
 
-generator: 
-        cl $(CFLAGS) $(HEADER) Generate.cpp DESCommon.cpp DESChainWalkContext.cpp        \
-        /link $(LDFLAGS) /out:generator.exe
+generator: Interface\DESGenerator.cpp Common\DESCommon.cpp Common\DESChainWalkContext.cpp 
+        cl $(CFLAGS) $(HEADER)  $**      \
+        /link $(LDFLAGS) /LIBPATH:$(SSLLIB) /STACK:"100000000" /out:$@.exe
 
-verified: 
-        cl $(CFLAGS) $(HEADER) Verified.cpp DESCommon.cpp DESChainWalkContext.cpp        \
-        /link $(LDFLAGS) /out:verified.exe
+verified: Interface\DESVerified.cpp Common\DESCommon.cpp Common\DESChainWalkContext.cpp 
+        cl $(CFLAGS) $(HEADER)  $**     \
+        /link $(LDFLAGS) /LIBPATH:$(SSLLIB) /out:$@.exe
 
-sort:
-        cl $(CFLAGS) $(HEADER) SortPreCalculate.cpp DESCommon.cpp        \
-        /link $(LDFLAGS) /out:sort.exe
+sort:    Interface\DESSort.cpp Common\DESCommon.cpp
+        cl $(CFLAGS) $(HEADER)  $**      \
+        /link $(LDFLAGS) /LIBPATH:$(SSLLIB) /STACK:"1000000000" /out:$@.exe
 
-crack:
-        cl $(CFLAGS) $(HEADER) DESCrack.cpp DESCommon.cpp DESChainWalkContext.cpp DESCipherSet.cpp DESCrackEngine.cpp MemoryPool.cpp        \
-        /link $(LDFLAGS) /out:crack.exe
+crack:  Interface/DESCrack.cpp Common/DESCommon.cpp Common/DESChainWalkContext.cpp Common/DESCipherSet.cpp Common/DESCrackEngine.cpp 
+        cl $(CFLAGS) $(HEADER) $**      \
+        /link $(LDFLAGS) /LIBPATH:$(SSLLIB) /out:$@.exe
 
-gencuda:    
-        nvcc.exe $(HEADER) -I. -G --compile -cudart static -Xcompiler "/wd 4819" -o DESCuda.obj DESCuda.cu
-        link $(LDFLAGS) /DYNAMICBASE "cudart_static.lib" /LIBPATH:$(CUDALIB) DESCuda.obj /out:DESCuda.exe
+gencuda: Interface/DESCuda.cu
+        nvcc.exe $(HEADER) -I. -G --compile -cudart static -Xcompiler "/wd 4819" -o $@.obj $**
+        link $(LDFLAGS) /DYNAMICBASE "cudart_static.lib" /LIBPATH:$(CUDALIB) $@.obj /out:$@.exe
 
 clean:
         del *.obj DES_* *.txt *.exe

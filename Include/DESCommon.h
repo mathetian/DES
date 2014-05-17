@@ -63,6 +63,8 @@ inline uint64_t atoll(const char * str)
 
     return rs;
 }
+
+extern string GetLastErrorStdStr();
 #endif
 
 #endif

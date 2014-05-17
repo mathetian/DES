@@ -251,6 +251,40 @@ void TestCaseGenerator()
     fclose(file);
 }
 
+#define TTWO (1048576*32)
+
+void GenerateRandomData()
+{
+    RainbowChain chains[TTWO];
+    FILE *file = fopen("DEMO.data","wb+");
+    assert(file);
+    TimeStamp tms; TimeStamp eats;
+    tms.StartTime();TimeStamp tms2;
+    for(int i=0;i<4;i++) //2^20*2^5*2^2 chains * 2^4 = 2G
+    {
+        uint64_t m_nIndex;
+        printf("round %d\n",i);
+        eats.StartTime();
+        for(int j=0;j<TTWO;j++) 
+        {
+            RAND_bytes((unsigned char*)&m_nIndex,5);
+            chains[j].nStartKey = m_nIndex;
+            RAND_bytes((unsigned char*)&m_nIndex,5);
+            chains[j].nEndKey   = m_nIndex;
+        }
+        tms2.StartTime();
+        assert(fwrite((char*)&chains[0], sizeof(RainbowChain), TTWO, file) == TTWO);
+        char str[256];
+        sprintf(str, "round %d, spend time: ", i);
+        eats.StopTime(str);
+        tms2.StopTime("write time :");
+    }
+
+    fflush(file);
+    fclose(file);
+    tms.StopTime("Total Time:");
+}
+
 #ifdef _WIN32
 typedef struct
 {
@@ -288,7 +322,7 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
         printf("rank %d of %d, failed to create %s\n", rank, numproc, szFileName);
         return 0;
     }
-
+    printf("open successfully\n");
     nDatalen = GetFileLen(file);
     nDatalen = (nDatalen >> 4) << 4;
 
@@ -311,9 +345,8 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 
     cwc.SetChainInfo(chainLen, chainCount);
 
-    TimeStamp tmps;
+    TimeStamp tmps, parts;
     tmps.StartTime();
-
     for(; index < chainCount; index++)
     {
         chain.nStartKey = cwc.GetRandomKey();
@@ -325,11 +358,14 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
         }
 
         chain.nEndKey = cwc.GetKey();
+        parts.StartTime();
         if(fwrite((char*)&chain, sizeof(RainbowChain), 1, file) != 1)
         {
             printf("rank %d of %d, disk write error\n", rank, numproc);
             return 0;
         }
+        parts.StopTime();
+        parts.AddTime(m_disktime);
         if((index + 1)%10000 == 0||index + 1 == chainCount)
         {
             sprintf(str,"rank %d of %d, generate: nChains: %lld, chainLen: %lld: total time:", rank, numproc, (long long)index, (long long)chainLen);
@@ -340,7 +376,6 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
     fclose(file);
     return 0;
 }
-
 
 int main(int argc,char * argv[])
 {
@@ -359,6 +394,8 @@ int main(int argc,char * argv[])
             TestKeySchedule();
         else if(strcmp(argv[1],"testcasegenerator") == 0)
             TestCaseGenerator();
+        else if(strcmp(argv[1],"generaterandomdata") == 0)
+            GenerateRandomData();
         else  Usage();
         return 0;
     }
@@ -382,8 +419,7 @@ int main(int argc,char * argv[])
     memset(suffix, 0, 256);
     memcpy(suffix, argv[3], strlen(argv[3]));
 
-#define THRNUM 2
-
+#define THRNUM 8
     DATA datas[THRNUM];
     HANDLE  hThreadArray[THRNUM];
     DWORD   dwThreadIdArray[THRNUM];
@@ -395,12 +431,10 @@ int main(int argc,char * argv[])
         datas[i].chainCount = chainCount;
         datas[i].rank = i;
         datas[i].numproc = THRNUM;
-
         hThreadArray[i] = CreateThread( NULL,0, MyThreadFunction, &datas[i],0,&dwThreadIdArray[i]);
+        assert(hThreadArray[i]);
     }
-
     WaitForMultipleObjects(THRNUM, hThreadArray, TRUE, INFINITE);
-
     return 0;
 }
 #else
