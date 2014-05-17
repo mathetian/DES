@@ -67,4 +67,6 @@ inline uint64_t atoll(const char * str)
 extern string GetLastErrorStdStr();
 #endif
 
+#define _fseeki64 fseek
+#define _ftelli64 ftell
 #endif

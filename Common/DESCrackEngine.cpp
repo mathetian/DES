@@ -70,8 +70,8 @@ bool DESCrackEngine::CheckAlarm(RainbowChain * pChain, uint64_t nGuessPos, uint6
     {
         printf("plaintext of %lld is %lld\n",(long long)cwc.GetKey(), (long long)old);
         p_cs -> AddResult(p_cs -> GetLeftKey(), old);
-        p_cs -> Succeed();
-        return true;
+        //p_cs -> Succeed();
+        //return true;
     }
 
     return false;
@@ -139,7 +139,7 @@ void DESCrackEngine::SearchRainbowTable(const char * fileName)
 
         if(p_cs -> Solved()) break;
     }
-    p_cs -> Done();
+    p_cs -> Done(p_cs->GetLeftKey());
     fclose(file);
 }
 

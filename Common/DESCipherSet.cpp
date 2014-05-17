@@ -36,9 +36,9 @@ uint64_t DESCipherSet::GetLeftKey()
     return m_vKeys.at(index);
 }
 
-void DESCipherSet::AddResult(uint64_t cipherKey,uint64_t key)
+void DESCipherSet::AddResult(uint64_t cipherKey, uint64_t key)
 {
-    m_vFound.push_back(make_pair(cipherKey, key));
+    m_maps[cipherKey].push_back(key);
 }
 
 void DESCipherSet::Succeed()
@@ -46,7 +46,7 @@ void DESCipherSet::Succeed()
     solve = 1;
 }
 
-void DESCipherSet::Done()
+void DESCipherSet::Done(uint64_t cipherKey)
 {
     index++;
 }
@@ -63,15 +63,17 @@ int DESCipherSet::GetKeyFoundNum()
 
 void DESCipherSet::PrintAllFound()
 {
-    int index = 0;
-    int ss = m_vFound.size();
-    for(; index < ss; index++)
-    {
-        unsigned int high1 = (m_vFound.at(index).first >> 32);
-        unsigned int low1  = (m_vFound.at(index).first & ((1ull << 32) - 1));
-        unsigned int high2 = (m_vFound.at(index).second >> 32);
-        unsigned int low2  = (m_vFound.at(index).second & ((1ull << 32) - 1));
-        printf("Time: %d, 0x%x%x 0x%x%x\n", index + 1, high1, low1, high2, low2);
+}
 
+int DESCipherSet::Detect(RainbowChain chain)
+{
+    vector<uint64_t> tmp = m_maps[chain.nEndKey];
+    if(tmp.size() == 0) return 0;
+    cout<<chain.nEndKey<<" "<<tmp.size()<<endl;
+    for(uint64_t i=0;i<tmp.size();i++)
+    {
+        if(tmp.at(i) ==  chain.nStartKey)
+            return 1;
     }
+    return 0;
 }

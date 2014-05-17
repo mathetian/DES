@@ -38,9 +38,9 @@ int main(int argc,char*argv[])
         assert(file && "main fopen error\n");
         RainbowChain chain;
         while(fread((char*)&chain, sizeof(RainbowChain), 1, file))
-        {
             p_cs -> AddKey(chain.nEndKey);
-        }
+
+        fclose(file);
     }
     else if(strcmp(argv[1],"text") == 0)
     {
@@ -71,4 +71,11 @@ int main(int argc,char*argv[])
     printf("Total chains step: %lld\n", (long long)ce.GetTotalChains());
     printf("Total false alarm: %lld\n", (long long)ce.GetFalseAlarms());
     printf("\n");
+
+    FILE * file = fopen(argv[3],"rb"); int number = 0;
+    assert(file && "main fopen error\n"); RainbowChain chain;
+    while(fread((char*)&chain, sizeof(RainbowChain), 1, file))
+        number += p_cs -> Detect(chain);
+    fclose(file);
+    printf("Detected %d numbers\n", number);
 }

@@ -9,3 +9,5 @@ gencuda
 *.obj
 round*
 DEMO*
+Binary/*
+backup*/*

@@ -603,9 +603,9 @@ int main(int argc,char*argv[])
     // {
     //     TestCollision2();
     // }
-    {
-        SortLargeFile("DEMO.data");
-    }
+    // {
+    //     SortLargeFile("DEMO.data");
+    // }
     if(argc != 4)
     {
         Usage();

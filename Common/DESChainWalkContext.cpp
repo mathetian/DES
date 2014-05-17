@@ -6,11 +6,12 @@ uint64_t   DESChainWalkContext::m_keySpaceTotal = (1ull << 11) - 1;
 //uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 23) - (1ull << 8) - 2 - (1ull << 16);
 /**24 bit**/
 //uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 28) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24);
-uint64_t DESChainWalkContext::m_keySpaceTotalT = (1ull<<38) - (1ull<<8) - 2 -(1ull<<16) -(1ull<<24)-(1ull<<28);
+//uint64_t DESChainWalkContext::m_keySpaceTotalT = (1ull<<38) - (1ull<<8) - 2 -(1ull<<16) -(1ull<<24)-(1ull<<28);
 /**28 bit, 2^10 * 2^18**/
 //uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 32) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24);
 //uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 12) - 2 - (1ull << 8);
 //uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 19) - (1ull << 8) - 2 - (1ull<<16);
+uint64_t DESChainWalkContext::m_keySpaceTotalT = (1ull << 38) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32);
 /**32 bit(100 M), 2^11 * 2^21**/
 /*uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24) - 1;*/
 
@@ -82,6 +83,7 @@ void DESChainWalkContext::KeyReduction(int nPos)
     /**
     	Exist very big problem, will worse the distribution.
     **/
+    if(nPos < 1024) nPos = 0;
     m_nIndex = (m_nIndex + nPos) & m_keySpaceTotalT;
     m_nIndex = (m_nIndex + (nPos << 8)) & m_keySpaceTotalT;
     m_nIndex = (m_nIndex + ((nPos << 8) << 8)) & m_keySpaceTotalT;

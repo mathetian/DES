@@ -20,9 +20,8 @@ LIB = -lrt -lssl -lcrypto -ldl -L. -ldescrypt
 LIB1 = -lrt -lssl -lcrypto -ldl
 ALL = generator verified sort crack gencuda
 
-lib: compile
+lib: clean compile
 	${CXX} -shared *.o ${LIB1} -o ${LIBMISC}
-	${CP}  ${LIBMISC} ${BINARY}
 	${RM} *.o
 
 compile:
@@ -51,7 +50,7 @@ gencuda: Interface/DESCuda.cu
 	${CP} $@  ${BINARY}
 
 rungen: generator
-	mpirun -np 4 ./$^ 8192 8388608 test
+	mpirun -np 4 ./$^ 2048 4194304 test
 
 runcuda: gencuda
 	./$^ 1024 250000 test

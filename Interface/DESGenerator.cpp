@@ -441,6 +441,21 @@ int main(int argc,char * argv[])
 /**
 	Exist one bug in CPUParallel, not enough random
 **/
+
+uint64_t Convert(uint64_t num)
+{
+    uint64_t rs = 0, tmp =0;
+    tmp = num & ((1ull << 7) - 1); tmp <<= 1;
+    rs = tmp; num >>= 7;
+    tmp = num & ((1ull << 7) - 1); tmp <<= 1; tmp <<= 8;
+    rs |= tmp; num >>= 7;
+    tmp = num & ((1ull << 7) - 1); tmp <<= 1; tmp <<= 16;
+    rs |= tmp; num >>= 7;
+    tmp = num & ((1ull << 7) - 1); tmp <<= 1; tmp <<= 24;
+    rs |= tmp; num >>= 7;
+    return rs;
+}
+
 void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, int rank, int numproc)
 {
     FILE * file;
@@ -458,6 +473,7 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
         printf("rank %d of %d, failed to create %s\n",rank, numproc, szFileName);
         return;
     }
+    printf("rank %d of %d, succeed to create %s\n",rank, numproc, szFileName);
 
     nDatalen = GetFileLen(file);
     nDatalen = (nDatalen >> 4) << 4;
@@ -487,7 +503,9 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
 
     for(; index < chainCount; index++)
     {
-        chain.nStartKey = cwc.GetRandomKey();
+        cwc.SetKey(Convert(rank*chainCount + index));
+        chain.nStartKey = cwc.GetKey();
+
         uint32_t nPos;
         for(nPos = 0; nPos < chainLen; nPos++)
         {
@@ -602,11 +620,6 @@ int main(int argc,char * argv[])
         else Usage();
         return 0;
     }
-    
-    if(strcmp(argv[1],"experiment") == 0)
-        ConductExperiment(atoi(argv[2]),atoi(argv[3]),atoi(argv[4]));
-    
-    return 0;
 
     if(argc != 4)
     {
