@@ -1,13 +1,16 @@
 #include "DESChainWalkContext.h"
 
 uint64_t   DESChainWalkContext::m_plainText     = 0x305532286D6F295A;
-uint64_t   DESChainWalkContext::m_keySpaceTotal = (1ull << 20) - 1;
+uint64_t   DESChainWalkContext::m_keySpaceTotal = (1ull << 11) - 1;
 /**20 bit, 2^10 * 2^11**/
-/*uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 24) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 17); */
-
+//uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 23) - (1ull << 8) - 2 - (1ull << 16);
+/**24 bit**/
+//uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 28) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24);
+uint64_t DESChainWalkContext::m_keySpaceTotalT = (1ull<<38) - (1ull<<8) - 2 -(1ull<<16) -(1ull<<24)-(1ull<<28);
 /**28 bit, 2^10 * 2^18**/
-uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 32) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24);
-
+//uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 32) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24);
+//uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 12) - 2 - (1ull << 8);
+//uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 19) - (1ull << 8) - 2 - (1ull<<16);
 /**32 bit(100 M), 2^11 * 2^21**/
 /*uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24) - 1;*/
 
@@ -36,7 +39,6 @@ uint64_t DESChainWalkContext::GetRandomKey()
 {
     /**Need rewrite it with custom-random generator**/
     RAND_bytes((unsigned char*)&m_nIndex,8);
-
     m_nIndex = m_nIndex & m_keySpaceTotalT;
     return m_nIndex;
 }

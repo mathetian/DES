@@ -478,6 +478,63 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
     fclose(file);
 }
 
+void ConductExperiment(int chainLen, int chainCount, int tim)
+{    
+    FILE * file, * file2;
+    DESChainWalkContext cwc;
+
+    uint64_t index;
+
+    RainbowChain chain;
+
+    if((file = fopen("ConductExperiment.txt","a+")) == NULL)
+        return;
+
+    if((file2 = fopen("ConductExperiment2.txt","a+")) == NULL)
+        return;
+
+    cwc.SetChainInfo(chainLen, chainCount);
+
+    TimeStamp tms;
+    tms.StartTime();
+
+    int slice=chainLen/tim;
+    cout<<"slice:"<<slice<<endl;
+    int count=0;
+    for(index = 0; index < chainCount; index++)
+    {
+        chain.nStartKey = cwc.GetRandomKey();count++;uint32_t nPos = 0;
+        fwrite((char*)&chain, sizeof(uint64_t), 1, file);
+        // for(int i=0;i<tim;i++)
+        // {
+        //     for(; nPos < slice*(i+1); nPos++)
+        //     {
+        //         cwc.KeyToCipher();cwc.KeyReduction(i*slice);
+        //         chain.nStartKey = cwc.GetKey();count++;
+        //         fwrite((char*)&chain, sizeof(uint64_t), 1, file);
+        //     }
+        // }
+
+        for(;nPos<chainLen/2;nPos++)
+        {
+            cwc.KeyToCipher();
+            cwc.KeyReduction(nPos);
+            chain.nStartKey = cwc.GetKey();
+            fwrite((char*)&chain, sizeof(uint64_t), 1, file);
+        }
+
+        for(;nPos<chainLen;nPos++)
+        {
+            cwc.KeyToCipher();
+            cwc.KeyReduction(nPos);
+            chain.nStartKey = cwc.GetKey();
+            fwrite((char*)&chain, sizeof(uint64_t), 1, file);
+        }
+    }
+    cout<<"count:"<<count<<endl;
+    fclose(file);
+}
+
 #include <mpi.h>
 
 int main(int argc,char * argv[])
@@ -499,7 +556,9 @@ int main(int argc,char * argv[])
             TestKeySchedule();
         else if(strcmp(argv[1],"testcasegenerator") == 0)
             TestCaseGenerator();
-        else  Usage();
+        else  
+            Usage();
+
         return 0;
     }
     else if(argc == 3)
@@ -509,6 +568,11 @@ int main(int argc,char * argv[])
         else Usage();
         return 0;
     }
+    
+    if(strcmp(argv[1],"experiment") == 0)
+        ConductExperiment(atoi(argv[2]),atoi(argv[3]),atoi(argv[4]));
+    
+    return 0;
 
     if(argc != 4)
     {

@@ -59,5 +59,9 @@ runcuda: gencuda
 astyle:
 	astyle --style=allman */*.cpp
 
+creat:
+	-mkdir Binary
+
 clean:
-	rm -f ${ALL} *.o DES_* *.a
+	rm -f ${ALL} *.o DES_* *.a *.txt
+	-rm -rf Binary
