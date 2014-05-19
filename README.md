@@ -102,3 +102,11 @@ In i7 2600, each core 2^21.6.
 Using hyper-threading, each core(two logic cores) 2^21.8
 
 Same with E5 1620, maybe even better.
+
+-------------------------------------------
+Todo list:
+1. k: 0.3 -> 1.0 performance change
+1.0: 55%     40%
+0.3: 2306860*1126 25%  15%
+
+2. 0.87t (1782)  performance change

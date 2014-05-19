@@ -136,6 +136,7 @@ def DoTest3():
 	for i in range(10):
 		Test3_Inner(N, m/(2**i), t*(2**i))
 
+Test3_Inner(8589934592.0, 4194304.0, int(1782))
 # DoTest3()
 
 # 4194304.0 2048 0.5557
@@ -151,42 +152,42 @@ def DoTest3():
 
 # experiment 4, Final Test
 
-def compute2(k):
-	N = 8589934592.0 #2**33
+# def compute2(k):
+# 	N = 8589934592.0 #2**33
 
-	m = 4194304.0 #2**22
-	t = 2048 #2**11
+# 	m = 4194304.0 #2**22
+# 	t = 2048 #2**11
 
-	m=m*k
-	t=(int)(t*k)
+# 	m=m*k
+# 	t=(int)(t*k)
 
-	rs = 1
-	mt = m
-	for i in range(t):
-		rs = rs*(1-mt/N)
-		mt = N*(1.0-(1.0-1/N)**mt)
+# 	rs = 1
+# 	mt = m
+# 	for i in range(t):
+# 		rs = rs*(1-mt/N)
+# 		mt = N*(1.0-(1.0-1/N)**mt)
 
-	arr=[] 
-	flag = 1
-	for i in range(200):
-		prob = ((1-(rs**(i+1)))*100)
-		if prob >= 99.2 and flag == 1:
-			if prob >= 99.3 : break
- 			print i, k, (i+1)*(k**2), prob
-			flag = 0
-		arr.append({i+1:'%.4f'%prob})
+# 	arr=[] 
+# 	flag = 1
+# 	for i in range(200):
+# 		prob = ((1-(rs**(i+1)))*100)
+# 		if prob >= 99.2 and flag == 1:
+# 			if prob >= 99.3 : break
+#  			print i, k, (i+1)*(k**2), prob
+# 			flag = 0
+# 		arr.append({i+1:'%.4f'%prob})
 	
-	rss1 = []
-	rss1.append({'k^2':'%.2f'%k**2})
-	rss1.append({'p':'%.4f'%((1.0-rs)*100)})
-	rss1.append({'l':arr})
-	rss.append(rss1)
+# 	rss1 = []
+# 	rss1.append({'k^2':'%.2f'%k**2})
+# 	rss1.append({'p':'%.4f'%((1.0-rs)*100)})
+# 	rss1.append({'l':arr})
+# 	rss.append(rss1)
 
-orig = 0.1
+# orig = 0.1
 
-for i in range(2000):
-	rss = []
-	compute2(sqrt(orig+i*0.001))
-	#print rss
+# for i in range(2000):
+# 	rss = []
+# 	compute2(sqrt(orig+i*0.001))
+# 	#print rss
 
 

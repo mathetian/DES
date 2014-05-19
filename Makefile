@@ -52,6 +52,9 @@ gencuda: Interface/DESCuda.cu
 rungen: generator
 	mpirun -np 4 ./$^ 2048 4194304 test
 
+rungen2: generator
+	mpirun -np 4 ./$^ 1126 2306860 test
+
 runcuda: gencuda
 	./$^ 1024 250000 test
 
