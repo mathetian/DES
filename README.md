@@ -108,5 +108,9 @@ Todo list:
 1. k: 0.3 -> 1.0 performance change
 1.0: 55%     40%
 0.3: 2306860*1126 25%  15%
+1.6: 5284820*2581 
 
-2. 0.87t (1782)  performance change
+2. 0.87t (2245)  performance change
+Theory 0.6502(origin 0.6894) -> 0.9906(0.9865)
+
+
