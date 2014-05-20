@@ -83,7 +83,7 @@ void DESChainWalkContext::KeyReduction(int nPos)
     /**
     	Exist very big problem, will worse the distribution.
     **/
-    //if(nPos < 550) nPos = 0;
+    if(nPos < 1300) nPos = 0;
     m_nIndex = (m_nIndex + nPos) & m_keySpaceTotalT;
     m_nIndex = (m_nIndex + (nPos << 8)) & m_keySpaceTotalT;
     m_nIndex = (m_nIndex + ((nPos << 8) << 8)) & m_keySpaceTotalT;
