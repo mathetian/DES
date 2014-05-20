@@ -119,7 +119,7 @@ void DESCrackEngine::SearchRainbowTable(const char * fileName)
         TimeStamp tmps;
         tmps.StartTime();
 
-        nDataRead = fread(pChain,1, nAllocateSize,file);
+        nDataRead = fread(pChain, 1, nAllocateSize, file);
         if(nDataRead != nAllocateSize)
         {
             printf("Warning nDataRead: %lld, nAllocateSize: %lld\n", (long long)nDataRead, (long long)nAllocateSize);

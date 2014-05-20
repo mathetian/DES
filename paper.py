@@ -11,15 +11,25 @@ def Test1_Inner(N, m , t0):
 	t = 2**t0
 	for i in range(t):
 		rs = rs*(1-mt/N)
-		mt=N*(1.0-(1.0-1/N)**mt)
+		mt = N*(1.0-(1.0-1/N)**mt)
 
-	print '%2.0f'%t0, '%.4f'%(mt/m)
+	#print '%2.0f'%t0, '%.4f'%(mt/m)
+
+	return [t0, '%.4f'%(mt/m)]
 
 def DoTest1():
 	N = 8589934592.0
-	m = 4194304.0 #2**22
+	m = 2194304.0 #2**22
+	rs = []
 	for i in range(20):
-		Test1_Inner(N, m, i)
+		rs.append(Test1_Inner(N, m, i))
+	print rs
+	x = []
+	y = []
+	for i in rs:
+		x.append(i[0])
+		y.append(float(i[1]))
+	print x,y
 
 # DoTest1()
 
@@ -67,7 +77,7 @@ def DoTest1():
 # 18 0.0154
 # 19 0.0078
 
-#  m = 2**20
+#  m = 2**21
 #  0 0.9999
 #  1 0.9997
 #  2 0.9995
@@ -93,19 +103,30 @@ def DoTest1():
 
 def Test2_Inner(p, l):
 	p1 = 1-(1-p)**l
-	if p1 > 0.9:
+	if p1 > 0.99:
 		print '%.1f'%p, l, '%.4f'%p1
-		return 1
+		return [1, p, l]
 
-	return 0
+	return [0, 0, 0, 0]
 
 def DoTest2():
 	p0 = 1
 	flag = 0
+	rs = []
 	for i in range(9):
 		for j in range(50):
-			if Test2_Inner((i+1)/10.0, j) == 1:
+			ret = Test2_Inner((i+1)/10.0, j)
+			if ret[0] == 1:
+				rs.append(ret[1:])
 				break
+	rs0 = []
+	rs1 = []
+
+	for i in rs:
+		rs0.append(i[0])
+		rs1.append(i[1])
+	print rs0, rs1
+
 # DoTest2()
 
 # 0.1 22 0.9015
@@ -132,11 +153,11 @@ def Test3_Inner(N, m, t):
 def DoTest3():
 	N = 8589934592.0
 	m = 4194304.0 #2**22
-	t = 2048
+	t = 12048
 	for i in range(10):
 		Test3_Inner(N, m/(2**i), t*(2**i))
 
-Test3_Inner(8589934592.0, 5284820.0, int(2581))
+# Test3_Inner(8589934592.0, 5284820.0, int(2581))
 # DoTest3()
 
 # 4194304.0 2048 0.5557
@@ -162,21 +183,24 @@ def Test4_Inner(N, m, t, k, rss):
 		rs = rs*(1-mt/N)
 		mt = N*(1.0-(1.0-1/N)**mt)
 
-	arr=[] 
 	flag = 1
-	for i in range(200):
+	prob = ((1-(rs**(500000)))*100)
+	# print prob, '%.4f'%(((500000+1)**3)*(k**2))
+	for i in range(20):
 		prob = ((1-(rs**(i+1)))*100)
 		if prob >= 99.0 and flag == 1:
-			if prob >= 99.1 : break
- 			print i+1, '%.4f'%(k*k), '%.4f'%k, '%.4f'%(((i+1)**3)*(k**2)), '%.4f'%(prob)
+			if prob >= 99.5 : break
+ 			# print i+1, '%.4f'%(k*k), '%.4f'%k, '%.4f'%(((i+1)**3)*(k**2)), '%.3f'%(prob)
+ 			return [float('%.2f'%(k*k)), float('%.2f'%(((i+1)**3)*(k**2)))]
 			flag = 0
-		arr.append({i+1:'%.4f'%prob})
+		rss.append(float('%.3f'%prob))
 	
-	rss1 = []
-	rss1.append({'k^2':'%.2f'%k**2})
-	rss1.append({'p':'%.4f'%((1.0-rs)*100)})
-	rss1.append({'l':arr})
-	rss.append(rss1)
+	# print rss
+	# rss1 = []
+	# rss1.append({'k^2':'%.2f'%k**2})
+	# rss1.append({'p':'%.4f'%((1.0-rs)*100)})
+	# rss1.append({'l':arr})
+	# rss.append(rss1)
 
 def DoTest4():
 	N = 8589934592.0 #2**33
@@ -186,10 +210,32 @@ def DoTest4():
 
 	orig = 0.1
 
-	for i in range(2000):
+	x = []
+	y1 = []
+	y2 = []
+	y3 = [] 
+	rss2 = []
+	for i in range(200):
 		rss = []
-		Test4_Inner(N, m, t, sqrt(orig+i*0.001), rss)
-		#print rss
+		rs2 = Test4_Inner(N, m, t, sqrt(orig+i*0.01), rss)
+		if rs2 != None:
+			rss2.append(rs2)
+		# rss2.append(rss)
+	#print rss2
+	for i in rss2:
+		x.append(i[0])
+		y1.append(i[1])
+	print x
+	print y1
+	# for i in range(20):
+	# 	y1 = []
+	# 	for j in range(20):
+	# 		y1.append(rss2[j][i])
+	# 	# print "y%d ="%i,y1
+
+	# rss = []
+	# Test4_Inner(N, m, t, sqrt(0.00001), rss)
+	# print rss
 
 # DoTest4()
 
