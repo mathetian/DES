@@ -50,7 +50,7 @@ gencuda: Interface/DESCuda.cu
 	${CP} $@  ${BINARY}
 
 rungen: generator
-	mpirun -np 4 ./$^ 2048 4194304 test
+	mpirun -np 4 ./$^ 4096 33554432 test
 
 rungen2: generator
 	mpirun -np 4 ./$^ 2581 5284820 test
