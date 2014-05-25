@@ -148,12 +148,12 @@ def Test3_Inner(N, m, t):
 		rs = rs*(1-mt/N)
 		mt = N*(1.0-(1.0-1/N)**mt)
 	ps = 1 - rs
-	print m, t, '%.4f'%ps
+	print m ,',', t, ',' , '%.4f'%ps
 
 def DoTest3():
 	N = 8589934592.0
 	m = 4194304.0 #2**22
-	t = 12048
+	t = 2048
 	for i in range(10):
 		Test3_Inner(N, m/(2**i), t*(2**i))
 
@@ -174,8 +174,10 @@ def DoTest3():
 # experiment 4, Final Test
 
 def Test4_Inner(N, m, t, k, rss):
-	m=m*k
-	t=(int)(t*k)
+	k0 = sqrt(k)
+
+	m=m*k0
+	t=(int)(t*k0)
 
 	rs = 1
 	mt = m
@@ -184,14 +186,12 @@ def Test4_Inner(N, m, t, k, rss):
 		mt = N*(1.0-(1.0-1/N)**mt)
 
 	flag = 1
-	prob = ((1-(rs**(500000)))*100)
-	# print prob, '%.4f'%(((500000+1)**3)*(k**2))
-	for i in range(20):
-		prob = ((1-(rs**(i+1)))*100)
+	for l in range(20):
+		prob = ((1-(rs**(l+1)))*100)
 		if prob >= 99.0 and flag == 1:
-			if prob >= 99.5 : break
- 			# print i+1, '%.4f'%(k*k), '%.4f'%k, '%.4f'%(((i+1)**3)*(k**2)), '%.3f'%(prob)
- 			return [float('%.2f'%(k*k)), float('%.2f'%(((i+1)**3)*(k**2)))]
+			if prob >= 99.1 : break
+ 			#print '%.2f'%(k*(l+1)), l+1, '%.2f'%k, '%.4f'%(((l+1)**3)*(k**2)), '%.3f'%(prob)
+ 			return ['%.2f'%k, '%.2f'%(k*(l+1)), l+1, '%.2f'%(((l+1)**3)*(k**2)), '%.2f'%(prob)]
 			flag = 0
 		rss.append(float('%.3f'%prob))
 	
@@ -203,10 +203,14 @@ def Test4_Inner(N, m, t, k, rss):
 	# rss.append(rss1)
 
 def DoTest4():
-	N = 8589934592.0 #2**33
+	# N = 8589934592.0 #2**33
 
-	m = 4194304.0 #2**22
-	t = 2048 #2**11
+	# m = 4194304.0 #2**22
+	# t = 2048 #2**11
+
+	N = 137438953472.0
+	m = 16777216.0
+	t = 8192
 
 	orig = 0.1
 
@@ -217,16 +221,24 @@ def DoTest4():
 	rss2 = []
 	for i in range(200):
 		rss = []
-		rs2 = Test4_Inner(N, m, t, sqrt(orig+i*0.01), rss)
+		rs2 = Test4_Inner(N, m, t, orig+i*0.01, rss)
 		if rs2 != None:
 			rss2.append(rs2)
 		# rss2.append(rss)
 	#print rss2
-	for i in rss2:
-		x.append(i[0])
-		y1.append(i[1])
-	print x
-	print y1
+	x = [[] for i in range(len(rss2))]
+
+	for i in range(5):
+		for j in range(len(rss2)):
+			x[j].append(float(rss2[j][i]))
+
+	for i in x:
+		print i
+	# for i in rss2:
+	# 	x.append(float(i[0]))
+	# 	y1.append(float(i[3]))
+	#print x
+	#print y1
 	# for i in range(20):
 	# 	y1 = []
 	# 	for j in range(20):
@@ -237,5 +249,76 @@ def DoTest4():
 	# Test4_Inner(N, m, t, sqrt(0.00001), rss)
 	# print rss
 
-# DoTest4()
+DoTest4()
 
+# k=1, 5 + 45% = {(l**3)(k**2) : , l*k : 5.7}
+# k=1.56, 4  = { , l*k : 6.24}
+
+def Test5_Inner(N, m, t, k0):
+	k = sqrt(k0)
+	m=m*k
+	t=(int)(t*k)
+
+	rs = 1
+	mt = m
+	for i in range(t):
+		rs = rs*(1-mt/N)
+		mt = N*(1.0-(1.0-1/N)**mt)
+
+	flag = 1
+	prob = 1-rs
+	return ['%.2f'%(k0), '%.4f'%prob]
+
+def DoTest5():
+	N = 137438953472.0 #2**33
+
+	m = 16777216.0 #2**22
+	t = 8192 #2**11
+
+	orig = 0.1
+
+	rs = []
+	for i in range(20):
+		rs.append(Test5_Inner(N, m, t, orig+i*0.1))
+	x = [] 
+	y = []
+	for i in range(20):
+		x.append(float(rs[i][0]))
+		y.append(float(rs[i][1]))
+
+	print x
+	print y
+
+# DoTest5()
+
+def Test6_Inner(N, m, t, k):
+	m=m*k
+	t=(int)(t/k)
+	#print m, t, m*t, N
+	rs = 1
+	mt = m
+	for i in range(t):
+		rs = rs*(1-mt/N)
+		mt = N*(1.0-(1.0-1/N)**mt)
+
+	return "%.1f"%((1 - rs)*100)
+
+def DoTest6():
+	N = 137438953472.0 #2**33
+
+	rs = []
+	for i in range(10):
+		N1 = N * (2**(i-5))
+		t = 2**((int)(10+i/2))
+		m = float(N1/t)
+		rss = []
+		for j in range(10):
+			rss.append(Test6_Inner(N, m, t, 2**j))
+		rs.append(rss)
+
+	for i in range(10):
+		rss = []
+		for j in range(10):
+			rss.append(float(rs[j][i]))
+		print rss
+# DoTest6()
