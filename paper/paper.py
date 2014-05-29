@@ -190,7 +190,7 @@ def Test4_Inner(N, m, t, k, rss):
 		prob = ((1-(rs**(l+1)))*100)
 		if prob >= 99.0 and flag == 1:
 			if prob >= 99.1 : break
- 			#print '%.2f'%(k*(l+1)), l+1, '%.2f'%k, '%.4f'%(((l+1)**3)*(k**2)), '%.3f'%(prob)
+ 			print '%.2f'%k, '%.2f'%(k*(l+1)), l+1, '%.4f'%(((l+1)**3)*(k**2)), '%.3f'%(prob)
  			return ['%.2f'%k, '%.2f'%(k*(l+1)), l+1, '%.2f'%(((l+1)**3)*(k**2)), '%.2f'%(prob)]
 			flag = 0
 		rss.append(float('%.3f'%prob))
