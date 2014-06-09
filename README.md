@@ -112,5 +112,15 @@ Todo list:
 
 2. 0.87t (2245)  performance change
 Theory 0.6502(origin 0.6894) -> 0.9906(0.9865)
+-------------------------------------------
+-------------------------------------------
+4.62 s / 2^12
+648M	DES_5181-42446356_test
+
+cryptanalysis time:  0 s, 792651 us
+Warning nDataRead: 40091968, nAllocateSize: 213016576
+213016576 bytes read, disk access time: 0 s, 9220 us
+Searching for key: 2330165311108...
+
 
 
