@@ -7,6 +7,6 @@ print len(x), len(y)
 
 plt.plot(x, y, 'r--')
 plt.axis([0, 2.1, 100, 500])
-plt.xlabel('k')
-plt.ylabel('(l^3)(k^2)')
+plt.xlabel('relative ratio')
+plt.ylabel('Metric Coefficient')
 plt.show()
