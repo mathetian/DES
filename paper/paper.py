@@ -151,14 +151,14 @@ def Test3_Inner(N, m, t):
 	print m ,',', t, ',' , '%.4f'%ps
 
 def DoTest3():
-	N = 8589934592.0
-	m = 4194304.0 #2**22
-	t = 2048
+	N = 137438953472.0
+	m = 33554432.0 #2**25
+	t = 3500 #2**12
 	for i in range(10):
 		Test3_Inner(N, m/(2**i), t*(2**i))
 
 # Test3_Inner(8589934592.0, 5284820.0, int(2581))
-# DoTest3()
+DoTest3()
 
 # 4194304.0 2048 0.5557
 # 2097152.0 4096 0.5556
@@ -249,7 +249,7 @@ def DoTest4():
 	# Test4_Inner(N, m, t, sqrt(0.00001), rss)
 	# print rss
 
-DoTest4()
+# DoTest4()
 
 # k=1, 5 + 45% = {(l**3)(k**2) : , l*k : 5.7}
 # k=1.56, 4  = { , l*k : 6.24}
