@@ -148,9 +148,10 @@ def Test3_Inner(N, m, t):
 		rs = rs*(1-mt/N)
 		mt = N*(1.0-(1.0-1/N)**mt)
 	ps = 1 - rs
-	print m ,',', t, ',' , '%.4f'%ps
+	print m ,',', t, ',' , '%.4f'%ps, log(sqrt(m/t),2)
 
 def DoTest3():
+<<<<<<< HEAD
 	N = 137438953472.0
 	m = 33554432.0 #2**25
 	t = 3500 #2**12
@@ -159,6 +160,19 @@ def DoTest3():
 
 # Test3_Inner(8589934592.0, 5284820.0, int(2581))
 DoTest3()
+=======
+	N = 137438953472.0 #2**37
+	m = 33554432.0 #2**25
+	t = 4096
+	for i in range(10):
+		Test3_Inner(N, m/(2**i), t*(2**i))
+
+# def DoTest31():
+# 	for k in range(11):
+# 		DoTest3(sqrt(2**k))
+
+# DoTest3()
+>>>>>>> f9275069f808bedbe23e3bcec1fcd3ac76b0ca5b
 
 # 4194304.0 2048 0.5557
 # 2097152.0 4096 0.5556
@@ -189,8 +203,8 @@ def Test4_Inner(N, m, t, k, rss):
 	for l in range(20):
 		prob = ((1-(rs**(l+1)))*100)
 		if prob >= 99.0 and flag == 1:
-			if prob >= 99.1 : break
- 			print '%.2f'%k, '%.2f'%(k*(l+1)), l+1, '%.4f'%(((l+1)**3)*(k**2)), '%.3f'%(prob)
+			if prob >= 99.2 : break
+ 			# print '%.2f'%k, '%.2f'%(k*(l+1)), l+1, '%.4f'%(((l+1)**3)*(k**2)), '%.3f'%(prob)
  			return ['%.2f'%k, '%.2f'%(k*(l+1)), l+1, '%.2f'%(((l+1)**3)*(k**2)), '%.2f'%(prob)]
 			flag = 0
 		rss.append(float('%.3f'%prob))
@@ -222,6 +236,9 @@ def DoTest4():
 	for i in range(200):
 		rss = []
 		rs2 = Test4_Inner(N, m, t, orig+i*0.01, rss)
+		if (orig + i*0.01) < 0.6 or (orig + i*0.01) > 1.65:
+			continue
+
 		if rs2 != None:
 			rss2.append(rs2)
 		# rss2.append(rss)
@@ -232,8 +249,16 @@ def DoTest4():
 		for j in range(len(rss2)):
 			x[j].append(float(rss2[j][i]))
 
-	for i in x:
-		print i
+	y = []
+	for i in range(5):
+		y0 = []
+		for j in range(len(rss2)):
+			y0.append(x[j][i])
+		y.append(y0)
+
+	for i in range(5):
+		print y[i]
+
 	# for i in rss2:
 	# 	x.append(float(i[0]))
 	# 	y1.append(float(i[3]))
@@ -254,10 +279,12 @@ def DoTest4():
 # k=1, 5 + 45% = {(l**3)(k**2) : , l*k : 5.7}
 # k=1.56, 4  = { , l*k : 6.24}
 
+### Single table success rate with different k
+
 def Test5_Inner(N, m, t, k0):
 	k = sqrt(k0)
-	m=m*k
-	t=(int)(t*k)
+	m = m*k
+	t = (int)(t*k)
 
 	rs = 1
 	mt = m
@@ -291,10 +318,10 @@ def DoTest5():
 
 # DoTest5()
 
+### different k,r
 def Test6_Inner(N, m, t, k):
 	m=m*k
 	t=(int)(t/k)
-	#print m, t, m*t, N
 	rs = 1
 	mt = m
 	for i in range(t):
@@ -304,7 +331,7 @@ def Test6_Inner(N, m, t, k):
 	return "%.1f"%((1 - rs)*100)
 
 def DoTest6():
-	N = 137438953472.0 #2**33
+	N = 137438953472.0 #2**37
 
 	rs = []
 	for i in range(10):
@@ -321,4 +348,37 @@ def DoTest6():
 		for j in range(10):
 			rss.append(float(rs[j][i]))
 		print rss
+
 # DoTest6()
+
+### different k,r
+def Test7_Inner(N, m, t):
+	rs = 1
+	mt = m
+	for i in range(t):
+		rs = rs*(1-mt/N)
+		mt = N*(1.0-(1.0-1/N)**mt)
+
+	return "%.2f"%((1 - rs)*100)
+
+def DoTest7():
+	N = 137438953472.0 #2**37
+
+	arr2 = []
+	for k in range(10):
+		k0 = 2**(k - 5)
+		arr = []
+		for r in range(10):
+			r0 = 2**r
+			m0 = r0*sqrt(k0*N)
+			t0 = int(sqrt(k0*N)/r0)
+			arr.append(Test7_Inner(N, m0, t0) )
+		arr2.append(arr)
+
+	for k in range(10):
+		arr4 = []
+		for r in range(10):
+			arr4.append(float(arr2[r][k]))
+		print arr4
+
+# DoTest7()
