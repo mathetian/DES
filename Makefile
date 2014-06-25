@@ -1,12 +1,12 @@
 CXX      = g++
 CXXFLAGS = -Wall -fPIC -O -g
 
-MPICXX   = mpic++
+MPICXX   = mpicxx
 NVCC     = nvcc
 NVFLAGS  = -O -g
 
-AR	     = ar
-LIBMISC	 = libdescrypt.so
+AR	 = ar
+LIBMISC	 = libdescrypt.a
 RANLIB   = ranlib
 RM       = rm
 MV       = mv
@@ -21,17 +21,16 @@ LIB1 = -lrt -lssl -lcrypto -ldl
 ALL = generator verified sort crack gencuda
 
 lib: clean compile
-	${CXX} -shared *.o ${LIB1} -o ${LIBMISC}
-	${RM} *.o
-
+	${AR} rv ${LIBMISC} *.o
+	${RANLIB} ${LIBMISC}
+	rm *.o
 compile:
 	${CXX} ${CXXFLAGS} ${HEADER} -c ${SOURCES}
 
 all : ${ALL}
 
 generator: Interface/DESGenerator.cpp
-	${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB} 
-	${CP} $@  ${BINARY}
+	module purge && module load openmpi/gcc/1.6.5 && ${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
 
 verified: Interface/DESVerified.cpp
 	${CXX} ${CXXFLAGS} ${HEADER} ${LIB} $^ -o $@ ${LIB}
@@ -65,5 +64,5 @@ creat:
 	-mkdir Binary
 
 clean:
-	rm -f ${ALL} *.o DES_* *.a *.txt
+	rm -f ${ALL} *.o DES_* *.txt
 	-rm -rf Binary
