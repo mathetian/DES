@@ -1,3 +1,5 @@
+#include <mpi.h>
+
 #include "DESCommon.h"
 #include "TimeStamp.h"
 #include "DESChainWalkContext.h"
@@ -6,6 +8,15 @@
 using namespace std;
 
 #include <assert.h>
+
+#define BOOLEAN int
+#define MASTER_RANK 0
+#define TRUE 1
+#define FALSE 0
+#define BOOLEAN int
+#define BLOCK_SIZE 1048576
+#define MBYTE 1048576
+#define SYNOPSIS printf ("synopsis: %s -f <file> -l <blocks>\n", argv[0])
 
 void Usage()
 {
@@ -468,16 +479,35 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
 
     uint64_t chainCount = totalChainCount / numproc;
 
-    if((file = fopen(szFileName,"a+")) == NULL)
-    {
-        printf("rank %d of %d, failed to create %s\n",rank, numproc, szFileName);
-        return;
+    MPI_File fh;
+    MPI_Status  status;
+	BOOLEAN i_am_the_master = FALSE, input_error = FALSE, 
+    my_file_open_error = FALSE, file_open_error = FALSE,
+    my_write_error = FALSE, write_error = FALSE;
+    char error_string[BUFSIZ];
+    int length_of_error_string, error_class;
+
+    my_file_open_error = MPI_File_open(MPI_COMM_SELF, szFileName, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
+
+    if (my_file_open_error != MPI_SUCCESS) {
+
+      MPI_Error_class(my_file_open_error, &error_class);
+      MPI_Error_string(error_class, error_string, &length_of_error_string);
+      printf("%3d: %s\n", rank, error_string);
+
+      MPI_Error_string(my_file_open_error, error_string, 
+		       &length_of_error_string);
+      printf("%3d: %s\n", rank, error_string);
+
+      my_file_open_error = TRUE;
+
     }
+
+
     printf("rank %d of %d, succeed to create %s\n",rank, numproc, szFileName);
-
-    nDatalen = GetFileLen(file);
-    nDatalen = (nDatalen >> 4) << 4;
-
+    printf("%ld %lld %lld %d %d\n", (long long)chainCount, (long long)chainLen, (long long)totalChainCount, rank, numproc);
+    nDatalen = 0;
+ 
     if(nDatalen == (chainCount << 4))
     {
         printf("rank %d of %d, precompute has finised\n",rank, numproc);
@@ -489,8 +519,6 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
         printf("rank %d of %d, continuing from interrupted precomputing, ", rank, numproc);
         printf("have computed %lld chains\n", (ll)(nDatalen >> 4));
     }
-
-    fseek(file, nDatalen, SEEK_SET);
 
     nChainStart += (nDatalen >> 4);
 
@@ -514,11 +542,16 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
         }
 
         chain.nEndKey = cwc.GetKey();
-        if(fwrite((char*)&chain, sizeof(RainbowChain), 1, file) != 1)
-        {
-            printf("rank %d of %d, disk write error\n", rank, numproc);
-            break;
-        }
+	
+	MPI_File_write(fh, (char*)(&(chain)), 2, MPI_UINT64_T, &status);
+        if (my_write_error != MPI_SUCCESS) {
+	MPI_Error_class(my_write_error, &error_class);
+	MPI_Error_string(error_class, error_string, &length_of_error_string);
+	printf("%3d: %s\n", rank, error_string);
+	MPI_Error_string(my_write_error, error_string, &length_of_error_string);
+	printf("%3d: %s\n", rank, error_string);
+	my_write_error = TRUE;
+      }
 
         if((index + 1)%10000 == 0||index + 1 == chainCount)
         {
@@ -527,7 +560,8 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
             tms.StartTime();
         }
     }
-    fclose(file);
+    //fclose(file);
+    MPI_File_close(&fh);
 }
 
 void ConductExperiment(int chainLen, int chainCount, int tim)
@@ -586,8 +620,6 @@ void ConductExperiment(int chainLen, int chainCount, int tim)
     cout<<"count:"<<count<<endl;
     fclose(file);
 }
-
-#include <mpi.h>
 
 int main(int argc,char * argv[])
 {
