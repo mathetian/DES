@@ -1,4 +1,0 @@
-/lustre/home/eeghh/.lsbatch/1403746964.241921.shell: line 1: UB: command not found
---------------------------------------------------------------------------
-mpirun noticed that process rank 9 with PID 20117 on node node164 exited on signal 1 (Hangup).
---------------------------------------------------------------------------

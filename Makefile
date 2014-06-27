@@ -30,7 +30,8 @@ compile:
 all : ${ALL}
 
 generator: Interface/DESGenerator.cpp
-	module purge && module load openmpi/gcc/1.6.5 && ${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
+#	module purge && module load openmpi/gcc/1.6.5 && ${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	module purge && module load icc/13.1.1 impi/4.1.1.036 && ${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
 
 verified: Interface/DESVerified.cpp
 	${CXX} ${CXXFLAGS} ${HEADER} ${LIB} $^ -o $@ ${LIB}
