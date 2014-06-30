@@ -46,17 +46,14 @@ crack: Interface/DESCrack.cpp
 	${CP} $@  ${BINARY}
 
 gencuda: Interface/DESCuda.cu
-	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	module purge && module load cuda/5.5 & ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${CP} $@  ${BINARY}
 
 rungen: generator
 	mpirun -np 4 ./$^ 4096 33554432 test
 
-rungen2: generator
-	mpirun -np 4 ./$^ 2581 5284820 test
-
 runcuda: gencuda
-	./$^ 1024 250000 test
+	./$^ 4096 262144 cuda
 
 astyle:
 	astyle --style=allman */*.cpp

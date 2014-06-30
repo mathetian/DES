@@ -31,17 +31,10 @@ using namespace std;
 	Therefore, #define TIME 2^5
 **/
 
-/*#define BLOCK_LENGTH        1024
+#define BLOCK_LENGTH        1024
 #define MAX_THREAD			256
 #define ALL                 (1024*256)
-#define CHAINLEN            1024
-#define CHAINCOUNT          1024*/
-
-#define BLOCK_LENGTH        64
-#define MAX_THREAD			128
-#define ALL                 (128*64)
-#define CHAINLEN            1024
-#define CHAINCOUNT          1024
+#define CHAINLEN 4096
 
 #ifndef TX
 #if (__CUDA_ARCH__ < 200)
@@ -415,7 +408,8 @@ __device__ uint32_t plLeft  = 0x28325530;
 /*__device__ uint64_t totalSpace = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - \
 	(1ull << 24) - (1ull<<32) - (1ull<<33)- (1ull<<34)- (1ull<<35);*/
 
-__device__ uint64_t   totalSpace = (1ull << 32) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24);
+//__device__ uint64_t   totalSpace = (1ull << 32) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24);
+__device__ uint64_t totalSpace = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
 
 /*uint64_t totalSpaceT = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - \
 	(1ull << 24) - (1ull<<32) - (1ull<<33)- (1ull<<34)- (1ull<<35);*/

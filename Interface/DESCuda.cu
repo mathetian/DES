@@ -150,10 +150,15 @@ __global__ void  DESGeneratorCUDA(uint64_t * data)
         m_nIndex = DESOneTime(roundKeys);
 
         /**Second Step(Reduction Function)**/
-        m_nIndex &= totalSpace;
-        m_nIndex = (m_nIndex + nPos) & totalSpace;
-        m_nIndex = (m_nIndex + (nPos << 8)) & totalSpace;
-        m_nIndex = (m_nIndex + ((nPos << 8) << 8)) & totalSpace;
+        //m_nIndex &= totalSpace;
+        //m_nIndex = (m_nIndex + nPos) & totalSpace;
+        //m_nIndex = (m_nIndex + (nPos << 8)) & totalSpace;
+        //m_nIndex = (m_nIndex + ((nPos << 8) << 8)) & totalSpace;
+        int nnpos = nPos;
+        if(nPos < 1300) nnpos = 0;
+        m_nIndex = (m_nIndex + nnpos) & totalSpace;
+        m_nIndex = (m_nIndex + (nnpos << 8)) & totalSpace;
+        m_nIndex = (m_nIndex + ((nnpos << 8) << 8)) & totalSpace;	    
     }
 
     data[TX] = m_nIndex;
