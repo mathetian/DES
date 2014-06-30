@@ -1,6 +1,7 @@
 #include "DESCrackEngine.h"
 #include "TimeStamp.h"
-
+#include <openssl/rand.h>
+#include <openssl/des.h>
 #include <iostream>
 using namespace std;
 

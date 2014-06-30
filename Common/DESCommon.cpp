@@ -1,5 +1,8 @@
 #include "DESCommon.h"
 
+#include <openssl/rand.h>
+#include <openssl/des.h>
+
 bool RainbowChain::operator < (const RainbowChain &m) const
 {
     return nEndKey < m.nEndKey;

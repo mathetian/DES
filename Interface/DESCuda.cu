@@ -383,7 +383,6 @@ void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
     /**End Preparation**/
     printf("Need to compute %d rounds %lld\n", time1, (long long)remainCount);
 
-
     for(int round = 0; round < time1; round++)
     {
         printf("Begin compute the %d round\n", round+1);

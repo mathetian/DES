@@ -17,7 +17,7 @@ HEADER  = -I./Include
 BINARY  = Binary
 
 LIB = -lrt -lssl -lcrypto -ldl -L. -ldescrypt
-LIB1 = -lrt -lssl -lcrypto -ldl
+
 ALL = generator verified sort crack gencuda
 
 lib: clean compile
@@ -49,6 +49,9 @@ gencuda: Interface/DESCuda.cu
 	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 
+regencuda: Interface/DESRegenerator.cu
+	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	
 rungen: generator
 	mpirun -np 4 ./$^ 4096 33554432 test
 

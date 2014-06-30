@@ -9,11 +9,11 @@ using namespace std;
 void Usage()
 {
     Logo();
-    printf("Usage: crack   text hashListFileName encryptedText \n");
-    printf("               file hashListFileName encryptedFile \n\n");
+    printf("Usage: crack   text chainLen chainCount encryptedText \n");
+    printf("               file chainLen chainCount encryptedFile \n\n");
 
-    printf("example 1: crack text DES_1024-30000_test 12345 7831224 541234 3827427\n");
-    printf("example 2: crack file DES_1024-30000_test fileName\n\n");
+    printf("example 1: crack text chainLen chainCount 12345 7831224 541234 3827427\n");
+    printf("example 2: crack file chainLen chainCount fileName\n\n");
 }
 
 int main(int argc,char*argv[])
