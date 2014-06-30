@@ -148,12 +148,8 @@ __global__ void  DESGeneratorCUDA(uint64_t * data)
         /**First Step(Cipher Function)**/
         GenerateKey(m_nIndex,roundKeys);
         m_nIndex = DESOneTime(roundKeys);
+	m_nIndex &= totalSpace;
 
-        /**Second Step(Reduction Function)**/
-        //m_nIndex &= totalSpace;
-        //m_nIndex = (m_nIndex + nPos) & totalSpace;
-        //m_nIndex = (m_nIndex + (nPos << 8)) & totalSpace;
-        //m_nIndex = (m_nIndex + ((nPos << 8) << 8)) & totalSpace;
         int nnpos = nPos;
         if(nPos < 1300) nnpos = 0;
         m_nIndex = (m_nIndex + nnpos) & totalSpace;
@@ -345,7 +341,19 @@ uint64_t GetFileLen(FILE* file)
 
     return len;
 }
-
+uint64_t Convert(uint64_t num)
+{
+    uint64_t rs = 0, tmp =0;
+    tmp = num & ((1ull << 7) - 1); tmp <<= 1;
+    rs = tmp; num >>= 7;
+    tmp = num & ((1ull << 7) - 1); tmp <<= 1; tmp <<= 8;
+    rs |= tmp; num >>= 7;
+    tmp = num & ((1ull << 7) - 1); tmp <<= 1; tmp <<= 16;
+    rs |= tmp; num >>= 7;
+    tmp = num & ((1ull << 7) - 1); tmp <<= 1; tmp <<= 24;
+    rs |= tmp; num >>= 7;
+    return rs;
+}
 void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
 {
     char fileName[100];
@@ -385,9 +393,9 @@ void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
 
         for(uint64_t i = 0; i < ALL; i++)
         {
-            RAND_bytes((unsigned char*)(&(starts[i])),sizeof(uint64_t));
-            starts[i] &= totalSpaceT;
-        }
+            starts[i] = Convert(round*ALL + i);
+	    starts[i] &= totalSpaceT;
+	}
         /**Belong to CUDA logic**/
         _CUDA(cudaMemcpy(cudaIn,starts,size,cudaMemcpyHostToDevice));
 
@@ -411,8 +419,6 @@ void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
 
 void KeyTest()
 {
-    //uint64_t key=0xFEFEFEFEFEFEFEFE;
-    //uint64_t key=0x0E0E0E0E0E0E0E02; /**which can't be accessed by the device(GPU), SAD**/
     uint64_t * cudaIn;
     uint64_t starts[16];
     _CUDA(cudaMalloc((void**)&cudaIn , sizeof(uint64_t)*16));

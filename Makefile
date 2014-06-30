@@ -46,7 +46,7 @@ crack: Interface/DESCrack.cpp
 	${CP} $@  ${BINARY}
 
 gencuda: Interface/DESCuda.cu
-	module purge && module load cuda/5.5 & ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${CP} $@  ${BINARY}
 
 rungen: generator
