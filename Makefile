@@ -30,8 +30,8 @@ compile:
 all : ${ALL}
 
 generator: Interface/DESGenerator.cpp
-#	module purge && module load openmpi/gcc/1.6.5 && ${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
-	module purge && module load icc/13.1.1 impi/4.1.1.036 && ${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	#module purge && module load icc/13.1.1 impi/4.1.1.036 && ${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
 
 verified: Interface/DESVerified.cpp
 	${CXX} ${CXXFLAGS} ${HEADER} ${LIB} $^ -o $@ ${LIB}
@@ -46,8 +46,8 @@ crack: Interface/DESCrack.cpp
 	${CP} $@  ${BINARY}
 
 gencuda: Interface/DESCuda.cu
-	module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
-	${CP} $@  ${BINARY}
+	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 
 rungen: generator
 	mpirun -np 4 ./$^ 4096 33554432 test
