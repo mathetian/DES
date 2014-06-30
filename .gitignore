@@ -11,3 +11,6 @@ round*
 DEMO*
 Binary/*
 backup*/*
+*.err
+*.out
+*.a
