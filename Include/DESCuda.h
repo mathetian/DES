@@ -14,7 +14,7 @@ namespace descrack
 #define BLOCK_LENGTH        1024
 #define MAX_THREAD			256
 #define ALL                 (1024*256)
-#define CHAINLEN 4096
+#define CHAINLEN            4096
 
 #ifndef TX
 #if (__CUDA_ARCH__ < 200)

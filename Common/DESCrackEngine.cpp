@@ -181,7 +181,8 @@ void DESCrackEngine::SearchTableChunk(RainbowChain *pChain, int pChainCount)
             {
                 if(CheckAlarm(pChain + nIndex, nGuessPos, pEndKeys[nGuessPos]))
                     goto NEXT_HASH;
-                else nFalseAlarm++;
+                else 
+                    nFalseAlarm++;
             }
         }
 
@@ -193,7 +194,7 @@ NEXT_HASH:
     m_falseAlarms += nFalseAlarm;
 }
 
-void DESCrackEngine::Run(const char * fileName)
+void DESCrackEngine::Run(const char *fileName)
 {
     uint64_t nChainLen, nChainCount;
 

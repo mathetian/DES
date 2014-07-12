@@ -13,10 +13,10 @@ void Usage()
 {
     Logo();
     printf("Usage: crack   text chainLen chainCount encryptedText \n");
-    printf("               file chainLen chainCount encryptedFile \n\n");
+    printf("               file chainLen RainbowFiles encryptedFile \n\n");
 
-    printf("example 1: crack text chainLen chainCount 12345 7831224 541234 3827427\n");
-    printf("example 2: crack file chainLen chainCount fileName\n\n");
+    printf("example 1: crack text RainbowFiles 12345 7831224 541234 3827427\n");
+    printf("example 2: crack file RainbowFiles encryptedFile\n\n");
 }
 
 int main(int argc,char*argv[])
@@ -47,7 +47,7 @@ int main(int argc,char*argv[])
 
         fclose(file);
     }
-    else if(strcmp(argv[1],"text") == 0)
+    else if(strcmp(argv[1], "text") == 0)
     {
         keyNum = argc - 3;
 

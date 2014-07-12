@@ -233,7 +233,7 @@ int main(int argc,char * argv[])
 
 uint64_t Convert(uint64_t num, int time)
 {
-    assert(num < 8);
+    assert(time < 8);
 
     uint64_t rs = 0, tmp = 0;
 

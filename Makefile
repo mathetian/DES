@@ -56,10 +56,10 @@ regencuda: Interface/DESRegenerator.cu
 	${MV} $@  ${BINARY}
 
 rungen: generator
-	mpirun -np 4 ./$^ 4096 33554432 test
+	mpirun -np 4 ./$^ 4096 65536 test
 
 runcuda: gencuda
-	./$^ 4096 262144 cuda
+	./$^ 4096 65536 cuda
 
 astyle:
 	astyle --style=allman */*.cpp

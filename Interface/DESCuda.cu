@@ -35,22 +35,10 @@ __device__ int GenerateKey(uint64_t key, uint64_t * store)
     c&=0x0fffffffL;
 
 
-    RoundKey0(0);
-    RoundKey0(1);
-    RoundKey1(2);
-    RoundKey1(3);
-    RoundKey1(4);
-    RoundKey1(5);
-    RoundKey1(6);
-    RoundKey1(7);
-    RoundKey0(8);
-    RoundKey1(9);
-    RoundKey1(10);
-    RoundKey1(11);
-    RoundKey1(12);
-    RoundKey1(13);
-    RoundKey1(14);
-    RoundKey0(15);
+    RoundKey0(0); RoundKey0(1); RoundKey1(2); RoundKey1(3);
+    RoundKey1(4); RoundKey1(5); RoundKey1(6); RoundKey1(7);
+    RoundKey0(8); RoundKey1(9); RoundKey1(10); RoundKey1(11);
+    RoundKey1(12); RoundKey1(13); RoundKey1(14); RoundKey0(15);
 
     return 0;
 }
@@ -65,22 +53,14 @@ __device__ uint64_t DESOneTime(uint64_t * roundKeys)
     left  = ROTATE(left,29)&0xffffffffL;
     right = ROTATE(right,29)&0xffffffffL;
 
-    D_ENCRYPT(left,right, 0);
-    D_ENCRYPT(right,left, 1);
-    D_ENCRYPT(left,right, 2);
-    D_ENCRYPT(right,left, 3);
-    D_ENCRYPT(left,right, 4);
-    D_ENCRYPT(right,left, 5);
-    D_ENCRYPT(left,right, 6);
-    D_ENCRYPT(right,left, 7);
-    D_ENCRYPT(left,right, 8);
-    D_ENCRYPT(right,left, 9);
-    D_ENCRYPT(left,right,10);
-    D_ENCRYPT(right,left,11);
-    D_ENCRYPT(left,right,12);
-    D_ENCRYPT(right,left,13);
-    D_ENCRYPT(left,right,14);
-    D_ENCRYPT(right,left,15);
+    D_ENCRYPT(left,right, 0); D_ENCRYPT(right,left, 1);
+    D_ENCRYPT(left,right, 2); D_ENCRYPT(right,left, 3);
+    D_ENCRYPT(left,right, 4); D_ENCRYPT(right,left, 5);
+    D_ENCRYPT(left,right, 6); D_ENCRYPT(right,left, 7);
+    D_ENCRYPT(left,right, 8); D_ENCRYPT(right,left, 9);
+    D_ENCRYPT(left,right,10); D_ENCRYPT(right,left,11);
+    D_ENCRYPT(left,right,12); D_ENCRYPT(right,left,13);
+    D_ENCRYPT(left,right,14); D_ENCRYPT(right,left,15);
 
     left  = ROTATE(left,3)&0xffffffffL;
     right = ROTATE(right,3)&0xffffffffL;
@@ -126,7 +106,7 @@ __global__ void  DESGeneratorCUDA(uint64_t * data)
 
 uint64_t Convert(uint64_t num, int time)
 {
-    assert(num < 8);
+    assert(time < 8);
 
     uint64_t rs = 0, tmp = 0;
 
