@@ -16,7 +16,7 @@ SOURCES = Common/*.cpp
 HEADER  = -I./Include
 BINARY  = Binary
 
-LIB = -L. -L/usr/local/ssl/lib -lrt -lssl -lcrypto -ldl -ldescrypt
+LIB = -L. -L/usr/local/ssl/lib -lrt -ldescrypt -lssl -lcrypto -ldl 
 
 ALL = generator verified sort crack gencuda
 

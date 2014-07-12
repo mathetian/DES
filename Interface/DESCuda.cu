@@ -301,14 +301,6 @@ void DESCrypt()
     //printf("Ending DES kernel\n");
 }
 
-/**
-Combined with DESGeneratorCUDA to generate data
-**/
-
-void Logo()
-{
-    printf("DESRainbowCrack 1.0\n 	Make an implementation of DES Time-and-Memory Tradeoff Technology\n 	By Tian Yulong(mathetian@gmail.com)\n\n");
-}
 
 void Usage()
 {
