@@ -21,25 +21,27 @@ void Usage()
 
 int main(int argc,char*argv[])
 {
-    int keyNum, index;
-    DESCrackEngine  ce;
-    DESCipherSet  * p_cs = DESCipherSet::GetInstance();
+    int keyNum, index, num = 0;
+    DESCrackEngine ce;
+    DESCipherSet  *p_cs = DESCipherSet::GetInstance();
 
     if(argc <= 3)
     {
         Usage();
         return 0;
     }
-    if(strcmp(argv[1],"file") == 0)
+    else if(strcmp(argv[1],"file") == 0)
     {
         if(argc != 4)
         {
             Usage();
             return 0;
         }
+
         FILE * file = fopen(argv[3],"rb");
         assert(file && "main fopen error\n");
         RainbowChain chain;
+
         while(fread((char*)&chain, sizeof(RainbowChain), 1, file))
             p_cs -> AddKey(chain.nEndKey);
 
@@ -48,6 +50,7 @@ int main(int argc,char*argv[])
     else if(strcmp(argv[1],"text") == 0)
     {
         keyNum = argc - 3;
+
         for(index = 0; index < keyNum; index++)
             p_cs -> AddKey(atoll(argv[index+3]));
     }
@@ -66,21 +69,23 @@ int main(int argc,char*argv[])
     struct timeval diskTime  = ce.GetDiskTime();
     struct timeval totalTime = ce.GetTotalTime();
 
-    p_cs -> PrintAllFound();
-
     printf("Key found: %d\n", foundNum);
     printf("Total disk access time: %lld s, %lld us\n",(long long)diskTime.tv_sec,(long long)diskTime.tv_usec);
-    printf("Total spend time    : %lld s, %lld us\n",(long long)totalTime.tv_sec,(long long)totalTime.tv_usec);
-    printf("Total chains step: %lld\n", (long long)ce.GetTotalChains());
-    printf("Total false alarm: %lld\n", (long long)ce.GetFalseAlarms());
+    printf("Total spend time      : %lld s, %lld us\n",(long long)totalTime.tv_sec,(long long)totalTime.tv_usec);
+    printf("Total chains step     : %lld\n", (long long)ce.GetTotalChains());
+    printf("Total false alarm     : %lld\n", (long long)ce.GetFalseAlarms());
     printf("\n");
 
     FILE * file = fopen(argv[3],"rb");
-    int number = 0;
+
     assert(file && "main fopen error\n");
+
     RainbowChain chain;
+
     while(fread((char*)&chain, sizeof(RainbowChain), 1, file))
-        number += p_cs -> Detect(chain);
+        num += p_cs -> Detect(chain);
+
     fclose(file);
-    printf("Detected %d numbers\n", number);
+
+    printf("Detected %d numbers\n", num);
 }

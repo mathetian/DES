@@ -13,9 +13,7 @@ void Usage()
 {
     Logo();
     printf("Usage  : sort sort number fileName\n");
-    printf("         sort distinct number fileName\n");
     printf("example 1: sort sort 1 DES_100_100_test\n");
-    printf("example 2: sort distinct 1 DES_100_100_test\n\n");
 }
 
 typedef pair<RainbowChain, int> PPR;
@@ -26,13 +24,15 @@ struct cmp
     {
         RainbowChain  r1 = a.first;
         RainbowChain  r2 = b.first;
+
         if(r1.nEndKey > r2.nEndKey)
             return true;
+
         return false;
     }
 };
 
-void QuickSort(RainbowChain * pChain, uint64_t length)
+void QuickSort(RainbowChain *pChain, uint64_t length)
 {
     sort(pChain, pChain + length);
 }
@@ -78,14 +78,11 @@ void ExternalSort(FILE * file, vector <FILE*> tmpFiles)
     }
 }
 
-void ExternalSort(FILE * file)
+void ExternalSort(FILE *file)
 {
-    uint64_t nAvailPhys, fileLen;
+    uint64_t nAvailPhys, fileLen, memoryCount;
 
-    uint64_t memoryCount;
-    int tmpNum;
-    int index = 0;
-
+    int tmpNum, index = 0;
     char str[256];
 
     nAvailPhys = GetAvailPhysMemorySize();
@@ -96,6 +93,7 @@ void ExternalSort(FILE * file)
 
     uint64_t eachLen = memoryCount << 4;
     uint64_t lastLen = fileLen % eachLen;
+
     if(lastLen == 0) lastLen = eachLen;
 
     tmpNum      = fileLen/nAvailPhys;
@@ -114,7 +112,9 @@ void ExternalSort(FILE * file)
     {
         sprintf(str,"tmpFiles-%d",index);
         tmpFiles[index] = fopen(str, "wb");
+
         assert(tmpFiles[index] &&("tmpFiles fopen error\n"));
+
         if(index < tmpNum - 1)
         {
             assert(fread((char*)chains, sizeof(RainbowChain), memoryCount, file) == memoryCount);
@@ -143,54 +143,6 @@ void printMemory(const char * str, long long nAvailPhys)
     long long a = 1000, b = 1000*1000;
     long long c = b * 1000;
     printf("%s %lld GB, %lld MB, %lld KB, %lld B\n", str, nAvailPhys/c, (nAvailPhys%c)/b, (nAvailPhys%b)/a, nAvailPhys%1000);
-}
-
-void Distinct(const char * fileName)
-{
-    FILE * file;
-    uint64_t fileLen;
-
-    if((file = fopen(fileName, "rb")) == NULL)
-    {
-        printf("Failed to open: %s\n",fileName);
-        return;
-    }
-
-    fileLen = GetFileLen(file);
-
-    uint64_t nRainbowChainCount = fileLen >> 4;
-
-    RainbowChain * pChain = (RainbowChain*)new unsigned char[fileLen];
-    RainbowChain * tmpChain = (RainbowChain*)new unsigned char[fileLen];
-
-    fseek(file, 0, SEEK_SET);
-
-    printf("Begin Read file\n");
-    if(fread(pChain, 1, fileLen, file) != fileLen)
-    {
-        printf("disk read fail\n");
-        return;
-    }
-    printf("End Read file\n");
-    fclose(file);
-
-    printf("Begin Distinct\n");
-    uint64_t index = 0, num =0;
-    while(index < nRainbowChainCount)
-    {
-        tmpChain[num++] = pChain[index];
-        while(index + 1 < nRainbowChainCount && \
-                pChain[index].nEndKey == pChain[index+1].nEndKey)
-            index++;
-        index ++;
-    }
-    FILE * file2 = fopen("Distinct.txt","wb");
-    assert(file2 && "fopen error");
-    printf("End Distinct\n");
-    fwrite((char*)tmpChain, sizeof(RainbowChain), num, file2);
-
-    cout<<GetFileLen(file2)<<" "<<GetFileLen(file2)/16<<endl;
-    fclose(file2);
 }
 
 void SortFiles(vector <string> fileNames, vector <FILE*> files, const char * prefix)
@@ -298,7 +250,7 @@ void SortOneFile(const char * prefix)
 
         if(pChain != NULL)
         {
-            _fseeki64(targetFile, 0, SEEK_SET);
+            fseek(targetFile, 0, SEEK_SET);
 
             if(fread(pChain, 1, fileLen, targetFile) != fileLen)
             {
@@ -312,7 +264,7 @@ void SortOneFile(const char * prefix)
 
             printf("Writing sorted rainbow table...\n");
 
-            _fseeki64(targetFile, 0, SEEK_SET);
+            fseek(targetFile, 0, SEEK_SET);
             assert(fwrite(pChain, 1, fileLen, targetFile)==fileLen);
 
             delete [] pChain;
@@ -326,8 +278,6 @@ ABORT:
 
 #define AA 536870912
 #define BB 33554432
-// #define AA 268435456
-// #define BB 16777216
 
 void SortLargeFile(const char * prefix)
 {
@@ -381,8 +331,8 @@ void SortLargeFile(const char * prefix)
 
         RainbowChain chain;
 
-        _fseeki64(file, 0, SEEK_SET);
-        assert(_ftelli64(file) == 0);
+        fseek(file, 0, SEEK_SET);
+        assert(ftell(file) == 0);
         vector <uint64_t> tmpLens(round, 0);
 
         int ss    = tmpFiles.size();
@@ -390,7 +340,7 @@ void SortLargeFile(const char * prefix)
 
         for(; index < ss; index++)
         {
-            _fseeki64(tmpFiles[index], 0, SEEK_SET);
+            fseek(tmpFiles[index], 0, SEEK_SET);
             tmpLens[index] = GetFileLen(tmpFiles[index]) >> 4;
         }
 
@@ -398,7 +348,7 @@ void SortLargeFile(const char * prefix)
 
         for(index = 0; index < ss; index++)
         {
-            assert(_ftelli64(tmpFiles[index]) == 0);
+            assert(ftell(tmpFiles[index]) == 0);
             assert(fread((char*)&chain, sizeof(RainbowChain), 1, tmpFiles[index]) == 1);
             chainPQ.push(make_pair(chain,index));
         }
@@ -422,15 +372,15 @@ void SortLargeFile(const char * prefix)
         }
         m_tms.StopTime("ExternalSort Time:");
 
-        _fseeki64(file, 0, SEEK_SET);
-        assert(_ftelli64(file) == 0);
+        fseek(file, 0, SEEK_SET);
+        assert(ftell(file) == 0);
 
         for(uint64_t i = 0; i < round; i++)
         {
             sprintf(str,"LargeFile-%d.data", (int)i);
             printf("%s\n",str);
-            _fseeki64(tmpFiles.at(i), 0, SEEK_SET);
-            assert(_ftelli64(tmpFiles.at(i)) == 0);
+            fseek(tmpFiles.at(i), 0, SEEK_SET);
+            assert(ftell(tmpFiles.at(i)) == 0);
             m_tms.StartTime();
             assert(fread((char*)&chains, sizeof(RainbowChain), BB, file) == BB);
             m_tms.StopTime("Read Time: ");
@@ -447,8 +397,8 @@ void SortLargeFile(const char * prefix)
 void verifiedSorted(const char *fileName)
 {
     FILE *file = fopen(fileName,"rb+");
-    _fseeki64(file, 0, SEEK_SET);
-    assert(_ftelli64(file) == 0);
+    fseek(file, 0, SEEK_SET);
+    assert(ftell(file) == 0);
 
     RainbowChain chains[TTWO];
     TimeStamp tms1;
@@ -510,8 +460,8 @@ int TestCollision()
         tms1.StartTime();
         FILE *file = fopen(str,"rb+");
         assert(file);
-        _fseeki64(file, 0, SEEK_SET);
-        assert(_ftelli64(file) == 0);
+        fseek(file, 0, SEEK_SET);
+        assert(ftell(file) == 0);
         assert(fread((char*)&chains[0], sizeof(RainbowChain), TTWO, file) == TTWO);
         fclose(file);
         tms1.StopTime("Read time: ");
@@ -557,8 +507,8 @@ int TestCollision2()
         tms1.StartTime();
         FILE *file = fopen(str,"rb+");
         assert(file);
-        _fseeki64(file, 0, SEEK_SET);
-        assert(_ftelli64(file) == 0);
+        fseek(file, 0, SEEK_SET);
+        assert(ftell(file) == 0);
         assert(fread((char*)&chains[0], sizeof(RainbowChain), TTWO, file) == TTWO);
         fclose(file);
         tms1.StopTime("Read time: ");
@@ -585,41 +535,13 @@ int TestCollision2()
 
 int main(int argc,char*argv[])
 {
-    // {
-    //     verifiedSorted(argv[1]);
-    //     return 0;
-    // }
-    // {
-    //     for(uint64_t index = 0;index < 10;index++)
-    //     {
-    //         if(TestCollision() ==1)
-    //         {
-    //             printf("index %d\n",index);
-    //         }
-    //         if(index %10==0)
-    //             printf("round %d\n",(int)index);
-    //     }
-    //     return 0;
-    // }
-    // {
-    //     TestCollision2();
-    // }
-    // {
-    //     SortLargeFile("DEMO.data");
-    // }
     if(argc != 4)
     {
         Usage();
         return 0;
     }
 
-    if(strcmp(argv[1],"distinct") == 0)
-    {
-        int num = atoi(argv[2]);
-        assert((num == 1) && "Sorry for that, I want to write `less` code");
-        Distinct(argv[3]);
-    }
-    else if(strcmp(argv[1],"sort") == 0)
+    if(strcmp(argv[1],"sort") == 0)
     {
         int num =  atoi(argv[2]);
 
@@ -633,8 +555,8 @@ int main(int argc,char*argv[])
         }
         else
         {
-            vector <string> fileNames(num, "");
-            vector <FILE*>  files(num, NULL);
+            vector<string> fileNames(num, "");
+            vector<FILE*>  files(num, NULL);
 
             for(int index = 0; index < num; index++)
             {
@@ -650,7 +572,8 @@ int main(int argc,char*argv[])
             printf("End SortFiles\n");
         }
     }
-    else Usage();
+    else
+        Usage();
 
     return 0;
 }

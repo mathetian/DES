@@ -50,11 +50,7 @@ extern uint64_t GetAvailPhysMemorySize();
 
 extern void U56ToArr7(const uint64_t & key56, unsigned char * key_56);
 
-
 extern void Arr7ToU56(const unsigned char * key_56, uint64_t & key56);
-/**
-	des_cblock: typedef unsigned char DES_cblock[8]
-**/
 
 extern void SetupDESKey(const uint64_t&key56, des_key_schedule &ks);
 
@@ -72,11 +68,10 @@ inline uint64_t atoll(const char * str)
     return rs;
 }
 
-extern string GetLastErrorStdStr();
 #endif
 
-#define _fseeki64 fseek
-#define _ftelli64 ftell
+#define fseek64 fseek
+#define ftell64 ftell
 
 };
 

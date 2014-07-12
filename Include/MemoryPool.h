@@ -24,7 +24,8 @@ public:
         else
             m_nMemMax = m_nAvailPhys - 8*1024*1024;
     }
-    virtual ~ MemoryPool()
+
+    virtual ~MemoryPool()
     {
         if(m_pMem)
         {
@@ -34,7 +35,8 @@ public:
     }
 
 public:
-    unsigned char*Allocate(uint64_t nFileLen, uint64_t & nAllocatedSize)
+
+    unsigned char* Allocate(uint64_t nFileLen, uint64_t &nAllocatedSize)
     {
         unsigned int nTargetSize;
 

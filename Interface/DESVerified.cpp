@@ -19,9 +19,11 @@ void Usage()
 int main(int argc,char*argv[])
 {
     FILE * file;
-    uint64_t chainLen, chainCount, fileLen;
     RainbowChain chain;
-    uint64_t index;
+
+    uint64_t chainLen, chainCount;
+    uint64_t fileLen, index;
+
     DESChainWalkContext cwc;
 
     if(argc != 3)
@@ -58,18 +60,21 @@ int main(int argc,char*argv[])
         assert(fread(&chain, sizeof(RainbowChain), 1, file) == 1);
 
         cwc.SetKey(chain.nStartKey);
+
         for(uint32_t j = 0; j < chainLen; j++)
         {
             cwc.KeyToCipher();
             cwc.KeyReduction(j);
         }
+
         if(cwc.GetKey() != chain.nEndKey)
-            printf("warning: integrity check fail, index: %lld \n",(long long)index);
+            printf("warning: integrity check fail, index: %lld \n", (long long)index);
 
         if(index % 5000 == 0)
-            printf("Have check %lld chains\n",(long long)(index + 1));
-
+            printf("Have check %lld chains\n", (long long)(index + 1));
     }
+
     fclose(file);
+
     return 0;
 }

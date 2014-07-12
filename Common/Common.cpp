@@ -19,11 +19,11 @@ void Logo()
 
 uint64_t GetFileLen(FILE* file)
 {
-    uint64_t pos = _ftelli64(file);
-    _fseeki64(file, 0, SEEK_END);
-    uint64_t len = _ftelli64(file);
+    uint64_t pos = ftell(file);
+    fseek(file, 0, SEEK_END);
+    uint64_t len = ftell(file);
 
-    _fseeki64(file, pos, SEEK_SET);
+    fseek(file, pos, SEEK_SET);
 
     return len;
 }
@@ -91,35 +91,5 @@ bool AnylysisFileName(const char * filename, uint64_t & chainLen, uint64_t & cha
 
     return true;
 }
-
-#ifdef _WIN32
-string GetLastErrorStdStr()
-{
-    DWORD error = GetLastError();
-    if (error)
-    {
-        LPVOID lpMsgBuf;
-        DWORD bufLen = FormatMessage(
-                           FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                           FORMAT_MESSAGE_FROM_SYSTEM |
-                           FORMAT_MESSAGE_IGNORE_INSERTS,
-                           NULL,
-                           error,
-                           MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                           (LPTSTR) &lpMsgBuf,
-                           0, NULL );
-        if (bufLen)
-        {
-            LPCSTR lpMsgStr = (LPCSTR)lpMsgBuf;
-            std::string result(lpMsgStr, lpMsgStr+bufLen);
-
-            LocalFree(lpMsgBuf);
-
-            return result;
-        }
-    }
-    return std::string();
-}
-#endif
 
 };

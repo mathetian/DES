@@ -19,7 +19,6 @@ class DESCrackEngine
 {
 public:
     DESCrackEngine();
-    ~ DESCrackEngine();
 
 public:
     void  Run(const char * fileName);
@@ -38,8 +37,8 @@ private:
 
 private:
     static MemoryPool mp;
-    vector <uint64_t> pEndKeys;
-    vector <uint64_t> pVerified;
+    vector<uint64_t> pEndKeys;
+    vector<uint64_t> pVerified;
 
 private:
     uint64_t  BinarySearch(RainbowChain * pChain, uint64_t pChainCount, uint64_t nIndex);

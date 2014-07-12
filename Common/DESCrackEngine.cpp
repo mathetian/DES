@@ -14,77 +14,87 @@ MemoryPool DESCrackEngine::mp;
 
 DESCrackEngine::DESCrackEngine() : m_totalChains(0), m_falseAlarms(0)
 {
-    m_diskTime.tv_sec = 0;
-    m_diskTime.tv_usec = 0;
-    m_totalTime.tv_sec = 0;
+    m_diskTime.tv_sec   = 0;
+    m_diskTime.tv_usec  = 0;
+    m_totalTime.tv_sec  = 0;
     m_totalTime.tv_usec = 0;
-    this -> p_cs = DESCipherSet::GetInstance();
-}
-
-DESCrackEngine::~DESCrackEngine()
-{
+    p_cs = DESCipherSet::GetInstance();
 }
 
 uint64_t DESCrackEngine::BinarySearch(RainbowChain * pChain, uint64_t pChainCount, uint64_t nIndex)
 {
-    long long low=0, high=pChainCount;
-    while(low<high)
+    uint64_t low = 0, high = pChainCount;
+
+    while(low < high)
     {
-        long long mid = (low+high)/2;
-        if(pChain[mid].nEndKey == nIndex) return mid;
-        else if(pChain[mid].nEndKey < nIndex) low = mid + 1;
-        else high=mid;
+        uint64_t mid = (low+high)/2;
+
+        if(pChain[mid].nEndKey == nIndex)
+            return mid;
+        else if(pChain[mid].nEndKey < nIndex)
+            low = mid + 1;
+        else
+            high=mid;
     }
+
     return low;
 }
 
-void DESCrackEngine::GetIndexRange(RainbowChain * pChain,uint64_t pChainCount, uint64_t nChainIndex,uint64_t&nChainIndexFrom, uint64_t&nChainIndexTo)
+void DESCrackEngine::GetIndexRange(RainbowChain * pChain,uint64_t pChainCount, uint64_t nChainIndex, uint64_t &nChainIndexFrom, uint64_t &nChainIndexTo)
 {
     nChainIndexFrom = nChainIndex;
     nChainIndexTo   = nChainIndex;
+
     while(nChainIndexFrom>0)
     {
         if(pChain[nChainIndexFrom - 1].nEndKey == pChain[nChainIndex].nEndKey)
             nChainIndexFrom--;
-        else break;
+        else
+            break;
     }
+
     while(nChainIndexTo < pChainCount)
     {
-        if(pChain[nChainIndexTo+1].nEndKey==pChain[nChainIndex].nEndKey)
+        if(pChain[nChainIndexTo+1].nEndKey == pChain[nChainIndex].nEndKey)
             nChainIndexTo++;
-        else break;
+        else
+            break;
     }
 }
 
-bool DESCrackEngine::CheckAlarm(RainbowChain * pChain, uint64_t nGuessPos, uint64_t testV)
+bool DESCrackEngine::CheckAlarm(RainbowChain *pChain, uint64_t nGuessPos, uint64_t testV)
 {
     DESChainWalkContext cwc;
-    uint32_t nPos;
-    uint64_t old = pChain -> nStartKey;
+
+    uint64_t nPos = 0, old = pChain -> nStartKey;
 
     cwc.SetKey(pChain -> nStartKey);
 
-    for(nPos = 0; nPos <= nGuessPos; nPos++)
+    for(; nPos <= nGuessPos; nPos++)
     {
         old = cwc.GetKey();
         cwc.KeyToCipher();
         cwc.KeyReduction(nPos);
     }
+
     if(cwc.GetKey() == pVerified[nGuessPos])
     {
-        printf("plaintext of %lld is %lld\n",(long long)cwc.GetKey(), (long long)old);
+        printf("plaintext of %lld is %lld\n", (long long)cwc.GetKey(), (long long)old);
         p_cs -> AddResult(p_cs -> GetLeftKey(), old);
+
+        return true;
     }
 
     return false;
 }
 
-void DESCrackEngine::SearchRainbowTable(const char * fileName)
+void DESCrackEngine::SearchRainbowTable(const char *fileName)
 {
     char str[256];
+
     uint64_t fileLen, nAllocateSize, nDataRead;
-    FILE * file;
-    RainbowChain * pChain;
+    FILE *file;
+    RainbowChain *pChain;
 
     if((file = fopen(fileName,"rb")) == NULL)
     {
@@ -95,7 +105,8 @@ void DESCrackEngine::SearchRainbowTable(const char * fileName)
     fileLen = GetFileLen(file);
 
     assert(fileLen % 16 == 0);
-    cout<<DESChainWalkContext::m_chainCount<<" "<<fileLen<<endl;
+
+    cout << DESChainWalkContext::m_chainCount << " " << fileLen << endl;
 
     if(fileLen % 16 != 0 || DESChainWalkContext::m_chainCount*16 != fileLen)
     {
@@ -115,16 +126,19 @@ void DESCrackEngine::SearchRainbowTable(const char * fileName)
     while(true)
     {
         if(fileLen == (uint64_t)ftell(file)) break;
+
         TimeStamp tmps;
         tmps.StartTime();
 
         nDataRead = fread(pChain, 1, nAllocateSize, file);
+
         if(nDataRead != nAllocateSize)
         {
             printf("Warning nDataRead: %lld, nAllocateSize: %lld\n", (long long)nDataRead, (long long)nAllocateSize);
         }
 
         sprintf(str,"%lld bytes read, disk access time:", (long long)nAllocateSize);
+
         tmps.StopTime(str);
         tmps.AddTime(m_diskTime);
 
@@ -133,21 +147,24 @@ void DESCrackEngine::SearchRainbowTable(const char * fileName)
         SearchTableChunk(pChain, nDataRead >> 4);
 
         sprintf(str,"cryptanalysis time: ");
+
         tmps.StopTime(str);
         tmps.AddTime(m_totalTime);
 
         if(p_cs -> Solved()) break;
     }
+
     p_cs -> Done(p_cs->GetLeftKey());
+
     fclose(file);
 }
 
-void DESCrackEngine::SearchTableChunk(RainbowChain * pChain, int pChainCount)
+void DESCrackEngine::SearchTableChunk(RainbowChain *pChain, int pChainCount)
 {
     uint64_t nFalseAlarm, nIndex, nGuessPos;
     uint64_t key = p_cs -> GetLeftKey();
 
-    printf("Searching for key: %lld...\n",(long long)key);
+    printf("Searching for key: %lld...\n", (long long)key);
 
     nFalseAlarm  = 0;
 
@@ -167,6 +184,7 @@ void DESCrackEngine::SearchTableChunk(RainbowChain * pChain, int pChainCount)
                 else nFalseAlarm++;
             }
         }
+
         if(nGuessPos % 100 == 0) printf("nGuessPos %lld\n", (long long)nGuessPos);
     }
 NEXT_HASH:
@@ -177,7 +195,6 @@ NEXT_HASH:
 
 void DESCrackEngine::Run(const char * fileName)
 {
-    this -> p_cs = DESCipherSet::GetInstance();
     uint64_t nChainLen, nChainCount;
 
     if(AnylysisFileName(fileName, nChainLen, nChainCount) == false)
@@ -186,19 +203,24 @@ void DESCrackEngine::Run(const char * fileName)
         return;
     }
 
-    printf("\nnChainLen: %lld, nChainCount: %lld\n",(long long)nChainLen,(long long)nChainCount);
+    printf("\nnChainLen: %lld, nChainCount: %lld\n", (long long)nChainLen, (long long)nChainCount);
 
     DESChainWalkContext::SetChainInfo(nChainLen, nChainCount);
 
     int index = 0;
+
     while(p_cs -> AnyKeyLeft())
     {
         printf("-------------------------------------------------------\n");
         printf("Time: %d, key: %lld\n\n",index++,(long long)p_cs -> GetLeftKey());
+
         TimeStamp tmps;
         tmps.StartTime();
+
         InitEndKeys(p_cs -> GetLeftKey());
+
         tmps.StopTime("Init Time: ");
+
         SearchRainbowTable(fileName);
 
         printf("-------------------------------------------------------\n");
