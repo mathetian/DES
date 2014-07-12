@@ -84,7 +84,7 @@ __global__ void  DESGeneratorCUDA(uint64_t * data)
 
     for(int nPos = 0; nPos < CHAINLEN; nPos++)
     {
-        GenerateKey(m_nIndex,roundKeys);
+        GenerateKey(m_nIndex, roundKeys);
 
         m_nIndex  = DESOneTime(roundKeys);
         m_nIndex &= totalSpace;
@@ -122,12 +122,12 @@ uint64_t Convert(uint64_t num, int time)
     return rs;
 }
 
-void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
+void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char *suffix)
 {
     char fileName[100];
     memset(fileName, 0, 100);
 
-    sprintf(fileName,"DES_%lld-%lld_%s-cuda", (long long)chainLen, (long long)chainCount,suffix);
+    sprintf(fileName,"DES_%lld-%lld_%s-cuda", (long long)chainLen, (long long)chainCount, suffix);
 
     FILE * file = fopen(fileName, "ab+");
     assert(file);
@@ -196,7 +196,7 @@ int main(int argc, char * argv[])
 
     chainLen   = atoll(argv[1]);
     chainCount = atoll(argv[2]);
-    memcpy(suffix,argv[3],strlen(argv[3]));
+    memcpy(suffix, argv[3], strlen(argv[3]));
 
     DESGenerator(chainLen, chainCount, suffix);
 

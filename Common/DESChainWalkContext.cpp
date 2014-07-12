@@ -10,8 +10,7 @@ namespace descrack
 uint64_t DESChainWalkContext::m_plainText     = 0x305532286D6F295A;
 unsigned char DESChainWalkContext::m_dplainText[8] = {0x6D,0x6F,0x29,0x5A,0x30,0x55,0x32,0x28};
 
-//uint64_t DESChainWalkContext::m_keySpaceTotal = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
-uint64_t DESChainWalkContext::m_keySpaceTotal = (1ull << 24) - 2 - (1ull << 8) - (1ull << 16);
+uint64_t DESChainWalkContext::m_keySpaceTotal = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
 
 uint64_t DESChainWalkContext::m_chainLen;
 uint64_t DESChainWalkContext::m_chainCount;
