@@ -76,4 +76,9 @@ int DESCipherSet::Detect(RainbowChain chain)
     return 0;
 }
 
+int DESCipherSet::GetRemainCount()
+{
+    return m_vKeys.size() - index;
+}
+
 };

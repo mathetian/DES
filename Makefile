@@ -52,6 +52,7 @@ gencuda: Interface/DESCuda.cu
 	${MV} $@  ${BINARY}
 
 regencuda: Interface/DESRegenerator.cu
+	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
 

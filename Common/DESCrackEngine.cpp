@@ -181,7 +181,7 @@ void DESCrackEngine::SearchTableChunk(RainbowChain *pChain, int pChainCount)
             {
                 if(CheckAlarm(pChain + nIndex, nGuessPos, pEndKeys[nGuessPos]))
                     goto NEXT_HASH;
-                else 
+                else
                     nFalseAlarm++;
             }
         }

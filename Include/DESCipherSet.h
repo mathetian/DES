@@ -28,6 +28,8 @@ public:
     int      GetKeyFoundNum();
     int      Detect(RainbowChain chain);
 
+    int      GetRemainCount();
+
 private:
     DESCipherSet();
     static DESCipherSet * p_cs;
