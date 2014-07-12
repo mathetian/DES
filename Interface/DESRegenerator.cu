@@ -107,13 +107,13 @@ __global__ void  DESGeneratorCUDA(uint64_t * data)
     {
         GenerateKey(m_nIndex, roundKeys);
         m_nIndex  = DESOneTime(roundKeys);
-		m_nIndex &= totalSpace;
+        m_nIndex &= totalSpace;
 
         int nnpos = nPos;
         if(nPos < 1300) nnpos = 0;
         m_nIndex = (m_nIndex + nnpos) & totalSpace;
         m_nIndex = (m_nIndex + (nnpos << 8)) & totalSpace;
-        m_nIndex = (m_nIndex + ((nnpos << 8) << 8)) & totalSpace;	    
+        m_nIndex = (m_nIndex + ((nnpos << 8) << 8)) & totalSpace;
     }
 
     data[TX] = m_nIndex;
@@ -132,57 +132,60 @@ void Usage()
 }
 
 void Regenerator(DESCipherSet *p_cs, uint64_t chainLen, uint64_t chainCount)
-{	
-	assert(chainLen <= ALL*sizeof(uint64_t));
+{
+    assert(chainLen <= ALL*sizeof(uint64_t));
 
-	uint64_t starts[ALL], ends[ALL];
-	
-	uint64_t *cudaIn; int size = chainLen*sizeof(uint64_t);
-	_CUDA(cudaMalloc((void**)&cudaIn , size));
+    uint64_t starts[ALL], ends[ALL];
 
-	while(p_cs -> AnyKeyLeft() == true)
-	{
-		uint64_t key = p_cs -> GetLeftKey();
-		p_cs -> Done(0);
-		
-		stringstream ss; ss << key << ".txt";
-		
-		/// Won't check duplicate files
-		FILE *file = fopen(ss.str().c_str(), "ab+");
+    uint64_t *cudaIn;
+    int size = chainLen*sizeof(uint64_t);
+    _CUDA(cudaMalloc((void**)&cudaIn , size));
+
+    while(p_cs -> AnyKeyLeft() == true)
+    {
+        uint64_t key = p_cs -> GetLeftKey();
+        p_cs -> Done(0);
+
+        stringstream ss;
+        ss << key << ".txt";
+
+        /// Won't check duplicate files
+        FILE *file = fopen(ss.str().c_str(), "ab+");
 
         assert(file);
 
-		for(uint64_t nPos = 0; nPos < chainLen ; nPos++)
-		{
-			starts[nPos] = (key & totalSpaceT);
-			int nnpos = nPos;
+        for(uint64_t nPos = 0; nPos < chainLen ; nPos++)
+        {
+            starts[nPos] = (key & totalSpaceT);
+            int nnpos = nPos;
 
-	        if(nPos < 1300) nnpos = 0;
-	        starts[nPos] = (starts[nPos] + nnpos) & totalSpaceT;
-	        starts[nPos] = (starts[nPos] + (nnpos << 8)) & totalSpaceT;
-	        starts[nPos] = (starts[nPos] + ((nnpos << 8) << 8)) & totalSpaceT;
-		}
+            if(nPos < 1300) nnpos = 0;
+            starts[nPos] = (starts[nPos] + nnpos) & totalSpaceT;
+            starts[nPos] = (starts[nPos] + (nnpos << 8)) & totalSpaceT;
+            starts[nPos] = (starts[nPos] + ((nnpos << 8) << 8)) & totalSpaceT;
+        }
 
-		_CUDA(cudaMemcpy(cudaIn, starts, size,cudaMemcpyHostToDevice));
+        _CUDA(cudaMemcpy(cudaIn, starts, size,cudaMemcpyHostToDevice));
 
-		DESGeneratorCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
+        DESGeneratorCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
 
         _CUDA(cudaMemcpy(ends, cudaIn, size, cudaMemcpyDeviceToHost));
 
         for(uint64_t pos = 0; pos < chainLen ; pos++)
-		{
+        {
             int flag1 = fwrite((char*)&(starts[pos]), sizeof(uint64_t), 1, file);
             int flag2 = fwrite((char*)&(ends[pos]), sizeof(uint64_t), 1, file);
             assert((flag1 == 1) && (flag2 == 1));
-		}
+        }
 
         fclose(file);
-	}
+    }
 }
 
 int main(int argc, char *argv[])
 {
-    int keyNum, index; uint64_t chainLen, chainCount;
+    int keyNum, index;
+    uint64_t chainLen, chainCount;
     DESCipherSet  * p_cs = DESCipherSet::GetInstance();
 
     if(argc <= 3)
@@ -227,5 +230,5 @@ int main(int argc, char *argv[])
 
     Regenerator(p_cs, chainLen, chainCount);
 
-	return 0;
+    return 0;
 }

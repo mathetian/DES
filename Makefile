@@ -5,12 +5,11 @@ MPICXX   = mpicxx
 NVCC     = nvcc
 NVFLAGS  = -O -g
 
-AR	 = ar
+AR	     = ar
 LIBMISC	 = libdescrypt.a
 RANLIB   = ranlib
 RM       = rm
-MV       = mv
-CP       = cp
+MV       = cp
 
 SOURCES = Common/*.cpp
 HEADER  = -I./Include
@@ -23,35 +22,39 @@ ALL = generator verified sort crack gencuda
 lib: clean compile
 	${AR} rv ${LIBMISC} *.o
 	${RANLIB} ${LIBMISC}
+	rm *.o
 
 compile:
 	${CXX} ${CXXFLAGS} ${HEADER} -c ${SOURCES}
 
-all: ${ALL}
+all: creat ${ALL}
 
 generator: Interface/DESGenerator.cpp
 	#module purge && module load icc/13.1.1 impi/4.1.1.036 && ${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	${MV} $@  ${BINARY}
 
 verified: Interface/DESVerified.cpp
 	${CXX} ${CXXFLAGS} ${HEADER} ${LIB} $^ -o $@ ${LIB}
-	${CP} $@  ${BINARY}
+	${MV} $@  ${BINARY}
 
 sort: Interface/DESSort.cpp
 	${CXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
-	${CP} $@  ${BINARY}
+	${MV} $@  ${BINARY}
 
 crack: Interface/DESCrack.cpp
 	${CXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
-	${CP} $@  ${BINARY}
+	${MV} $@  ${BINARY}
 
 gencuda: Interface/DESCuda.cu
 	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	${MV} $@  ${BINARY}
 
 regencuda: Interface/DESRegenerator.cu
 	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
-	
+	${MV} $@  ${BINARY}
+
 rungen: generator
 	mpirun -np 4 ./$^ 4096 33554432 test
 

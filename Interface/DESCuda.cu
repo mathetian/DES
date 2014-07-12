@@ -147,13 +147,13 @@ __global__ void  DESGeneratorCUDA(uint64_t * data)
         /**First Step(Cipher Function)**/
         GenerateKey(m_nIndex,roundKeys);
         m_nIndex = DESOneTime(roundKeys);
-	m_nIndex &= totalSpace;
+        m_nIndex &= totalSpace;
 
         int nnpos = nPos;
         if(nPos < 1300) nnpos = 0;
         m_nIndex = (m_nIndex + nnpos) & totalSpace;
         m_nIndex = (m_nIndex + (nnpos << 8)) & totalSpace;
-        m_nIndex = (m_nIndex + ((nnpos << 8) << 8)) & totalSpace;	    
+        m_nIndex = (m_nIndex + ((nnpos << 8) << 8)) & totalSpace;
     }
 
     data[TX] = m_nIndex;
@@ -323,26 +323,28 @@ struct RainbowChain_t
 
 typedef struct RainbowChain_t RainbowChain;
 
-uint64_t GetFileLen(FILE* file)
-{
-    unsigned int pos = ftell(file);
-    fseek(file, 0, SEEK_END);
-    uint64_t len = ftell(file);
-    fseek(file, pos, SEEK_SET);
-
-    return len;
-}
 uint64_t Convert(uint64_t num)
 {
     uint64_t rs = 0, tmp =0;
-    tmp = num & ((1ull << 7) - 1); tmp <<= 1;
-    rs = tmp; num >>= 7;
-    tmp = num & ((1ull << 7) - 1); tmp <<= 1; tmp <<= 8;
-    rs |= tmp; num >>= 7;
-    tmp = num & ((1ull << 7) - 1); tmp <<= 1; tmp <<= 16;
-    rs |= tmp; num >>= 7;
-    tmp = num & ((1ull << 7) - 1); tmp <<= 1; tmp <<= 24;
-    rs |= tmp; num >>= 7;
+    tmp = num & ((1ull << 7) - 1);
+    tmp <<= 1;
+    rs = tmp;
+    num >>= 7;
+    tmp = num & ((1ull << 7) - 1);
+    tmp <<= 1;
+    tmp <<= 8;
+    rs |= tmp;
+    num >>= 7;
+    tmp = num & ((1ull << 7) - 1);
+    tmp <<= 1;
+    tmp <<= 16;
+    rs |= tmp;
+    num >>= 7;
+    tmp = num & ((1ull << 7) - 1);
+    tmp <<= 1;
+    tmp <<= 24;
+    rs |= tmp;
+    num >>= 7;
     return rs;
 }
 void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
@@ -384,8 +386,8 @@ void DESGenerator(uint64_t chainLen, uint64_t chainCount, const char * suffix)
         for(uint64_t i = 0; i < ALL; i++)
         {
             starts[i] = Convert(round*ALL + i);
-	    starts[i] &= totalSpaceT;
-	}
+            starts[i] &= totalSpaceT;
+        }
         /**Belong to CUDA logic**/
         _CUDA(cudaMemcpy(cudaIn,starts,size,cudaMemcpyHostToDevice));
 
