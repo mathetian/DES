@@ -1,7 +1,11 @@
-#include "DESCommon.h"
+// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-#include <openssl/rand.h>
-#include <openssl/des.h>
+#include "Common.h"
+
+namespace descrack
+{
 
 bool RainbowChain::operator < (const RainbowChain &m) const
 {
@@ -52,9 +56,6 @@ void U56ToArr7(const uint64_t & key56, unsigned char * key_56)
     key_56[7] = ((key56 >> 56) & mask);
 }
 
-/**
-	Problem with that, how to convert 64 bit wrong to 56 bit right
-**/
 void Arr7ToU56(const unsigned char * key_56, uint64_t & key56)
 {
     key56 = *(uint64_t*)key_56;
@@ -120,3 +121,5 @@ string GetLastErrorStdStr()
   return std::string();
 }
 #endif
+
+};

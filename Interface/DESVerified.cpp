@@ -1,7 +1,12 @@
-#include "DESCommon.h"
-#include "DESChainWalkContext.h"
+// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-#include <assert.h>
+#include "Common.h"
+using namespace utils;
+
+#include "DESChainWalkContext.h"
+using namespace descrack;
 
 void Usage()
 {

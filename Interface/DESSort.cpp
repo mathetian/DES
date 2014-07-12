@@ -1,15 +1,13 @@
-#include <algorithm>
-#include <vector>
-#include <queue>
-#include <string>
-#include <iostream>
-using namespace std;
+// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-#include "DESCommon.h"
+#include "Common.h"
 #include "TimeStamp.h"
-#include "DESChainWalkContext.h"
+using namespace utils;
 
-#include <assert.h>
+#include "DESChainWalkContext.h"
+using namespace descrack;
 
 void Usage()
 {
@@ -22,7 +20,6 @@ void Usage()
 
 typedef pair<RainbowChain, int> PPR;
 
-/**fix cmp bug**/
 struct cmp
 {
     bool operator()(const PPR &a, const PPR &b)

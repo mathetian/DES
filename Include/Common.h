@@ -1,19 +1,9 @@
+// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+
 #ifndef _COMMON_H
 #define _COMMON_H
-
-#include <time.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <openssl/des.h>
-
-#include <string>
-#include <sstream>
-#include <iostream>
-using namespace std;
-
-#include <stdint.h>
 
 #ifdef _WIN32
 #pragma warning(disable : 4786)
@@ -26,6 +16,8 @@ using namespace std;
 #include <sys/time.h>
 #endif
 
+namespace utils
+{
 
 class RainbowChain
 {
@@ -69,4 +61,7 @@ extern string GetLastErrorStdStr();
 
 #define _fseeki64 fseek
 #define _ftelli64 ftell
+
+};
+
 #endif

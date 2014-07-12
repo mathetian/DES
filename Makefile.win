@@ -15,19 +15,19 @@ CUDALIB = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\lib\Win32"
 
 all: $(PROGS)
 
-generator: Interface\DESGenerator.cpp Common\DESCommon.cpp Common\DESChainWalkContext.cpp 
+generator: Interface\DESGenerator.cpp Common\Common.cpp Common\DESChainWalkContext.cpp 
         cl $(CFLAGS) $(HEADER)  $**      \
         /link $(LDFLAGS) /LIBPATH:$(SSLLIB) /STACK:"100000000" /out:$@.exe
 
-verified: Interface\DESVerified.cpp Common\DESCommon.cpp Common\DESChainWalkContext.cpp 
+verified: Interface\DESVerified.cpp Common\Common.cpp Common\DESChainWalkContext.cpp 
         cl $(CFLAGS) $(HEADER)  $**     \
         /link $(LDFLAGS) /LIBPATH:$(SSLLIB) /out:$@.exe
 
-sort:    Interface\DESSort.cpp Common\DESCommon.cpp
+sort:    Interface\DESSort.cpp Common\Common.cpp
         cl $(CFLAGS) $(HEADER)  $**      \
         /link $(LDFLAGS) /LIBPATH:$(SSLLIB) /STACK:"1000000000" /out:$@.exe
 
-crack:  Interface/DESCrack.cpp Common/DESCommon.cpp Common/DESChainWalkContext.cpp Common/DESCipherSet.cpp Common/DESCrackEngine.cpp 
+crack:  Interface/DESCrack.cpp Common/Common.cpp Common/DESChainWalkContext.cpp Common/DESCipherSet.cpp Common/DESCrackEngine.cpp 
         cl $(CFLAGS) $(HEADER) $**      \
         /link $(LDFLAGS) /LIBPATH:$(SSLLIB) /out:$@.exe
 

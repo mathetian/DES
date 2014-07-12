@@ -1,11 +1,14 @@
+// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+
 #ifndef _CHAIN_WALK_CONTEXT_H
 #define _CHAIN_WALK_CONTEXT_H
 
-#include <openssl/rand.h>
-#include <string>
-using namespace std;
+#include "Common.h"
 
-#include "DESCommon.h"
+namespace descrack
+{
 
 #define HASH_LEN 8
 
@@ -43,6 +46,8 @@ private:
 
 private:
     uint64_t m_nIndex;
+};
+
 };
 
 #endif

@@ -1,13 +1,14 @@
+// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+
 #ifndef _CIPHER_SET_H
 #define _CIPHER_SET_H
 
-#include <map>
-#include <vector>
-#include <iostream>
-using namespace std;
+#include "Common.h"
 
-#include <assert.h>
-#include "DESCommon.h"
+namespace descrack
+{
 
 class DESCipherSet
 {
@@ -36,6 +37,8 @@ private:
     map<uint64_t, vector<uint64_t> > m_maps;
     uint32_t index;
     int solve;
+};
+
 };
 
 #endif

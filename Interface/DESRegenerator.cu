@@ -1,14 +1,10 @@
+// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+
 #include "DESCuda.h"
-
 #include "DESCipherSet.h"
-
-#include <stdio.h>
-
-#include <iostream>
-#include <sstream>
-using namespace std;
-
-#include <assert.h>
+using namespace descrack;
 
 __device__ int GenerateKey(uint64_t key, uint64_t * store)
 {

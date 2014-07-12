@@ -1,13 +1,15 @@
+// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+
 #include <mpi.h>
 
-#include "DESCommon.h"
+#include "Common.h"
 #include "TimeStamp.h"
+using namespace utils;
+
 #include "DESChainWalkContext.h"
-
-#include <iostream>
-using namespace std;
-
-#include <assert.h>
+using namespace descrack;
 
 #define BOOLEAN int
 #define MASTER_RANK 0

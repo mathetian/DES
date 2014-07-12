@@ -1,8 +1,9 @@
+// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+
 #ifndef _TIME_STAMP_H
 #define _TIME_STAMP_H
-
-#include <time.h>
-#include <stdio.h>
 
 #ifdef _WIN32
 #pragma  warning(disable : 4786)
@@ -11,6 +12,9 @@
 #else
 #include <sys/time.h>
 #endif
+
+namespace utils
+{
 
 inline struct timeval DW2time(int dur)
 {
@@ -89,6 +93,8 @@ private:
 
 private:
     struct timeval starttime,curtime,difference;
+};
+
 };
 
 #endif

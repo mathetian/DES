@@ -1,27 +1,19 @@
+// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+
 #include "DESChainWalkContext.h"
 
-uint64_t   DESChainWalkContext::m_plainText     = 0x305532286D6F295A;
-uint64_t   DESChainWalkContext::m_keySpaceTotal = (1ull << 11) - 1;
-/**20 bit, 2^10 * 2^11**/
-//uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 23) - (1ull << 8) - 2 - (1ull << 16);
-/**24 bit**/
-//uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 28) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24);
-//uint64_t DESChainWalkContext::m_keySpaceTotalT = (1ull<<38) - (1ull<<8) - 2 -(1ull<<16) -(1ull<<24)-(1ull<<28);
-/**28 bit, 2^10 * 2^18**/
-//uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 32) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24);
-//uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 12) - 2 - (1ull << 8);
-//uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 19) - (1ull << 8) - 2 - (1ull<<16);
-//uint64_t DESChainWalkContext::m_keySpaceTotalT = (1ull << 38) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32);
-uint64_t DESChainWalkContext::m_keySpaceTotalT = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
-/**32 bit(100 M), 2^11 * 2^21**/
-/*uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24) - 1;*/
+namespace descrack
+{
 
-/**35 bit(100M), 2^13 * 2^23 **/
-/*uint64_t   DESChainWalkContext::m_keySpaceTotalT = (1ull << 40) - (1ull << 8) - 2 - (1ull << 16) - (1ull << 24) -(1ull << 32);*/
-
-uint64_t   DESChainWalkContext::m_chainLen;
-uint64_t   DESChainWalkContext::m_chainCount;
+uint64_t DESChainWalkContext::m_plainText     = 0x305532286D6F295A;
 unsigned char DESChainWalkContext::m_dplainText[8] = {0x6D,0x6F,0x29,0x5A,0x30,0x55,0x32,0x28};
+
+uint64_t DESChainWalkContext::m_keySpaceTotal = (1ull << 11) - 1;
+uint64_t DESChainWalkContext::m_keySpaceTotalT = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
+uint64_t DESChainWalkContext::m_chainLen;
+uint64_t DESChainWalkContext::m_chainCount;
 
 DESChainWalkContext::DESChainWalkContext()
 {
@@ -39,26 +31,10 @@ void DESChainWalkContext::SetChainInfo(uint64_t chainLen, uint64_t chainCount)
 
 uint64_t DESChainWalkContext::GetRandomKey()
 {
-    /**Need rewrite it with custom-random generator**/
     RAND_bytes((unsigned char*)&m_nIndex,8);
     m_nIndex = m_nIndex & m_keySpaceTotalT;
     return m_nIndex;
 }
-
-/**
-    des_cblock: typedef unsigned char DES_cblock[8];
-**/
-/**
-typedef struct DES_ks
-{
-    union
-	{
-		DES_cblock cblock;
-		DES_LONG deslong[2];
-	} ks[16];
-} DES_key_schedule;
-DES_LONG is 'unsigned int'
-**/
 
 void DESChainWalkContext::KeyToCipher()
 {
@@ -76,14 +52,8 @@ void DESChainWalkContext::CipherToKey(unsigned char * out)
     m_nIndex &= m_keySpaceTotalT;
 }
 
-/**
-	Still exist the same problem
-**/
 void DESChainWalkContext::KeyReduction(int nPos)
 {
-    /**
-    	Exist very big problem, will worse the distribution.
-    **/
     if(nPos < 1300) nPos = 0;
     m_nIndex = (m_nIndex + nPos) & m_keySpaceTotalT;
     m_nIndex = (m_nIndex + (nPos << 8)) & m_keySpaceTotalT;
@@ -111,3 +81,5 @@ uint64_t DESChainWalkContext::Crypt(uint64_t key)
     key &= m_keySpaceTotalT;
     return key;
 }
+
+};

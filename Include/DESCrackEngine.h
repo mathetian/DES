@@ -1,10 +1,17 @@
+// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+
 #ifndef _CRACK_ENGINE_H
 #define _CRACK_ENGINE_H
 
-#include "DESCommon.h"
+#include "MemoryPool.h"
+#include "Common.h"
 #include "DESCipherSet.h"
 #include "DESChainWalkContext.h"
-#include "MemoryPool.h"
+
+namespace descrack
+{
 
 class DESCrackEngine
 {
@@ -41,6 +48,8 @@ private:
     void      SearchTableChunk(RainbowChain * pChain,int pChainCount);
     void      SearchRainbowTable(const char * fileName);
     void      InitEndKeys(uint64_t key);
+};
+
 };
 
 #endif

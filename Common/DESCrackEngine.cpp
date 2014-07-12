@@ -1,11 +1,14 @@
-#include "DESCrackEngine.h"
-#include "TimeStamp.h"
-#include <openssl/rand.h>
-#include <openssl/des.h>
-#include <iostream>
-using namespace std;
+// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-#include <assert.h>
+#include "TimeStamp.h"
+using namespace utils;
+
+#include "DESCrackEngine.h"
+
+namespace descrack
+{
 
 MemoryPool DESCrackEngine::mp;
 
@@ -71,8 +74,6 @@ bool DESCrackEngine::CheckAlarm(RainbowChain * pChain, uint64_t nGuessPos, uint6
     {
         printf("plaintext of %lld is %lld\n",(long long)cwc.GetKey(), (long long)old);
         p_cs -> AddResult(p_cs -> GetLeftKey(), old);
-        //p_cs -> Succeed();
-        //return true;
     }
 
     return false;
@@ -101,10 +102,7 @@ void DESCrackEngine::SearchRainbowTable(const char * fileName)
         printf("file length check error\n");
         return;
     }
-    /**
-    	Reuse the space and avoid duplicate allocation
-    	Allocate at most max(fileLen,memorySize);
-    **/
+
     if((pChain = (RainbowChain*)mp.Allocate(fileLen, nAllocateSize)) == NULL)
     {
         printf("SearchRainbowTable: allocate error\n");
@@ -246,13 +244,7 @@ void DESCrackEngine::InitEndKeys(uint64_t key)
         }
 
         pEndKeys[nGuessPos] = m_cwc.GetKey();
-
-        /**
-        	No bug was found in this part.
-        **/
-        /*
-        	if(key == 12629012 && nGuessPos == 0)
-        	cout << key << ":" << m_cwc.GetKey() << endl;
-        */
     }
 }
+
+};

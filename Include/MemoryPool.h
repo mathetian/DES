@@ -1,7 +1,14 @@
+// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+
 #ifndef _MEMORY_POOL_H
 #define _MEMORY_POOL_H
 
-#include "DESCommon.h"
+#include "Common.h"
+
+namespace utils
+{
 
 class MemoryPool
 {
@@ -66,6 +73,8 @@ private:
     uint64_t    m_nMemSize;
     uint64_t    m_nMemMax;
     uint64_t    m_nAvailPhys;
+};
+
 };
 
 #endif

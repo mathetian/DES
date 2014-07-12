@@ -1,35 +1,12 @@
+// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+
 #ifndef _DES_CUDA_H
 #define _DES_CUDA_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-
-/*#ifndef _WIN
-	#include <sys/time.h>
-#endif
-*/
-#include <openssl/evp.h>
-#include <openssl/des.h>
-#include <cuda_runtime_api.h>
-
-#include <iostream>
-using namespace std;
-
-#include <assert.h>
-
-/**
-	The Macro below shows the basic configurtion setting
-
-	Chain Len, 1024. Each time, the gpu will compute 2^18 chains.
-
-	For example, if we want to compute 2^35, setting like that
-
-	#define CHAINLEN 2048
-	#define CHAINCOUNT 2^23
-
-	Therefore, #define TIME 2^5
-**/
+namespace descrack
+{
 
 #define BLOCK_LENGTH        1024
 #define MAX_THREAD			256
@@ -454,5 +431,7 @@ uint64_t totalSpaceT = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 
 	tmp=(ROTATE(t2,26)&0xffffffffL);\
 	store[S] |= (tmp << 32);\
 }
+
+};
 
 #endif
