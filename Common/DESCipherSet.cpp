@@ -74,7 +74,7 @@ int DESCipherSet::Detect(RainbowChain chain)
     vector<uint64_t> tmp = m_maps[chain.nEndKey];
     if(tmp.size() == 0) return 0;
     cout<<chain.nEndKey<<" "<<tmp.size()<<endl;
-    for(uint64_t i=0;i<tmp.size();i++)
+    for(uint64_t i=0; i<tmp.size(); i++)
     {
         if(tmp.at(i) ==  chain.nStartKey)
             return 1;

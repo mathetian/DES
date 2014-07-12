@@ -5,6 +5,9 @@
 #ifndef _DES_CUDA_H
 #define _DES_CUDA_H
 
+#include "Common.h"
+using namespace utils;
+
 namespace descrack
 {
 

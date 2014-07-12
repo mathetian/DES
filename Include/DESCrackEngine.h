@@ -5,8 +5,10 @@
 #ifndef _CRACK_ENGINE_H
 #define _CRACK_ENGINE_H
 
-#include "MemoryPool.h"
 #include "Common.h"
+#include "MemoryPool.h"
+using namespace utils;
+
 #include "DESCipherSet.h"
 #include "DESChainWalkContext.h"
 

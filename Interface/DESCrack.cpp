@@ -75,8 +75,10 @@ int main(int argc,char*argv[])
     printf("Total false alarm: %lld\n", (long long)ce.GetFalseAlarms());
     printf("\n");
 
-    FILE * file = fopen(argv[3],"rb"); int number = 0;
-    assert(file && "main fopen error\n"); RainbowChain chain;
+    FILE * file = fopen(argv[3],"rb");
+    int number = 0;
+    assert(file && "main fopen error\n");
+    RainbowChain chain;
     while(fread((char*)&chain, sizeof(RainbowChain), 1, file))
         number += p_cs -> Detect(chain);
     fclose(file);

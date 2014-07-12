@@ -6,6 +6,7 @@
 #define _CIPHER_SET_H
 
 #include "Common.h"
+using namespace utils;
 
 namespace descrack
 {

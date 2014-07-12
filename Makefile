@@ -16,18 +16,18 @@ SOURCES = Common/*.cpp
 HEADER  = -I./Include
 BINARY  = Binary
 
-LIB = -lrt -lssl -lcrypto -ldl -L. -ldescrypt
+LIB = -L. -L/usr/local/ssl/lib -lrt -lssl -lcrypto -ldl -ldescrypt
 
 ALL = generator verified sort crack gencuda
 
 lib: clean compile
 	${AR} rv ${LIBMISC} *.o
 	${RANLIB} ${LIBMISC}
-	rm *.o
+
 compile:
 	${CXX} ${CXXFLAGS} ${HEADER} -c ${SOURCES}
 
-all : ${ALL}
+all: ${ALL}
 
 generator: Interface/DESGenerator.cpp
 	#module purge && module load icc/13.1.1 impi/4.1.1.036 && ${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}

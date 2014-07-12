@@ -271,14 +271,16 @@ void GenerateRandomData()
     RainbowChain chains[TTWO];
     FILE *file = fopen("DEMO.data","wb+");
     assert(file);
-    TimeStamp tms; TimeStamp eats;
-    tms.StartTime();TimeStamp tms2;
-    for(int i=0;i<4;i++) //2^20*2^5*2^2 chains * 2^4 = 2G
+    TimeStamp tms;
+    TimeStamp eats;
+    tms.StartTime();
+    TimeStamp tms2;
+    for(int i=0; i<4; i++) //2^20*2^5*2^2 chains * 2^4 = 2G
     {
         uint64_t m_nIndex;
         printf("round %d\n",i);
         eats.StartTime();
-        for(int j=0;j<TTWO;j++) 
+        for(int j=0; j<TTWO; j++)
         {
             RAND_bytes((unsigned char*)&m_nIndex,5);
             chains[j].nStartKey = m_nIndex;
@@ -458,20 +460,30 @@ int main(int argc,char * argv[])
 uint64_t Convert(uint64_t num)
 {
     uint64_t rs = 0, tmp =0;
-    tmp = num & ((1ull << 7) - 1); tmp <<= 1;
-    rs = tmp; num >>= 7;
-    tmp = num & ((1ull << 7) - 1); tmp <<= 1; tmp <<= 8;
-    rs |= tmp; num >>= 7;
-    tmp = num & ((1ull << 7) - 1); tmp <<= 1; tmp <<= 16;
-    rs |= tmp; num >>= 7;
-    tmp = num & ((1ull << 7) - 1); tmp <<= 1; tmp <<= 24;
-    rs |= tmp; num >>= 7;
+    tmp = num & ((1ull << 7) - 1);
+    tmp <<= 1;
+    rs = tmp;
+    num >>= 7;
+    tmp = num & ((1ull << 7) - 1);
+    tmp <<= 1;
+    tmp <<= 8;
+    rs |= tmp;
+    num >>= 7;
+    tmp = num & ((1ull << 7) - 1);
+    tmp <<= 1;
+    tmp <<= 16;
+    rs |= tmp;
+    num >>= 7;
+    tmp = num & ((1ull << 7) - 1);
+    tmp <<= 1;
+    tmp <<= 24;
+    rs |= tmp;
+    num >>= 7;
     return rs;
 }
 
 void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, int rank, int numproc)
 {
-    FILE * file;
     DESChainWalkContext cwc;
     char str[256];
 
@@ -483,33 +495,34 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
 
     MPI_File fh;
     MPI_Status  status;
-	BOOLEAN i_am_the_master = FALSE, input_error = FALSE, 
-    my_file_open_error = FALSE, file_open_error = FALSE,
-    my_write_error = FALSE, write_error = FALSE;
+
+    BOOLEAN my_file_open_error = FALSE, my_write_error = FALSE;
+
     char error_string[BUFSIZ];
     int length_of_error_string, error_class;
 
     my_file_open_error = MPI_File_open(MPI_COMM_SELF, szFileName, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 
-    if (my_file_open_error != MPI_SUCCESS) {
+    if (my_file_open_error != MPI_SUCCESS)
+    {
 
-      MPI_Error_class(my_file_open_error, &error_class);
-      MPI_Error_string(error_class, error_string, &length_of_error_string);
-      printf("%3d: %s\n", rank, error_string);
+        MPI_Error_class(my_file_open_error, &error_class);
+        MPI_Error_string(error_class, error_string, &length_of_error_string);
+        printf("%3d: %s\n", rank, error_string);
 
-      MPI_Error_string(my_file_open_error, error_string, 
-		       &length_of_error_string);
-      printf("%3d: %s\n", rank, error_string);
+        MPI_Error_string(my_file_open_error, error_string,
+                         &length_of_error_string);
+        printf("%3d: %s\n", rank, error_string);
 
-      my_file_open_error = TRUE;
+        my_file_open_error = TRUE;
 
     }
 
 
     printf("rank %d of %d, succeed to create %s\n",rank, numproc, szFileName);
-    printf("%ld %lld %lld %d %d\n", (long long)chainCount, (long long)chainLen, (long long)totalChainCount, rank, numproc);
+    printf("%lld %lld %lld %d %d\n", (long long)chainCount, (long long)chainLen, (long long)totalChainCount, rank, numproc);
     nDatalen = 0;
- 
+
     if(nDatalen == (chainCount << 4))
     {
         printf("rank %d of %d, precompute has finised\n",rank, numproc);
@@ -544,16 +557,17 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
         }
 
         chain.nEndKey = cwc.GetKey();
-	
-	MPI_File_write(fh, (char*)(&(chain)), 2, MPI_UINT64_T, &status);
-        if (my_write_error != MPI_SUCCESS) {
-	MPI_Error_class(my_write_error, &error_class);
-	MPI_Error_string(error_class, error_string, &length_of_error_string);
-	printf("%3d: %s\n", rank, error_string);
-	MPI_Error_string(my_write_error, error_string, &length_of_error_string);
-	printf("%3d: %s\n", rank, error_string);
-	my_write_error = TRUE;
-      }
+
+        MPI_File_write(fh, (char*)(&(chain)), 2, MPI_UINT64_T, &status);
+        if (my_write_error != MPI_SUCCESS)
+        {
+            MPI_Error_class(my_write_error, &error_class);
+            MPI_Error_string(error_class, error_string, &length_of_error_string);
+            printf("%3d: %s\n", rank, error_string);
+            MPI_Error_string(my_write_error, error_string, &length_of_error_string);
+            printf("%3d: %s\n", rank, error_string);
+            my_write_error = TRUE;
+        }
 
         if((index + 1)%10000 == 0||index + 1 == chainCount)
         {
@@ -567,11 +581,11 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
 }
 
 void ConductExperiment(int chainLen, int chainCount, int tim)
-{    
+{
     FILE * file, * file2;
     DESChainWalkContext cwc;
 
-    uint64_t index;
+    int index;
 
     RainbowChain chain;
 
@@ -586,24 +600,16 @@ void ConductExperiment(int chainLen, int chainCount, int tim)
     TimeStamp tms;
     tms.StartTime();
 
-    int slice=chainLen/tim;
-    cout<<"slice:"<<slice<<endl;
     int count=0;
+
     for(index = 0; index < chainCount; index++)
     {
-        chain.nStartKey = cwc.GetRandomKey();count++;uint32_t nPos = 0;
+        chain.nStartKey = cwc.GetRandomKey();
+        count++;
+        int nPos = 0;
         fwrite((char*)&chain, sizeof(uint64_t), 1, file);
-        // for(int i=0;i<tim;i++)
-        // {
-        //     for(; nPos < slice*(i+1); nPos++)
-        //     {
-        //         cwc.KeyToCipher();cwc.KeyReduction(i*slice);
-        //         chain.nStartKey = cwc.GetKey();count++;
-        //         fwrite((char*)&chain, sizeof(uint64_t), 1, file);
-        //     }
-        // }
 
-        for(;nPos<chainLen/2;nPos++)
+        for(; nPos<chainLen/2; nPos++)
         {
             cwc.KeyToCipher();
             cwc.KeyReduction(nPos);
@@ -611,7 +617,7 @@ void ConductExperiment(int chainLen, int chainCount, int tim)
             fwrite((char*)&chain, sizeof(uint64_t), 1, file);
         }
 
-        for(;nPos<chainLen;nPos++)
+        for(; nPos<chainLen; nPos++)
         {
             cwc.KeyToCipher();
             cwc.KeyReduction(nPos);
@@ -642,7 +648,7 @@ int main(int argc,char * argv[])
             TestKeySchedule();
         else if(strcmp(argv[1],"testcasegenerator") == 0)
             TestCaseGenerator();
-        else  
+        else
             Usage();
 
         return 0;

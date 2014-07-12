@@ -5,13 +5,7 @@
 #ifndef _TIME_STAMP_H
 #define _TIME_STAMP_H
 
-#ifdef _WIN32
-#pragma  warning(disable : 4786)
-#pragma  warning(disable : 4996)
-#include <Windows.h>
-#else
-#include <sys/time.h>
-#endif
+#include "Common.h"
 
 namespace utils
 {

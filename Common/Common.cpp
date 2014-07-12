@@ -4,7 +4,7 @@
 
 #include "Common.h"
 
-namespace descrack
+namespace utils
 {
 
 bool RainbowChain::operator < (const RainbowChain &m) const
@@ -22,7 +22,7 @@ uint64_t GetFileLen(FILE* file)
     uint64_t pos = _ftelli64(file);
     _fseeki64(file, 0, SEEK_END);
     uint64_t len = _ftelli64(file);
-    
+
     _fseeki64(file, pos, SEEK_SET);
 
     return len;
@@ -95,30 +95,30 @@ bool AnylysisFileName(const char * filename, uint64_t & chainLen, uint64_t & cha
 #ifdef _WIN32
 string GetLastErrorStdStr()
 {
-  DWORD error = GetLastError();
-  if (error)
-  {
-    LPVOID lpMsgBuf;
-    DWORD bufLen = FormatMessage(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-        FORMAT_MESSAGE_FROM_SYSTEM |
-        FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL,
-        error,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPTSTR) &lpMsgBuf,
-        0, NULL );
-    if (bufLen)
+    DWORD error = GetLastError();
+    if (error)
     {
-      LPCSTR lpMsgStr = (LPCSTR)lpMsgBuf;
-      std::string result(lpMsgStr, lpMsgStr+bufLen);
-      
-      LocalFree(lpMsgBuf);
+        LPVOID lpMsgBuf;
+        DWORD bufLen = FormatMessage(
+                           FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                           FORMAT_MESSAGE_FROM_SYSTEM |
+                           FORMAT_MESSAGE_IGNORE_INSERTS,
+                           NULL,
+                           error,
+                           MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                           (LPTSTR) &lpMsgBuf,
+                           0, NULL );
+        if (bufLen)
+        {
+            LPCSTR lpMsgStr = (LPCSTR)lpMsgBuf;
+            std::string result(lpMsgStr, lpMsgStr+bufLen);
 
-      return result;
+            LocalFree(lpMsgBuf);
+
+            return result;
+        }
     }
-  }
-  return std::string();
+    return std::string();
 }
 #endif
 

@@ -6,6 +6,7 @@
 #define _CHAIN_WALK_CONTEXT_H
 
 #include "Common.h"
+using namespace utils;
 
 namespace descrack
 {

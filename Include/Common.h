@@ -2,8 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-#ifndef _COMMON_H
-#define _COMMON_H
+#ifndef _Common_H
+#define _Common_H
+
+#include <map>
+#include <queue>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+#include <assert.h>
+#include <stdint.h>
+#include <string.h>
+
+#include <openssl/des.h>
+#include <openssl/rand.h>
 
 #ifdef _WIN32
 #pragma warning(disable : 4786)
