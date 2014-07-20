@@ -96,16 +96,15 @@ __global__ void  DESGeneratorCUDA(uint64_t *data)
 
     __syncthreads();
 
-    int tx = TX / 4096;
-    int ix = 4096*2*tx + (TX % 4096);
+    uint64_t tx = TX / 4096;
+    uint64_t st = tx*4096*2;
+    uint64_t ix = st + (TX % 4096);
 
     register uint64_t m_nIndex = data[ix];
 
     uint64_t roundKeys[16];
 
-    uint64_t needCal = (TX % 4096); // 0 ~ 4095
-
-    for(int nPos = 4096 - needCal; nPos < 4096; nPos++)
+    for(int nPos = (TX % 4096) + 1; nPos < 4096; nPos++)
     {
         GenerateKey(m_nIndex, roundKeys);
         m_nIndex  = DESOneTime(roundKeys);
@@ -120,13 +119,12 @@ __global__ void  DESGeneratorCUDA(uint64_t *data)
 
     data[ix] = m_nIndex;
 
-    tx = tx*4096*2;
+    ix = st + 2*4096 - TX % 4096 - 1;
+    st = st + 4096;
 
-    ix = (tx + 1)*4096*2 - (TX % 4096);
     m_nIndex = data[ix];
-    needCal = 4095 - needCal;
 
-    for(int nPos = 4096 - needCal; nPos < 4096; nPos++)
+    for(int nPos = 4096 - (TX % 4096); nPos < 4096; nPos++)
     {
         GenerateKey(m_nIndex, roundKeys);
         m_nIndex  = DESOneTime(roundKeys);
