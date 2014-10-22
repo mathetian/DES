@@ -1,4 +1,4 @@
-DESCrack
+RainbowCrack
 =====
 
-DESCrack is an implementation of Rainbow Table.
+RainbowCrack is an implementation of Rainbow Table.
