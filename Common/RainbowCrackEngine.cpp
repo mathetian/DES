@@ -77,12 +77,54 @@ bool RainbowCrackEngine::CheckAlarm(RainbowChain *pChain, uint64_t nGuessPos, ui
     if(cwc.GetKey() == pVerified[nGuessPos])
     {
         printf("plaintext of %lld is %lld\n", (long long)cwc.GetKey(), (long long)old);
-        p_cs -> AddResult(p_cs -> GetLeftKey(), old);
+        p_cs -> AddResult(p_cs -> GetLastKey(), old);
 
         return true;
     }
 
     return false;
+}
+
+struct timeval RainbowCrackEngine::GetDiskTime()
+{
+    return m_diskTime;
+}
+
+struct timeval RainbowCrackEngine::GetTotalTime()
+{
+    return m_totalTime;
+}
+
+uint64_t RainbowCrackEngine::GetTotalChains()
+{
+    return m_totalChains;
+}
+
+uint64_t RainbowCrackEngine::GetFalseAlarms()
+{
+    return m_falseAlarms;
+}
+
+void RainbowCrackEngine::InitEndKeys(uint64_t key)
+{
+    pEndKeys  = vector<uint64_t>(RainbowChainWalk::m_chainLen, 0);
+    pVerified = vector<uint64_t>(RainbowChainWalk::m_chainLen, 0);
+
+    for(uint32_t nGuessPos = 0; nGuessPos < RainbowChainWalk::m_chainLen; nGuessPos++)
+    {
+        m_cwc.SetKey(key);
+        m_cwc.KeyReduction(nGuessPos);
+
+        pVerified[nGuessPos] = m_cwc.GetKey();
+
+        for(uint32_t nIndex = nGuessPos + 1; nIndex < RainbowChainWalk::m_chainLen; nIndex++)
+        {
+            m_cwc.KeyToCipher();
+            m_cwc.KeyReduction(nIndex);
+        }
+
+        pEndKeys[nGuessPos] = m_cwc.GetKey();
+    }
 }
 
 void RainbowCrackEngine::SearchRainbowTable(const char *fileName)
@@ -93,7 +135,7 @@ void RainbowCrackEngine::SearchRainbowTable(const char *fileName)
     FILE *file;
     RainbowChain *pChain;
 
-    if((file = fopen(fileName,"rb")) == NULL)
+    if((file = fopen(fileName, "rb")) == NULL)
     {
         printf("SearchRainbowTable: fopen error\n");
         return;
@@ -151,7 +193,7 @@ void RainbowCrackEngine::SearchRainbowTable(const char *fileName)
         if(p_cs -> Solved()) break;
     }
 
-    p_cs -> Done(p_cs->GetLeftKey());
+    p_cs -> Done(p_cs->GetLastKey());
 
     fclose(file);
 }
@@ -159,7 +201,7 @@ void RainbowCrackEngine::SearchRainbowTable(const char *fileName)
 void RainbowCrackEngine::SearchTableChunk(RainbowChain *pChain, int pChainCount)
 {
     uint64_t nFalseAlarm, nIndex, nGuessPos;
-    uint64_t key = p_cs -> GetLeftKey();
+    uint64_t key = p_cs -> GetLastKey();
 
     printf("Searching for key: %lld...\n", (long long)key);
 
@@ -185,13 +227,12 @@ void RainbowCrackEngine::SearchTableChunk(RainbowChain *pChain, int pChainCount)
 
         if(nGuessPos % 100 == 0) printf("nGuessPos %lld\n", (long long)nGuessPos);
     }
-NEXT_HASH:
-    ;
+NEXT_HASH: ;
     m_totalChains += pChainCount;
     m_falseAlarms += nFalseAlarm;
 }
 
-void RainbowCrackEngine::Run(const char *fileName)
+void RainbowCrackEngine::Run(const char *fileName, const char *type)
 {
     uint64_t nChainLen, nChainCount;
 
@@ -203,67 +244,25 @@ void RainbowCrackEngine::Run(const char *fileName)
 
     printf("\nnChainLen: %lld, nChainCount: %lld\n", (long long)nChainLen, (long long)nChainCount);
 
-    RainbowChainWalk::SetChainInfo(nChainLen, nChainCount);
+    RainbowChainWalk::SetChainInfo(nChainLen, nChainCount, type);
 
     int index = 0;
 
-    while(p_cs -> AnyKeyLeft())
+    while(p_cs -> Finished())
     {
         printf("-------------------------------------------------------\n");
-        printf("Time: %d, key: %lld\n\n",index++,(long long)p_cs -> GetLeftKey());
+        printf("Time: %d, key: %lld\n\n",index++,(long long)p_cs -> GetLastKey());
 
         TimeStamp tmps;
         tmps.StartTime();
 
-        InitEndKeys(p_cs -> GetLeftKey());
+        InitEndKeys(p_cs -> GetLastKey());
 
         tmps.StopTime("Init Time: ");
 
         SearchRainbowTable(fileName);
 
         printf("-------------------------------------------------------\n");
-    }
-}
-
-struct timeval RainbowCrackEngine::GetDiskTime()
-{
-    return m_diskTime;
-}
-
-struct timeval RainbowCrackEngine::GetTotalTime()
-{
-    return m_totalTime;
-}
-
-uint64_t RainbowCrackEngine::GetTotalChains()
-{
-    return m_totalChains;
-}
-
-uint64_t RainbowCrackEngine::GetFalseAlarms()
-{
-    return m_falseAlarms;
-}
-
-void RainbowCrackEngine::InitEndKeys(uint64_t key)
-{
-    pEndKeys  = vector<uint64_t>(RainbowChainWalk::m_chainLen, 0);
-    pVerified = vector<uint64_t>(RainbowChainWalk::m_chainLen, 0);
-
-    for(uint32_t nGuessPos = 0; nGuessPos < RainbowChainWalk::m_chainLen; nGuessPos++)
-    {
-        m_cwc.SetKey(key);
-        m_cwc.KeyReduction(nGuessPos);
-
-        pVerified[nGuessPos] = m_cwc.GetKey();
-
-        for(uint32_t nIndex = nGuessPos + 1; nIndex < RainbowChainWalk::m_chainLen; nIndex++)
-        {
-            m_cwc.KeyToCipher();
-            m_cwc.KeyReduction(nIndex);
-        }
-
-        pEndKeys[nGuessPos] = m_cwc.GetKey();
     }
 }
 

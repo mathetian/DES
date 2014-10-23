@@ -5,8 +5,8 @@
 #include "Common.h"
 using namespace utils;
 
-#include "RainbowCrackEngine.h"
 #include "RainbowChainWalk.h"
+#include "RainbowCrackEngine.h"
 using namespace rainbowcrack;
 
 void Usage()
@@ -64,7 +64,7 @@ int main(int argc,char*argv[])
         return 0;
     }
 
-    ce.Run(argv[3]);
+    ce.Run(argv[3], type);
 
     printf("Statistics\n");
     printf("-------------------------------------------------------\n");

@@ -159,7 +159,7 @@ void Regenerator(DESCipherSet *p_cs, uint64_t chainLen)
 
         for(int i = 0; i < 128; i++)
         {
-            keys[i] = p_cs -> GetLeftKey();
+            keys[i] = p_cs -> GetLastKey();
             p_cs -> Done(0);
         }
 

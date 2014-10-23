@@ -37,28 +37,6 @@ uint64_t GetAvailPhysMemorySize()
 #endif
 }
 
-/**
-** DES
-**/
-void U56ToArr7(const uint64_t & key56, unsigned char * key_56)
-{
-    key_56 = (unsigned char *)&key_56;
-}
-
-void Arr7ToU56(const unsigned char * key_56, uint64_t & key56)
-{
-    key56 = *(uint64_t*)key_56;
-}
-
-void SetupDESKey(const uint64_t & key56,des_key_schedule & ks)
-{
-    des_cblock key_56;
-
-    U56ToArr7(key56, key_56);
-
-    DES_set_key_unchecked(&key_56, &ks);
-}
-
 bool AnylysisFileName(const char * filename, uint64_t & chainLen, uint64_t & chainCount)
 {
     int len = strlen(filename), i = 0, j;

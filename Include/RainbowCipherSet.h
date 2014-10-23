@@ -19,8 +19,8 @@ public:
 
 public:
     void     AddKey(uint64_t cipherKey);
-    bool     AnyKeyLeft();
-    uint64_t GetLeftKey();
+    bool     Finished();
+    uint64_t GetLastKey();
     void     AddResult(uint64_t cipherKey,uint64_t key);
     void     Done(uint64_t cipherKey);
     bool     Solved();

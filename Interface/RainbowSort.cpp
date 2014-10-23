@@ -12,7 +12,7 @@ using namespace rainbowcrack;
 void Usage()
 {
     Logo();
-    printf("Usage  : sort sort number fileName\n");
+    printf("Usage  :   sort sort number fileName\n");
     printf("example 1: sort sort 1 DES_100_100_test\n");
 }
 
@@ -31,7 +31,7 @@ void QuickSort(RainbowChain *pChain, uint64_t length)
     sort(pChain, pChain + length);
 }
 
-void ExternalSort(FILE * file, vector <FILE*>tmpFiles)
+void ExternalSort(FILE *file, vector <FILE*>tmpFiles)
 {
     int index = 0;
     RainbowChain chain;
@@ -139,27 +139,20 @@ void printMemory(const char * str, long long nAvailPhys)
     printf("%s %lld GB, %lld MB, %lld KB, %lld B\n", str, nAvailPhys/c, (nAvailPhys%c)/b, (nAvailPhys%b)/a, nAvailPhys%1000);
 }
 
-void SortFiles(vector <string> fileNames, vector <FILE*> files, const char * prefix)
+void SortFiles(vector <string>fileNames, vector <FILE*>files, const char * prefix)
 {
-    int index = 0;
-    uint64_t nAvailPhys;
-    char str[256];
-
+    int index = 0; uint64_t nAvailPhys; char str[256];
     vector <uint64_t> fileLens(fileNames.size(), 0);
-
-    FILE * targetFile;
-
-    nAvailPhys = GetAvailPhysMemorySize();
+    FILE * targetFile = NULL; nAvailPhys = GetAvailPhysMemorySize();
+    
     sprintf(str, "Available free physical memory: ");
     printMemory(str, nAvailPhys);
 
     int ss = (int)fileNames.size();
 
-    for(; index < ss; index++)
+    for(;index < ss;index++)
     {
-
         uint64_t & fileLen = fileLens[index];
-
         fileLen = GetFileLen(files[index]);
 
         assert((fileLen % 16 ==0) && ("Rainbow table size check failed\n"));
@@ -172,7 +165,7 @@ void SortFiles(vector <string> fileNames, vector <FILE*> files, const char * pre
 
             RainbowChain * pChain = (RainbowChain*)new unsigned char[fileLen];
 
-            if(pChain!=NULL)
+            if(pChain != NULL)
             {
                 printf("%d, Loading rainbow table...\n", index);
 
@@ -215,13 +208,10 @@ ABORT:
 
 }
 
-void SortOneFile(const char * prefix)
+void SortOneFile(const char *prefix)
 {
-    uint64_t nAvailPhys;
-    char str[256];
-
-    FILE * targetFile;
-    uint64_t fileLen;
+    uint64_t nAvailPhys; char str[256];
+    FILE *targetFile; uint64_t fileLen;
 
     nAvailPhys = GetAvailPhysMemorySize();
     sprintf(str, "Available free physical memory: ");
@@ -264,7 +254,8 @@ void SortOneFile(const char * prefix)
             delete [] pChain;
         }
     }
-    else ExternalSort(targetFile);
+    else 
+        ExternalSort(targetFile);
 
 ABORT:
     fclose(targetFile);
@@ -272,42 +263,38 @@ ABORT:
 
 int main(int argc,char*argv[])
 {
-    if(argc != 4 || strcmp(argv[1],"sort") != 0)
+    if(argc != 4 || strcmp(argv[1], "sort") != 0)
     {
         Usage();
         return 0;
     }
 
-    if(strcmp(argv[1],"sort") == 0)
+    int num =  atoi(argv[2]);
+    assert((num < 9) && (num >= 1) && ("sorry number must be less than ten and more than zero\n"));
+
+    if(num == 1)
     {
-        int num =  atoi(argv[2]);
+        printf("Begin Sort One File\n");
+        SortOneFile(argv[3]);
+        printf("End Sort One File\n");
+    }
+    else
+    {
+        vector<string> fileNames(num, "");
+        vector<FILE*>  files(num, NULL);
 
-        assert((num < 9) && (num >= 1) && ("sorry number must be less than ten and more than zero\n"));
-
-        if(num == 1)
+        for(int index = 0; index < num; index++)
         {
-            printf("Begin Sort One File\n");
-            SortOneFile(argv[3]);
-            printf("End Sort One File\n");
+            fileNames[index] = argv[3];
+            fileNames[index] +=  "_";
+            fileNames[index].push_back(index + '0');
+            files[index] = fopen(fileNames[index].c_str(),"rb+");
+            assert(files[index] && "fopen error\n");
         }
-        else
-        {
-            vector<string> fileNames(num, "");
-            vector<FILE*>  files(num, NULL);
 
-            for(int index = 0; index < num; index++)
-            {
-                fileNames[index] = argv[3];
-                fileNames[index] +=  "_";
-                fileNames[index].push_back(index + '0');
-                files[index] = fopen(fileNames[index].c_str(),"rb+");
-                assert(files[index] && "fopen error\n");
-            }
-
-            printf("Begin SortFiles\n");
-            SortFiles(fileNames, files, argv[3]);
-            printf("End SortFiles\n");
-        }
+        printf("Begin SortFiles\n");
+        SortFiles(fileNames, files, argv[3]);
+        printf("End SortFiles\n");
     }
 
     return 0;

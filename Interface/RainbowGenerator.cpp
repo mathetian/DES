@@ -24,50 +24,13 @@ void Usage()
 {
     Logo();
     printf("Usage: generator type chainLen chainCount suffix\n");
-    printf("                 type benchmark\n");
     printf("                 type testcasegenerator\n");
 
     printf("example 1: generator des/md5 1000 10000 suffix\n");
-    printf("example 2: generator des/md5 benchmark\n");
-    printf("example 7: generator des/md5 testcasegenerator\n\n");
+    printf("example 2: generator des/md5 testcasegenerator\n\n");
 }
 
 typedef long long ll;
-
-void Benchmark(const char *type)
-{
-    int index, nLoop = 1 << 21;
-
-    char str[256];
-    memset(str, 0, sizeof(str));
-
-    RainbowChainWalk cwc;
-    cwc.GetRandomKey();
-
-    TimeStamp tmps;
-    tmps.StartTime();
-
-    for(index = 0; index < nLoop; index++)
-        cwc.KeyToCipher();
-
-    sprintf(str, "Benchmark: nLoop %d: keyToHash time:", nLoop);
-
-    tmps.StopTime(str);
-
-    cwc.GetRandomKey();
-
-    tmps.StartTime();
-
-    for(index = 0; index < nLoop; index++)
-    {
-        cwc.KeyToCipher();
-        cwc.KeyReduction(index);
-    }
-
-    sprintf(str, "Benchmark: nLoop %d: total time:    ", nLoop);
-
-    tmps.StopTime(str);
-}
 
 void TestCaseGenerator(const char *type)
 {
@@ -79,6 +42,8 @@ void TestCaseGenerator(const char *type)
     FILE *file = fopen("TestCaseGenerator.txt","wb");
 
     assert(file && "TestCaseGenerator fopen error\n");
+
+    cwc.SetChainInfo(1, 1, type);
 
     for(int index = 0; index < 100; index++)
     {
@@ -111,8 +76,7 @@ uint64_t Convert(uint64_t num, int time)
 
 void Generator(char *szFileName, uint64_t chainLen, uint64_t totalChainCount, int rank, int numproc, const char *type)
 {
-    RainbowChainWalk cwc;
-    char str[256];
+    RainbowChainWalk cwc; char str[256];
 
     uint64_t nDatalen, index, nChainStart;
 
@@ -165,7 +129,7 @@ void Generator(char *szFileName, uint64_t chainLen, uint64_t totalChainCount, in
 
     index = nDatalen >> 4;
 
-    cwc.SetChainInfo(chainLen, chainCount);
+    cwc.SetChainInfo(chainLen, chainCount, type);
 
     TimeStamp tms;
     tms.StartTime();
@@ -218,20 +182,15 @@ int main(int argc,char * argv[])
     if(argc == 3)
     {
         memcpy(type, argv[1], sizeof(argv[1]));
-        if(strcmp(argv[2],"benchmark") == 0)
-            Benchmark(type);
-        else if(strcmp(argv[2],"testcasegenerator") == 0)
+        if(strcmp(argv[2],"testcasegenerator") == 0)
             TestCaseGenerator(type);
-        else
-            Usage();
+        else Usage();
 
         return 0;
     }
     else if(argc != 5)
     {
-        Usage();
-
-        return 0;
+        Usage(); return 0;
     }
 
     memcpy(type, argv[1], sizeof(argv[1]));

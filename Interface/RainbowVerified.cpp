@@ -12,7 +12,6 @@ void Usage()
 {
     Logo();
     printf("Usage  : verified type filename chainLen\n");
-
     printf("example: verified des/md5 hello.rt 1000\n\n");
 }
 
@@ -57,9 +56,9 @@ int main(int argc,char*argv[])
 
     printf("FileLen: %lld, ChainCount: %lld\n", (long long)fileLen, (long long)chainCount);
 
-    RainbowChainWalk::SetChainInfo(chainLen, chainCount);
+    RainbowChainWalk::SetChainInfo(chainLen, chainCount, type);
 
-    for(index = 0; index < chainCount; index++)
+    for(index = 0;index < chainCount; index++)
     {
         assert(fread(&chain, sizeof(RainbowChain), 1, file) == 1);
 

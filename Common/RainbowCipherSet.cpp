@@ -25,12 +25,12 @@ void RainbowCipherSet::AddKey(uint64_t cipherKey)
     m_vKeys.push_back(cipherKey);
 }
 
-bool RainbowCipherSet::AnyKeyLeft()
+bool RainbowCipherSet::Finished()
 {
     return index == m_vKeys.size() ? false : true;
 }
 
-uint64_t RainbowCipherSet::GetLeftKey()
+uint64_t RainbowCipherSet::GetLastKey()
 {
     return m_vKeys[index];
 }

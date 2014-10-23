@@ -15,10 +15,12 @@ namespace rainbowcrack
 
 class RainbowCrackEngine;
 
+typedef void (*HASHROUTINE)(unsigned char* pPlain, int nPlainLen, unsigned char* pHash);
+
 class RainbowChainWalk
 {
 public:
-    static void 	SetChainInfo(uint64_t chainLen, uint64_t chainCount);
+    static void 	SetChainInfo(uint64_t chainLen, uint64_t chainCount, const char *type);
 
 public:
     void 	 		KeyToCipher();
@@ -29,18 +31,14 @@ public:
     uint64_t 		Crypt(uint64_t key);
 
 private:
-    void 			CipherToKey(unsigned char * out);
-
-private:
-    static uint64_t   m_plainText;
-    static uint64_t   m_chainLen;
-    static uint64_t   m_chainCount;
-    static uint64_t   m_keySpaceTotal;
-    static unsigned char m_dplainText[8];
-
+    static uint64_t    m_chainLen;
+    static uint64_t    m_chainCount;
+    static uint64_t    m_keySpaceTotal;
+    static HASHROUTINE m_algorithm;
+    
 private:
     uint64_t m_nIndex;
-
+    
     friend class RainbowCrackEngine;
 };
 
