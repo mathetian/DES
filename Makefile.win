@@ -27,7 +27,7 @@ sort:    Interface\DESSort.cpp Common\Common.cpp
         cl $(CFLAGS) $(HEADER)  $**      \
         /link $(LDFLAGS) /LIBPATH:$(SSLLIB) /STACK:"1000000000" /out:$@.exe
 
-crack:  Interface/DESCrack.cpp Common/Common.cpp Common/DESChainWalkContext.cpp Common/DESCipherSet.cpp Common/DESCrackEngine.cpp 
+crack:  Interface/RainbowCrack.cpp Common/Common.cpp Common/DESChainWalkContext.cpp Common/DESCipherSet.cpp Common/RainbowCrackEngine.cpp 
         cl $(CFLAGS) $(HEADER) $**      \
         /link $(LDFLAGS) /LIBPATH:$(SSLLIB) /out:$@.exe
 

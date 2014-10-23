@@ -1,4 +1,4 @@
-// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Copyright (c) 2014 The RainbowCrack Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
@@ -6,8 +6,8 @@
 #include "TimeStamp.h"
 using namespace utils;
 
-#include "DESChainWalkContext.h"
-using namespace descrack;
+#include "RainbowChainWalk.h"
+using namespace rainbowcrack;
 
 void Usage()
 {
@@ -22,13 +22,7 @@ struct cmp
 {
     bool operator()(const PPR &a, const PPR &b)
     {
-        RainbowChain  r1 = a.first;
-        RainbowChain  r2 = b.first;
-
-        if(r1.nEndKey > r2.nEndKey)
-            return true;
-
-        return false;
+        return a.first < b.first ? false : true;
     }
 };
 
@@ -37,7 +31,7 @@ void QuickSort(RainbowChain *pChain, uint64_t length)
     sort(pChain, pChain + length);
 }
 
-void ExternalSort(FILE * file, vector <FILE*> tmpFiles)
+void ExternalSort(FILE * file, vector <FILE*>tmpFiles)
 {
     int index = 0;
     RainbowChain chain;

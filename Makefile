@@ -29,35 +29,35 @@ compile:
 
 all: creat ${ALL}
 
-generator: Interface/DESGenerator.cpp
+generator: Interface/RainbowGenerator.cpp
 	#module purge && module load icc/13.1.1 impi/4.1.1.036 && ${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
 
-verified: Interface/DESVerified.cpp
+verified: Interface/RainbowVerified.cpp
 	${CXX} ${CXXFLAGS} ${HEADER} ${LIB} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
 
-sort: Interface/DESSort.cpp
+sort: Interface/RainbowSort.cpp
 	${CXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
 
-crack: Interface/DESCrack.cpp
+crack: Interface/RainbowCrack.cpp
 	${CXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
 
-gencuda: Interface/DESCuda.cu
+gencuda: Interface/RainbowDESCUDA.cu
 	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
 
-regencuda: Interface/DESRegenerator.cu
+regencuda: Interface/RainbowCrackCUDA.cu
 	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
 
 rungen: generator
-	mpirun -np 4 ./$^ 4096 65536 test
+	mpirun -np 4 ./$^ des 4096 65536 test
 
 runcuda: gencuda
 	./$^ 4096 65536 cuda

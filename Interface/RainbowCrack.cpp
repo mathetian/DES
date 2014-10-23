@@ -1,44 +1,48 @@
-// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Copyright (c) 2014 The RainbowCrack Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
 #include "Common.h"
 using namespace utils;
 
-#include "DESCrackEngine.h"
-#include "DESChainWalkContext.h"
-using namespace descrack;
+#include "RainbowCrackEngine.h"
+#include "RainbowChainWalk.h"
+using namespace rainbowcrack;
 
 void Usage()
 {
     Logo();
-    printf("Usage: crack   text chainLen chainCount encryptedText \n");
-    printf("               file chainLen RainbowFiles encryptedFile \n\n");
+    printf("Usage: crack  type text chainLen chainCount encryptedText \n");
+    printf("              type file RainbowFiles encryptedFile \n\n");
 
-    printf("example 1: crack text RainbowFiles 12345 7831224 541234 3827427\n");
-    printf("example 2: crack file RainbowFiles encryptedFile\n\n");
+    printf("example 1: crack md5/sha1 text RainbowFiles 12345 7831224 541234 3827427\n");
+    printf("example 2: crack md5/sha1 file RainbowFiles encryptedFile\n\n");
 }
 
 int main(int argc,char*argv[])
 {
     int keyNum, index, num = 0;
-    DESCrackEngine ce;
-    DESCipherSet  *p_cs = DESCipherSet::GetInstance();
+    RainbowCrackEngine ce;
+    RainbowCipherSet  *p_cs = RainbowCipherSet::GetInstance();
+    char type[256];
+    memset(type, 0, sizeof(type));
 
-    if(argc <= 3)
+    strcpy(type, argv[1]);
+
+    if(argc <= 4)
     {
         Usage();
         return 0;
     }
-    else if(strcmp(argv[1],"file") == 0)
+    else if(strcmp(argv[2],"file") == 0)
     {
-        if(argc != 4)
+        if(argc != 5)
         {
             Usage();
             return 0;
         }
 
-        FILE * file = fopen(argv[3],"rb");
+        FILE * file = fopen(argv[4],"rb");
         assert(file && "main fopen error\n");
         RainbowChain chain;
 
@@ -47,12 +51,12 @@ int main(int argc,char*argv[])
 
         fclose(file);
     }
-    else if(strcmp(argv[1], "text") == 0)
+    else if(strcmp(argv[2], "text") == 0)
     {
-        keyNum = argc - 3;
+        keyNum = argc - 4;
 
         for(index = 0; index < keyNum; index++)
-            p_cs -> AddKey(atoll(argv[index+3]));
+            p_cs -> AddKey(atoll(argv[index+4]));
     }
     else
     {
@@ -60,7 +64,7 @@ int main(int argc,char*argv[])
         return 0;
     }
 
-    ce.Run(argv[2]);
+    ce.Run(argv[3]);
 
     printf("Statistics\n");
     printf("-------------------------------------------------------\n");
@@ -76,7 +80,7 @@ int main(int argc,char*argv[])
     printf("Total false alarm     : %lld\n", (long long)ce.GetFalseAlarms());
     printf("\n");
 
-    FILE * file = fopen(argv[3],"rb");
+    FILE * file = fopen(argv[4],"rb");
 
     assert(file && "main fopen error\n");
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Copyright (c) 2014 The RainbowCrack Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
@@ -8,8 +8,8 @@
 #include "TimeStamp.h"
 using namespace utils;
 
-#include "DESChainWalkContext.h"
-using namespace descrack;
+#include "RainbowChainWalk.h"
+using namespace rainbowcrack;
 
 #define BOOLEAN int
 #define MASTER_RANK 0
@@ -23,25 +23,25 @@ using namespace descrack;
 void Usage()
 {
     Logo();
-    printf("Usage: generator chainLen chainCount suffix\n");
-    printf("                 benchmark\n");
-    printf("                 testcasegenerator\n");
+    printf("Usage: generator type chainLen chainCount suffix\n");
+    printf("                 type benchmark\n");
+    printf("                 type testcasegenerator\n");
 
-    printf("example 1: generator 1000 10000 suffix\n");
-    printf("example 2: generator benchmark\n");
-    printf("example 7: generator testcasegenerator\n\n");
+    printf("example 1: generator des/md5 1000 10000 suffix\n");
+    printf("example 2: generator des/md5 benchmark\n");
+    printf("example 7: generator des/md5 testcasegenerator\n\n");
 }
 
 typedef long long ll;
 
-void Benchmark()
+void Benchmark(const char *type)
 {
     int index, nLoop = 1 << 21;
 
     char str[256];
     memset(str, 0, sizeof(str));
 
-    DESChainWalkContext cwc;
+    RainbowChainWalk cwc;
     cwc.GetRandomKey();
 
     TimeStamp tmps;
@@ -69,10 +69,10 @@ void Benchmark()
     tmps.StopTime(str);
 }
 
-void TestCaseGenerator()
+void TestCaseGenerator(const char *type)
 {
-    RainbowChain chain;
-    DESChainWalkContext cwc;
+    RainbowChain     chain;
+    RainbowChainWalk cwc;
 
     srand((uint32_t)time(0));
 
@@ -90,146 +90,6 @@ void TestCaseGenerator()
 
     fclose(file);
 }
-
-#ifdef _WIN32
-typedef struct
-{
-    char szFileName[256];
-    uint64_t chainLen;
-    uint64_t chainCount;
-    int rank;
-    int numproc;
-} DATA;
-
-DWORD WINAPI MyThreadFunction( LPVOID lpParam )
-{
-    DATA * data = (DATA*)lpParam;
-    const char * szFileName = data -> szFileName;
-    uint64_t chainLen = data -> chainLen;
-    uint64_t totalChainCount = data -> chainCount;
-
-    int rank = data -> rank;
-    int numproc =  data -> numproc;
-
-    srand(rank);
-
-    FILE * file;
-    DESChainWalkContext cwc;
-    char str[256];
-
-    uint64_t nDatalen, index, nChainStart;
-
-    RainbowChain chain;
-
-    uint64_t chainCount = totalChainCount / numproc;
-
-    if((file = fopen(szFileName,"ab+")) == NULL)
-    {
-        printf("rank %d of %d, failed to create %s\n", rank, numproc, szFileName);
-        return 0;
-    }
-    printf("open successfully\n");
-    nDatalen = GetFileLen(file);
-    nDatalen = (nDatalen >> 4) << 4;
-
-    if(nDatalen == (chainCount << 4))
-    {
-        printf("rank %d of %d, precompute has finised\n",rank, numproc);
-        return 0;
-    }
-
-    if(nDatalen > 0)
-    {
-        printf("rank %d of %d, continuing from interrupted precomputing, ", rank, numproc);
-        printf("have computed %lld chains\n", (ll)(nDatalen >> 4));
-    }
-
-    fseek(file, (long)nDatalen, SEEK_SET);
-    nChainStart = (nDatalen >> 4);
-
-    index = nDatalen >> 4;
-
-    cwc.SetChainInfo(chainLen, chainCount);
-
-    TimeStamp tmps, parts;
-    tmps.StartTime();
-    for(; index < chainCount; index++)
-    {
-        chain.nStartKey = cwc.GetRandomKey();
-
-        for(int nPos = 0; nPos < chainLen; nPos++)
-        {
-            cwc.KeyToCipher();
-            cwc.KeyReduction(nPos);
-        }
-
-        chain.nEndKey = cwc.GetKey();
-        parts.StartTime();
-        if(fwrite((char*)&chain, sizeof(RainbowChain), 1, file) != 1)
-        {
-            printf("rank %d of %d, disk write error\n", rank, numproc);
-            return 0;
-        }
-        parts.StopTime();
-        parts.AddTime(m_disktime);
-        if((index + 1)%10000 == 0||index + 1 == chainCount)
-        {
-            sprintf(str,"rank %d of %d, generate: nChains: %lld, chainLen: %lld: total time:", rank, numproc, (long long)index, (long long)chainLen);
-            tmps.StopTime(str);
-            tmps.StartTime();
-        }
-    }
-    fclose(file);
-    return 0;
-}
-
-int main(int argc,char * argv[])
-{
-    uint64_t chainLen, chainCount;
-    char suffix[256];
-
-    if(argc == 2)
-    {
-        if(strcmp(argv[1], "benchmark") == 0)
-            Benchmark();
-        else if(strcmp(argv[1],"testcasegenerator") == 0)
-            TestCaseGenerator();
-        else
-            Usage();
-
-        return 0;
-    }
-    else if(argc != 4)
-    {
-        Usage();
-        return 0;
-    }
-
-    chainLen   = atoll(argv[1]);
-    chainCount = atoll(argv[2]);
-
-    memset(suffix, 0, 256);
-    memcpy(suffix, argv[3], strlen(argv[3]));
-
-#define THRNUM 8
-    DATA datas[THRNUM];
-    HANDLE  hThreadArray[THRNUM];
-    DWORD   dwThreadIdArray[THRNUM];
-
-    for(int i = 0; i < THRNUM; i++)
-    {
-        sprintf(datas[i].szFileName,"DES_%lld-%lld_%s_%d", (long long)chainLen, (long long)chainCount, suffix, i);
-        datas[i].chainLen = chainLen;
-        datas[i].chainCount = chainCount;
-        datas[i].rank = i;
-        datas[i].numproc = THRNUM;
-        hThreadArray[i] = CreateThread( NULL,0, MyThreadFunction, &datas[i],0,&dwThreadIdArray[i]);
-        assert(hThreadArray[i]);
-    }
-    WaitForMultipleObjects(THRNUM, hThreadArray, TRUE, INFINITE);
-    return 0;
-}
-#else
 
 uint64_t Convert(uint64_t num, int time)
 {
@@ -249,9 +109,9 @@ uint64_t Convert(uint64_t num, int time)
     return rs;
 }
 
-void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, int rank, int numproc)
+void Generator(char *szFileName, uint64_t chainLen, uint64_t totalChainCount, int rank, int numproc, const char *type)
 {
-    DESChainWalkContext cwc;
+    RainbowChainWalk cwc;
     char str[256];
 
     uint64_t nDatalen, index, nChainStart;
@@ -351,43 +211,43 @@ void Generator(char * szFileName, uint64_t chainLen, uint64_t totalChainCount, i
 int main(int argc,char * argv[])
 {
     long long chainLen, chainCount;
-    char suffix[256], szFileName[256];
+    char suffix[256], szFileName[256], type[256];
 
     int numproc,rank;
 
-    if(argc == 2)
+    if(argc == 3)
     {
-        if(strcmp(argv[1],"benchmark") == 0)
-            Benchmark();
-        else if(strcmp(argv[1],"testcasegenerator") == 0)
-            TestCaseGenerator();
+        memcpy(type, argv[1], sizeof(argv[1]));
+        if(strcmp(argv[2],"benchmark") == 0)
+            Benchmark(type);
+        else if(strcmp(argv[2],"testcasegenerator") == 0)
+            TestCaseGenerator(type);
         else
             Usage();
 
         return 0;
     }
-    else if(argc != 4)
+    else if(argc != 5)
     {
         Usage();
 
         return 0;
     }
 
-    chainLen   = atoll(argv[1]);
-    chainCount = atoll(argv[2]);
+    memcpy(type, argv[1], sizeof(argv[1]));
+    chainLen   = atoll(argv[2]);
+    chainCount = atoll(argv[3]);
 
-    memcpy(suffix, argv[3], sizeof(argv[3]));
+    memcpy(suffix, argv[4], sizeof(argv[4]));
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numproc);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    sprintf(szFileName,"DES_%lld-%lld_%s_%d", chainLen, chainCount, suffix, rank);
+    sprintf(szFileName,"%s_%lld-%lld_%s_%d", type, chainLen, chainCount, suffix, rank);
 
-    Generator(szFileName, chainLen, chainCount, rank, numproc);
+    Generator(szFileName, chainLen, chainCount, rank, numproc, type);
 
     MPI_Finalize();
 
     return 0;
 }
-
-#endif

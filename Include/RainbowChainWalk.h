@@ -1,4 +1,4 @@
-// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Copyright (c) 2014 The RainbowCrack Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
@@ -8,14 +8,14 @@
 #include "Common.h"
 using namespace utils;
 
-namespace descrack
+namespace rainbowcrack
 {
 
 #define HASH_LEN 8
 
-class DESCrackEngine;
+class RainbowCrackEngine;
 
-class DESChainWalkContext
+class RainbowChainWalk
 {
 public:
     static void 	SetChainInfo(uint64_t chainLen, uint64_t chainCount);
@@ -26,7 +26,6 @@ public:
     uint64_t 		GetRandomKey();
     uint64_t 		GetKey();
     void 			SetKey(uint64_t m_nIndex);
-
     uint64_t 		Crypt(uint64_t key);
 
 private:
@@ -42,7 +41,7 @@ private:
 private:
     uint64_t m_nIndex;
 
-    friend class DESCrackEngine;
+    friend class RainbowCrackEngine;
 };
 
 };

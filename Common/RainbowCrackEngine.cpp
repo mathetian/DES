@@ -1,27 +1,27 @@
-// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Copyright (c) 2014 The RainbowCrack Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
 #include "TimeStamp.h"
 using namespace utils;
 
-#include "DESCrackEngine.h"
+#include "RainbowCrackEngine.h"
 
-namespace descrack
+namespace rainbowcrack
 {
 
-MemoryPool DESCrackEngine::mp;
+MemoryPool RainbowCrackEngine::mp;
 
-DESCrackEngine::DESCrackEngine() : m_totalChains(0), m_falseAlarms(0)
+RainbowCrackEngine::RainbowCrackEngine() : m_totalChains(0), m_falseAlarms(0)
 {
     m_diskTime.tv_sec   = 0;
     m_diskTime.tv_usec  = 0;
     m_totalTime.tv_sec  = 0;
     m_totalTime.tv_usec = 0;
-    p_cs = DESCipherSet::GetInstance();
+    p_cs = RainbowCipherSet::GetInstance();
 }
 
-uint64_t DESCrackEngine::BinarySearch(RainbowChain * pChain, uint64_t pChainCount, uint64_t nIndex)
+uint64_t RainbowCrackEngine::BinarySearch(RainbowChain * pChain, uint64_t pChainCount, uint64_t nIndex)
 {
     uint64_t low = 0, high = pChainCount;
 
@@ -29,23 +29,20 @@ uint64_t DESCrackEngine::BinarySearch(RainbowChain * pChain, uint64_t pChainCoun
     {
         uint64_t mid = (low+high)/2;
 
-        if(pChain[mid].nEndKey == nIndex)
-            return mid;
-        else if(pChain[mid].nEndKey < nIndex)
-            low = mid + 1;
-        else
-            high=mid;
+        if(pChain[mid].nEndKey == nIndex) return mid;
+        else if(pChain[mid].nEndKey < nIndex) low = mid + 1;
+        else high = mid;
     }
 
     return low;
 }
 
-void DESCrackEngine::GetIndexRange(RainbowChain * pChain,uint64_t pChainCount, uint64_t nChainIndex, uint64_t &nChainIndexFrom, uint64_t &nChainIndexTo)
+void RainbowCrackEngine::GetIndexRange(RainbowChain * pChain,uint64_t pChainCount, uint64_t nChainIndex, uint64_t &nChainIndexFrom, uint64_t &nChainIndexTo)
 {
     nChainIndexFrom = nChainIndex;
     nChainIndexTo   = nChainIndex;
 
-    while(nChainIndexFrom>0)
+    while(nChainIndexFrom > 0)
     {
         if(pChain[nChainIndexFrom - 1].nEndKey == pChain[nChainIndex].nEndKey)
             nChainIndexFrom--;
@@ -62,9 +59,9 @@ void DESCrackEngine::GetIndexRange(RainbowChain * pChain,uint64_t pChainCount, u
     }
 }
 
-bool DESCrackEngine::CheckAlarm(RainbowChain *pChain, uint64_t nGuessPos, uint64_t testV)
+bool RainbowCrackEngine::CheckAlarm(RainbowChain *pChain, uint64_t nGuessPos, uint64_t testV)
 {
-    DESChainWalkContext cwc;
+    RainbowChainWalk cwc;
 
     uint64_t nPos = 0, old = pChain -> nStartKey;
 
@@ -88,7 +85,7 @@ bool DESCrackEngine::CheckAlarm(RainbowChain *pChain, uint64_t nGuessPos, uint64
     return false;
 }
 
-void DESCrackEngine::SearchRainbowTable(const char *fileName)
+void RainbowCrackEngine::SearchRainbowTable(const char *fileName)
 {
     char str[256];
 
@@ -106,9 +103,9 @@ void DESCrackEngine::SearchRainbowTable(const char *fileName)
 
     assert(fileLen % 16 == 0);
 
-    cout << DESChainWalkContext::m_chainCount << " " << fileLen << endl;
+    cout << RainbowChainWalk::m_chainCount << " " << fileLen << endl;
 
-    if(fileLen % 16 != 0 || DESChainWalkContext::m_chainCount*16 != fileLen)
+    if(fileLen % 16 != 0 || RainbowChainWalk::m_chainCount*16 != fileLen)
     {
         printf("file length check error\n");
         return;
@@ -159,7 +156,7 @@ void DESCrackEngine::SearchRainbowTable(const char *fileName)
     fclose(file);
 }
 
-void DESCrackEngine::SearchTableChunk(RainbowChain *pChain, int pChainCount)
+void RainbowCrackEngine::SearchTableChunk(RainbowChain *pChain, int pChainCount)
 {
     uint64_t nFalseAlarm, nIndex, nGuessPos;
     uint64_t key = p_cs -> GetLeftKey();
@@ -168,7 +165,7 @@ void DESCrackEngine::SearchTableChunk(RainbowChain *pChain, int pChainCount)
 
     nFalseAlarm  = 0;
 
-    for(nGuessPos = 0; nGuessPos < DESChainWalkContext::m_chainLen; nGuessPos++)
+    for(nGuessPos = 0; nGuessPos < RainbowChainWalk::m_chainLen; nGuessPos++)
     {
         uint64_t nMathingIndexE = BinarySearch(pChain, pChainCount, pEndKeys[nGuessPos]);
 
@@ -194,7 +191,7 @@ NEXT_HASH:
     m_falseAlarms += nFalseAlarm;
 }
 
-void DESCrackEngine::Run(const char *fileName)
+void RainbowCrackEngine::Run(const char *fileName)
 {
     uint64_t nChainLen, nChainCount;
 
@@ -206,7 +203,7 @@ void DESCrackEngine::Run(const char *fileName)
 
     printf("\nnChainLen: %lld, nChainCount: %lld\n", (long long)nChainLen, (long long)nChainCount);
 
-    DESChainWalkContext::SetChainInfo(nChainLen, nChainCount);
+    RainbowChainWalk::SetChainInfo(nChainLen, nChainCount);
 
     int index = 0;
 
@@ -228,39 +225,39 @@ void DESCrackEngine::Run(const char *fileName)
     }
 }
 
-struct timeval DESCrackEngine::GetDiskTime()
+struct timeval RainbowCrackEngine::GetDiskTime()
 {
     return m_diskTime;
 }
 
-struct timeval DESCrackEngine::GetTotalTime()
+struct timeval RainbowCrackEngine::GetTotalTime()
 {
     return m_totalTime;
 }
 
-uint64_t DESCrackEngine::GetTotalChains()
+uint64_t RainbowCrackEngine::GetTotalChains()
 {
     return m_totalChains;
 }
 
-uint64_t DESCrackEngine::GetFalseAlarms()
+uint64_t RainbowCrackEngine::GetFalseAlarms()
 {
     return m_falseAlarms;
 }
 
-void DESCrackEngine::InitEndKeys(uint64_t key)
+void RainbowCrackEngine::InitEndKeys(uint64_t key)
 {
-    pEndKeys  = vector<uint64_t>(DESChainWalkContext::m_chainLen, 0);
-    pVerified = vector<uint64_t>(DESChainWalkContext::m_chainLen, 0);
+    pEndKeys  = vector<uint64_t>(RainbowChainWalk::m_chainLen, 0);
+    pVerified = vector<uint64_t>(RainbowChainWalk::m_chainLen, 0);
 
-    for(uint32_t nGuessPos = 0; nGuessPos < DESChainWalkContext::m_chainLen; nGuessPos++)
+    for(uint32_t nGuessPos = 0; nGuessPos < RainbowChainWalk::m_chainLen; nGuessPos++)
     {
         m_cwc.SetKey(key);
         m_cwc.KeyReduction(nGuessPos);
 
         pVerified[nGuessPos] = m_cwc.GetKey();
 
-        for(uint32_t nIndex = nGuessPos + 1; nIndex < DESChainWalkContext::m_chainLen; nIndex++)
+        for(uint32_t nIndex = nGuessPos + 1; nIndex < RainbowChainWalk::m_chainLen; nIndex++)
         {
             m_cwc.KeyToCipher();
             m_cwc.KeyReduction(nIndex);

@@ -1,19 +1,19 @@
-// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Copyright (c) 2014 The RainbowCrack Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
 #include "Common.h"
 using namespace utils;
 
-#include "DESChainWalkContext.h"
-using namespace descrack;
+#include "RainbowChainWalk.h"
+using namespace rainbowcrack;
 
 void Usage()
 {
     Logo();
-    printf("Usage  : verified filename chainLen\n");
+    printf("Usage  : verified type filename chainLen\n");
 
-    printf("example: verified hello.rt 1000\n\n");
+    printf("example: verified des/md5 hello.rt 1000\n\n");
 }
 
 int main(int argc,char*argv[])
@@ -24,15 +24,19 @@ int main(int argc,char*argv[])
     uint64_t chainLen, chainCount;
     uint64_t fileLen, index;
 
-    DESChainWalkContext cwc;
+    RainbowChainWalk cwc;
+    char type[256];
+    memset(type, 0, sizeof(type));
 
-    if(argc != 3)
+    if(argc != 4)
     {
         Usage();
         return 0;
     }
 
-    if((file  = fopen(argv[1],"rb")) == NULL)
+    strcpy(type, argv[1]);
+
+    if((file  = fopen(argv[2],"rb")) == NULL)
     {
         printf("fopen error\n");
         return 0;
@@ -40,7 +44,7 @@ int main(int argc,char*argv[])
 
     fseek(file, 0, SEEK_SET);
 
-    chainLen = atoll(argv[2]);
+    chainLen = atoll(argv[3]);
     fileLen  = GetFileLen(file);
 
     if(fileLen % 16 != 0)
@@ -53,7 +57,7 @@ int main(int argc,char*argv[])
 
     printf("FileLen: %lld, ChainCount: %lld\n", (long long)fileLen, (long long)chainCount);
 
-    DESChainWalkContext::SetChainInfo(chainLen, chainCount);
+    RainbowChainWalk::SetChainInfo(chainLen, chainCount);
 
     for(index = 0; index < chainCount; index++)
     {

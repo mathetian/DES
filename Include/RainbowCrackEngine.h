@@ -1,4 +1,4 @@
-// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Copyright (c) 2014 The RainbowCrack Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
@@ -9,16 +9,16 @@
 #include "MemoryPool.h"
 using namespace utils;
 
-#include "DESCipherSet.h"
-#include "DESChainWalkContext.h"
+#include "RainbowCipherSet.h"
+#include "RainbowChainWalk.h"
 
-namespace descrack
+namespace rainbowcrack
 {
 
-class DESCrackEngine
+class RainbowCrackEngine
 {
 public:
-    DESCrackEngine();
+    RainbowCrackEngine();
 
 public:
     void  Run(const char * fileName);
@@ -28,8 +28,8 @@ public:
     uint64_t		 GetFalseAlarms();
 
 private:
-    DESChainWalkContext m_cwc;
-    DESCipherSet	 *   p_cs;
+    RainbowChainWalk  m_cwc;
+    RainbowCipherSet *p_cs;
     struct timeval   m_diskTime;
     struct timeval   m_totalTime;
     uint64_t         m_totalChains;

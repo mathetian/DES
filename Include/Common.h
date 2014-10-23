@@ -1,4 +1,4 @@
-// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Copyright (c) 2014 The RainbowCrack Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
@@ -32,6 +32,8 @@ using namespace std;
 #include <sys/time.h>
 #endif
 
+#define CHAIN_IN_MEMORY_MAX 1024
+
 namespace utils
 {
 
@@ -39,7 +41,10 @@ class RainbowChain
 {
 public:
     uint64_t nStartKey, nEndKey;
-    bool operator < (const RainbowChain &m) const;
+    bool operator < (const RainbowChain &m) const
+    {
+        return nEndKey < m.nEndKey;
+    }
 };
 
 extern uint64_t GetFileLen(FILE*file);
@@ -56,8 +61,6 @@ extern void SetupDESKey(const uint64_t&key56, des_key_schedule &ks);
 
 extern bool AnylysisFileName(const char * filename, uint64_t & chainLen, uint64_t & chainCount);
 
-#define CHAIN_IN_MEMORY_MAX 1024
-
 #ifdef _WIN32
 inline uint64_t atoll(const char * str)
 {
@@ -67,7 +70,6 @@ inline uint64_t atoll(const char * str)
 
     return rs;
 }
-
 #endif
 
 #define fseek64 fseek

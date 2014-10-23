@@ -1,22 +1,22 @@
-// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Copyright (c) 2014 The RainbowCrack Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
 #include "TimeStamp.h"
 using namespace utils;
 
-#include "DESCuda.h"
-using namespace descrack;
+#include "RainbowDESCuda.h"
+using namespace rainbowcrack;
 
 void Usage()
 {
     Logo();
-    printf("Usage: gencuda   chainLen chainCount suffix\n\n");
+    printf("Usage: gencuda  chainLen chainCount suffix\n\n");
 
     printf("example 1: gencuda 1000 10000 suffix\n");
 }
 
-__device__ int GenerateKey(uint64_t key, uint64_t * store)
+__device__ int GenerateKey(uint64_t key, uint64_t *store)
 {
     uint32_t c, d, t, s, t2;
     uint64_t tmp;
@@ -33,7 +33,6 @@ __device__ int GenerateKey(uint64_t key, uint64_t * store)
     d =	(((d&0x000000ffL)<<16L)| (d&0x0000ff00L)     |
          ((d&0x00ff0000L)>>16L)|((c&0xf0000000L)>>4L));
     c&=0x0fffffffL;
-
 
     RoundKey0(0);
     RoundKey0(1);

@@ -1,4 +1,4 @@
-// Copyright (c) 2014 The DESCrack Authors. All rights reserved.
+// Copyright (c) 2014 The RainbowCrack Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
@@ -8,31 +8,29 @@
 #include "Common.h"
 using namespace utils;
 
-namespace descrack
+namespace rainbowcrack
 {
 
-class DESCipherSet
+class RainbowCipherSet
 {
 
 public:
-    static DESCipherSet * GetInstance();
+    static RainbowCipherSet * GetInstance();
 
 public:
     void     AddKey(uint64_t cipherKey);
     bool     AnyKeyLeft();
     uint64_t GetLeftKey();
-
     void     AddResult(uint64_t cipherKey,uint64_t key);
     void     Done(uint64_t cipherKey);
     bool     Solved();
     int      GetKeyFoundNum();
     int      Detect(RainbowChain chain);
-
     int      GetRemainCount();
 
 private:
-    DESCipherSet();
-    static DESCipherSet * p_cs;
+    RainbowCipherSet();
+    static RainbowCipherSet * p_cs;
 
 private:
     vector<uint64_t> m_vKeys;
