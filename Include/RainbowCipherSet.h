@@ -22,7 +22,7 @@ public:
     bool     Finished();
     uint64_t GetLastKey();
     void     AddResult(uint64_t cipherKey,uint64_t key);
-    void     Done(uint64_t cipherKey);
+    void     Done();
     bool     Solved();
     int      GetKeyFoundNum();
     int      Detect(RainbowChain chain);

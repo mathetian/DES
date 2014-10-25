@@ -27,7 +27,7 @@ void RainbowChainWalk::SetChainInfo(uint64_t chainLen, uint64_t chainCount, cons
     else if(strcmp(type, "MD5") == 0)
     {
         m_algorithm = MD5;
-    } 
+    }
 }
 
 uint64_t RainbowChainWalk::GetRandomKey()

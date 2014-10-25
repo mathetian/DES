@@ -141,16 +141,19 @@ void printMemory(const char * str, long long nAvailPhys)
 
 void SortFiles(vector <string>fileNames, vector <FILE*>files, const char * prefix)
 {
-    int index = 0; uint64_t nAvailPhys; char str[256];
+    int index = 0;
+    uint64_t nAvailPhys;
+    char str[256];
     vector <uint64_t> fileLens(fileNames.size(), 0);
-    FILE * targetFile = NULL; nAvailPhys = GetAvailPhysMemorySize();
-    
+    FILE * targetFile = NULL;
+    nAvailPhys = GetAvailPhysMemorySize();
+
     sprintf(str, "Available free physical memory: ");
     printMemory(str, nAvailPhys);
 
     int ss = (int)fileNames.size();
 
-    for(;index < ss;index++)
+    for(; index < ss; index++)
     {
         uint64_t & fileLen = fileLens[index];
         fileLen = GetFileLen(files[index]);
@@ -210,8 +213,10 @@ ABORT:
 
 void SortOneFile(const char *prefix)
 {
-    uint64_t nAvailPhys; char str[256];
-    FILE *targetFile; uint64_t fileLen;
+    uint64_t nAvailPhys;
+    char str[256];
+    FILE *targetFile;
+    uint64_t fileLen;
 
     nAvailPhys = GetAvailPhysMemorySize();
     sprintf(str, "Available free physical memory: ");
@@ -254,7 +259,7 @@ void SortOneFile(const char *prefix)
             delete [] pChain;
         }
     }
-    else 
+    else
         ExternalSort(targetFile);
 
 ABORT:

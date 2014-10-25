@@ -35,10 +35,10 @@ private:
     static uint64_t    m_chainCount;
     static uint64_t    m_keySpaceTotal;
     static HASHROUTINE m_algorithm;
-    
+
 private:
     uint64_t m_nIndex;
-    
+
     friend class RainbowCrackEngine;
 };
 

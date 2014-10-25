@@ -58,7 +58,7 @@ int main(int argc,char*argv[])
 
     RainbowChainWalk::SetChainInfo(chainLen, chainCount, type);
 
-    for(index = 0;index < chainCount; index++)
+    for(index = 0; index < chainCount; index++)
     {
         assert(fread(&chain, sizeof(RainbowChain), 1, file) == 1);
 

@@ -41,7 +41,7 @@ void RainbowCipherSet::AddResult(uint64_t cipherKey, uint64_t key)
     m_maps[cipherKey].push_back(key);
 }
 
-void RainbowCipherSet::Done(uint64_t cipherKey)
+void RainbowCipherSet::Done()
 {
     solve = false;
     index++;

@@ -193,7 +193,7 @@ void RainbowCrackEngine::SearchRainbowTable(const char *fileName)
         if(p_cs -> Solved()) break;
     }
 
-    p_cs -> Done(p_cs->GetLastKey());
+    p_cs -> Done();
 
     fclose(file);
 }
@@ -227,7 +227,8 @@ void RainbowCrackEngine::SearchTableChunk(RainbowChain *pChain, int pChainCount)
 
         if(nGuessPos % 100 == 0) printf("nGuessPos %lld\n", (long long)nGuessPos);
     }
-NEXT_HASH: ;
+NEXT_HASH:
+    ;
     m_totalChains += pChainCount;
     m_falseAlarms += nFalseAlarm;
 }

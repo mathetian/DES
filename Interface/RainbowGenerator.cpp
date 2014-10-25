@@ -76,7 +76,8 @@ uint64_t Convert(uint64_t num, int time)
 
 void Generator(char *szFileName, uint64_t chainLen, uint64_t totalChainCount, int rank, int numproc, const char *type)
 {
-    RainbowChainWalk cwc; char str[256];
+    RainbowChainWalk cwc;
+    char str[256];
 
     uint64_t nDatalen, index, nChainStart;
 
@@ -190,7 +191,8 @@ int main(int argc,char * argv[])
     }
     else if(argc != 5)
     {
-        Usage(); return 0;
+        Usage();
+        return 0;
     }
 
     memcpy(type, argv[1], sizeof(argv[1]));
