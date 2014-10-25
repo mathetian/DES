@@ -49,9 +49,8 @@ __device__ void SHA1_Transform(uint32_t *state, const uint8_t *buffer)
         uint32_t l[16];
     } CHAR64LONG16;
 
-    CHAR64LONG16 block; memcpy(block.c, buffer, 64);
-
-   // block = (CHAR64LONG16*)buffer;
+    CHAR64LONG16 block;
+    memcpy(block.c, buffer, 64);
 
     a = state[0];
     b = state[1];

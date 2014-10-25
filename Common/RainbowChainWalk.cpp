@@ -3,14 +3,12 @@
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
 #include "RainbowAlgorithm.h"
-
 #include "RainbowChainWalk.h"
 
 namespace rainbowcrack
 {
 
-uint64_t RainbowChainWalk::m_keySpaceTotal = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
-
+uint64_t RainbowChainWalk::m_keySpaceTotal = (1ull << 63) - 1 + (1ull << 63);
 uint64_t     RainbowChainWalk::m_chainLen;
 uint64_t     RainbowChainWalk::m_chainCount;
 HASHROUTINE  RainbowChainWalk::m_algorithm;
@@ -19,15 +17,15 @@ void RainbowChainWalk::SetChainInfo(uint64_t chainLen, uint64_t chainCount, cons
 {
     m_chainLen   = chainLen;
     m_chainCount = chainCount;
-    if(strcmp(type, "DES") == 0)
+    if(strcmp(type, "des") == 0)
     {
-        m_algorithm = DES;
+        m_algorithm = HASH_DES;
         m_keySpaceTotal = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
     }
-    else if(strcmp(type, "MD5") == 0)
-    {
-        m_algorithm = MD5;
-    }
+    else if(strcmp(type, "md5") == 0) m_algorithm = HASH_MD5;
+    else if(strcmp(type, "sha1") == 0) m_algorithm = HASH_SHA1;
+    else if(strcmp(type, "hmac") == 0) m_algorithm = HASH_HMAC;
+    else assert(type && 0);
 }
 
 uint64_t RainbowChainWalk::GetRandomKey()
@@ -44,10 +42,12 @@ void RainbowChainWalk::KeyToCipher()
 
 void RainbowChainWalk::KeyReduction(int nPos)
 {
-    if(nPos < 1300) nPos = 0;
-    m_nIndex = (m_nIndex + nPos) & m_keySpaceTotal;
-    m_nIndex = (m_nIndex + (nPos << 8)) & m_keySpaceTotal;
-    m_nIndex = (m_nIndex + ((nPos << 8) << 8)) & m_keySpaceTotal;
+    if(nPos >= 1300)
+    {
+        m_nIndex = (m_nIndex + nPos) & m_keySpaceTotal;
+        m_nIndex = (m_nIndex + (nPos << 8)) & m_keySpaceTotal;
+        m_nIndex = (m_nIndex + ((nPos << 8) << 8)) & m_keySpaceTotal;
+    }
 }
 
 uint64_t RainbowChainWalk::GetKey()

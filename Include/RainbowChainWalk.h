@@ -15,7 +15,7 @@ namespace rainbowcrack
 
 class RainbowCrackEngine;
 
-typedef void (*HASHROUTINE)(unsigned char* pPlain, int nPlainLen, unsigned char* pHash);
+typedef void (*HASHROUTINE)(unsigned char *pPlain, int nPlainLen, unsigned char *pHash);
 
 class RainbowChainWalk
 {
