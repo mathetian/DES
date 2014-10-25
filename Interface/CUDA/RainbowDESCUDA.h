@@ -9,6 +9,13 @@
 
 namespace rainbowcrack
 {
+
+__device__ uint32_t plRight = 0x5A296F6D;
+__device__ uint32_t plLeft  = 0x28325530;
+
+__device__ uint64_t totalSpace_DES = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
+uint64_t totalSpace_Global_DES     = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
+
 __device__ uint32_t des_d_sp_c[8][64]=
 {
     {
@@ -358,13 +365,6 @@ __device__ uint32_t des_skb[8][64]=
 
 __device__ int shifts2[16]= {0,0,1,1,1,1,1,1,0,1,1,1,1,1,1,0};
 
-__device__ uint32_t plRight = 0x5A296F6D;
-__device__ uint32_t plLeft  = 0x28325530;
-
-__device__ uint64_t totalSpace = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
-
-uint64_t totalSpaceT = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
-
 #define RoundKey0(S) { \
 	c=((c>>1L)|(c<<27L)); d=((d>>1L)|(d<<27L));\
 	c&=0x0fffffffL;d&=0x0fffffffL;\
@@ -441,7 +441,7 @@ __device__ int GenerateKey(uint64_t key, uint64_t *store)
     return 0;
 }
 
-__device__ uint64_t DESOneTime(uint64_t * roundKeys)
+__device__ uint64_t DESOneTime(uint64_t *roundKeys)
 {
     uint64_t rs;
     uint32_t right = plRight, left = plLeft;
@@ -476,6 +476,86 @@ __device__ uint64_t DESOneTime(uint64_t * roundKeys)
     rs=(((uint64_t)right)<<32) | left;
 
     return rs;
+}
+
+__device__ uint64_t Key2Ciper_DES(uint64_t key)
+{
+    uint64_t         roundKeys[16];
+    GenerateKey(key, roundKeys);
+    key  = DESOneTime(roundKeys) & totalSpace_DES;
+    return key;
+}
+
+__device__ uint64_t Cipher2Key_DES(uint64_t key, int nPos)
+{
+    if(nPos >= 1300)
+    {
+        key = (key + nPos) & totalSpace_DES;
+        key = (key + (nPos << 8)) & totalSpace_DES;
+        key = (key + ((nPos << 8) << 8)) & totalSpace_DES;
+    }
+
+    return key;
+}
+
+uint64_t Convert(uint64_t num, int time)
+{
+    assert(time < 8);
+
+    uint64_t rs = 0, tmp = 0;
+
+    for(int i = 0; i < time; i++)
+    {
+        tmp = num & ((1ull << 7) - 1);
+        tmp <<= 1;
+        tmp <<= (8*i);
+        rs |= tmp;
+        num >>= 7;
+    }
+
+    return rs;
+}
+
+__global__ void DESCUDA(uint64_t *data)
+{
+    for(int i=0; i < 256; i++)
+        ((uint64_t *)des_SP)[i] = ((uint64_t *)des_d_sp_c)[i];
+
+    __syncthreads();
+
+    uint64_t key = data[TX];
+    for(int nPos = 0; nPos < CHAINLEN; nPos++)
+        key = Cipher2Key_DES(Key2Ciper_DES(key), nPos);
+    data[TX] = key;
+
+    __syncthreads();
+}
+
+__global__ void  DESCrackCUDA(uint64_t *data)
+{
+    for(int i=0; i<256; i++)
+        ((uint64_t *)des_SP)[i] = ((uint64_t *)des_d_sp_c)[i];
+
+    __syncthreads();
+
+    uint64_t tx = TX/4096;
+    uint64_t st = tx*4096*2;
+    uint64_t ix = st + (TX%4096);
+
+    uint64_t key = data[ix];
+    for(int nPos = (TX % 4096) + 1; nPos < 4096; nPos++)
+        key = Cipher2Key_DES(Key2Ciper_DES(key), nPos);
+    data[ix] = key;
+
+    ix = st + 2*4096 - TX%4096 - 1;
+    st = st + 4096;
+
+    key = data[ix];
+    for(int nPos = 4096 - (TX % 4096); nPos < 4096; nPos++)
+        key = Cipher2Key_DES(Key2Ciper_DES(key), nPos);
+    data[ix] = key;
+
+    __syncthreads();
 }
 
 };

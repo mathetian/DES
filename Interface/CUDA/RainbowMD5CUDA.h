@@ -9,14 +9,13 @@
 
 namespace rainbowcrack
 {
-
 typedef unsigned int MD5_u32plus;
 
 typedef struct
 {
     MD5_u32plus lo, hi;
     MD5_u32plus a, b, c, d;
-    unsigned char buffer[64];
+    uint8_t buffer[64];
     MD5_u32plus block[16];
 } MD5_CTX;
 
@@ -47,16 +46,13 @@ typedef struct
 	(ctx->block[(n)])
 #endif
 
-__device__ uint64_t totalSpace = (1ull << 63) - 1 + (1ull << 63);
-    uint64_t totalSpace_Global = (1ull << 63) - 1 + (1ull << 63);
-
 __device__ const void *body(MD5_CTX *ctx, const void *data, unsigned long size)
 {
-    const unsigned char *ptr;
+    const uint8_t *ptr;
     MD5_u32plus a, b, c, d;
     MD5_u32plus saved_a, saved_b, saved_c, saved_d;
 
-    ptr = (const unsigned char *)data;
+    ptr = (const uint8_t *)data;
 
     a = ctx->a;
     b = ctx->b;
@@ -189,7 +185,7 @@ __device__ void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size)
         }
 
         memcpy(&ctx->buffer[used], data, available);
-        data = (const unsigned char *)data + available;
+        data = (const uint8_t *)data + available;
         size -= available;
         body(ctx, ctx->buffer, 64);
     }
@@ -203,7 +199,7 @@ __device__ void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size)
     memcpy(ctx->buffer, data, size);
 }
 
-__device__ void MD5_Final(unsigned char *result, MD5_CTX *ctx)
+__device__ void MD5_Final(uint8_t *result, MD5_CTX *ctx)
 {
     unsigned long used, available;
 
@@ -255,54 +251,74 @@ __device__ void MD5_Final(unsigned char *result, MD5_CTX *ctx)
     memset(ctx, 0, sizeof(*ctx));
 }
 
-__device__ void MD5(unsigned char* pPlain, int nPlainLen, unsigned char *pHash)
+__device__ void MD5(uint8_t* pPlain, int nPlainLen, uint8_t *pHash)
 {
     MD5_CTX ctx;
     MD5_Init(&ctx);
     MD5_Update(&ctx, pPlain, nPlainLen);
-    unsigned char result[16];
+    uint8_t result[16];
     MD5_Final(result, &ctx);
     memcpy(pHash, result, 8);
 }
 
-__device__ void U64_2_CHAR(uint64_t message, unsigned char *pPlain)
+__device__ uint64_t Key2Ciper_MD5(uint64_t key)
 {
-    for(int i = 0; i < 8; i++) pPlain[i] = (message >> (i*8)) & ((1 << 8) - 1);
-}
-
-__device__ void CHAR_2_U64(uint64_t &message, unsigned char *pPlain)
-{
-    message = 0;
-    for(int i = 0; i < 8; i++)
-    {
-        uint64_t value = pPlain[i];
-        message |= (value << (i * 8));
-    }
-}
-
-__device__ uint64_t MSG2Ciper(uint64_t message)
-{
-    unsigned char result[16], result_2[8];
-    U64_2_CHAR(message, result_2);
+    uint8_t result[16], result_2[8];
+    U64_2_CHAR(key, result_2);
     MD5(result_2, 8, result);
     memcpy(result_2, result, 8);
-    CHAR_2_U64(message, result_2);
+    CHAR_2_U64(key, result_2);
 
-    return message;
+    return key;
 }
 
-__device__ uint64_t Cipher2MSG(uint64_t m_nIndex, int nPos = 0)
+__device__ uint64_t Cipher2Key_MD5(uint64_t key, int nPos = 0)
 {
     if(nPos >= 1300)
     {
-        m_nIndex = (m_nIndex + nPos) & totalSpace;
-        m_nIndex = (m_nIndex + (nPos << 8)) & totalSpace;
-        m_nIndex = (m_nIndex + ((nPos << 8) << 8)) & totalSpace;
+        key = (key + nPos) & totalSpace;
+        key = (key + (nPos << 8)) & totalSpace;
+        key = (key + ((nPos << 8) << 8)) & totalSpace;
     }
 
-    return m_nIndex;
+    return key;
 }
 
+__global__ void MD5CUDA(uint64_t *data)
+{
+    __syncthreads();
+
+    uint64_t key = data[TX];
+    for(int nPos = 0; nPos < CHAINLEN; nPos++)
+        key = Cipher2Key_MD5(Key2Ciper_MD5(key), nPos);
+    data[TX] = key;
+
+    __syncthreads();
+}
+
+__global__ void MD5CrackCUDA(uint64_t *data)
+{
+    __syncthreads();
+
+    uint64_t tx = TX/4096;
+    uint64_t st = tx*4096*2;
+    uint64_t ix = st + (TX%4096);
+
+    uint64_t key = data[ix];
+    for(int nPos = (TX % 4096) + 1; nPos < 4096; nPos++)
+        key = Cipher2Key_MD5(Key2Ciper_MD5(key), nPos);
+    data[ix] = key;
+
+    ix = st + 2*4096 - TX%4096 - 1;
+    st = st + 4096;
+
+    key = data[ix];
+    for(int nPos = 4096 - (TX % 4096); nPos < 4096; nPos++)
+        key = Cipher2Key_MD5(Key2Ciper_MD5(key), nPos);
+    data[ix] = key;
+
+    __syncthreads();
+}
 };
 
 #endif

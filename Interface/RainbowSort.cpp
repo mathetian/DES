@@ -96,7 +96,7 @@ void ExternalSort(FILE *file)
 
     assert((nAvailPhys <= fileLen) && "Error ExternalSort type\n");
 
-    RainbowChain * chains =  (RainbowChain*)new unsigned char[eachLen];
+    RainbowChain * chains =  (RainbowChain*)new uint8_t[eachLen];
 
     fseek(file, 0, SEEK_SET);
 
@@ -166,7 +166,7 @@ void SortFiles(vector <string>fileNames, vector <FILE*>files, const char * prefi
         {
             uint64_t nRainbowChainCount = fileLen >> 4;
 
-            RainbowChain * pChain = (RainbowChain*)new unsigned char[fileLen];
+            RainbowChain * pChain = (RainbowChain*)new uint8_t[fileLen];
 
             if(pChain != NULL)
             {
@@ -235,7 +235,7 @@ void SortOneFile(const char *prefix)
     {
         uint64_t nRainbowChainCount = fileLen >> 4;
 
-        RainbowChain * pChain = (RainbowChain*)new unsigned char[fileLen];
+        RainbowChain * pChain = (RainbowChain*)new uint8_t[fileLen];
 
         if(pChain != NULL)
         {

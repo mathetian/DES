@@ -9,9 +9,10 @@
 
 namespace rainbowcrack
 {
-
-__device__ void polarssl_zeroize( uint8_t *v, size_t n ) {
-    uint8_t *p = v; while( n-- ) *p++ = 0;
+__device__ void polarssl_zeroize( uint8_t *v, size_t n )
+{
+    uint8_t *p = v;
+    while( n-- ) *p++ = 0;
 }
 
 __device__ void SHA1_HMAC_Init(SHA1_CTX *ctx, const uint8_t *key, size_t keylen)
@@ -22,7 +23,8 @@ __device__ void SHA1_HMAC_Init(SHA1_CTX *ctx, const uint8_t *key, size_t keylen)
     if( keylen > 64 )
     {
         SHA1(key, keylen, sum);
-        keylen = 20; key = sum;
+        keylen = 20;
+        key = sum;
     }
 
     memset( ctx->ipad, 0x36, 64 );
@@ -68,7 +70,7 @@ __device__ void SHA1_HMAC(const uint8_t *key, size_t keylen, const uint8_t *inpu
     SHA1_HMAC_Final( &ctx, output );
 }
 
-__device__ uint64_t MSG2Ciper_HMAC(uint64_t key)
+__device__ uint64_t Key2Ciper_HMAC(uint64_t key)
 {
     uint8_t result[20], result_2[8];
     U64_2_CHAR(key, result_2);
@@ -79,7 +81,7 @@ __device__ uint64_t MSG2Ciper_HMAC(uint64_t key)
     return key;
 }
 
-__device__ uint64_t Cipher2MSG_HMAC(uint64_t key, int nPos)
+__device__ uint64_t Cipher2Key_HMAC(uint64_t key, int nPos)
 {
     if(nPos >= 1300)
     {
@@ -89,6 +91,18 @@ __device__ uint64_t Cipher2MSG_HMAC(uint64_t key, int nPos)
     }
 
     return key;
+}
+
+__global__ void HMACCUDA(uint64_t *data)
+{
+    __syncthreads();
+
+    uint64_t key = data[TX];
+    for(int nPos = 0; nPos < CHAINLEN; nPos++)
+        key = Cipher2Key_HMAC(Key2Ciper_HMAC(key), nPos);
+    data[TX] = key;
+
+    __syncthreads();
 }
 
 };

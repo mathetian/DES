@@ -182,7 +182,7 @@ int main(int argc,char * argv[])
 
     if(argc == 3)
     {
-        memcpy(type, argv[1], sizeof(argv[1]));
+        strcpy(type, argv[1]);
         if(strcmp(argv[2],"testcasegenerator") == 0)
             TestCaseGenerator(type);
         else Usage();
@@ -195,11 +195,11 @@ int main(int argc,char * argv[])
         return 0;
     }
 
-    memcpy(type, argv[1], sizeof(argv[1]));
+    strcpy(type, argv[1]);
     chainLen   = atoll(argv[2]);
     chainCount = atoll(argv[3]);
 
-    memcpy(suffix, argv[4], sizeof(argv[4]));
+    strcpy(suffix, argv[4]);
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numproc);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);

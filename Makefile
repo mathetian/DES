@@ -17,7 +17,7 @@ BINARY  = Binary
 
 LIB = -L. -L/usr/local/ssl/lib -lrt -ldescrypt -lssl -lcrypto -ldl 
 
-ALL = generator verified sort crack descuda descrackcuda md5cuda md5crackcuda hmaccuda
+ALL = generator verified sort crack cuda crackcuda
 
 lib: clean compile
 	${AR} rv ${LIBMISC} *.o
@@ -46,32 +46,12 @@ crack: Interface/RainbowCrack.cpp
 	${CXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
 
-descuda: Interface/CUDA/RainbowDESCUDA.cu
+cuda: Interface/CUDA/RainbowCUDA.cu
 	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
 
-descrackcuda: Interface/CUDA/RainbowDESCrackCUDA.cu
-	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
-	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
-	${MV} $@  ${BINARY}
-
-md5cuda: Interface/CUDA/RainbowMD5CUDA.cu
-	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
-	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
-	${MV} $@  ${BINARY}
-
-md5crackcuda: Interface/CUDA/RainbowMD5CrackCUDA.cu
-	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
-	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
-	${MV} $@  ${BINARY}
-
-sha1cuda: Interface/CUDA/RainbowSHA1CUDA.cu
-	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
-	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
-	${MV} $@  ${BINARY}
-
-hmaccuda: Interface/CUDA/RainbowHMACCUDA.cu
+crackcuda: Interface/CUDA/RainbowCrackCUDA.cu
 	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
