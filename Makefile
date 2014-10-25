@@ -17,7 +17,7 @@ BINARY  = Binary
 
 LIB = -L. -L/usr/local/ssl/lib -lrt -ldescrypt -lssl -lcrypto -ldl 
 
-ALL = generator verified sort crack descuda descrackcuda md5cuda md5crackcuda sha1cuda
+ALL = generator verified sort crack descuda descrackcuda md5cuda md5crackcuda hmaccuda
 
 lib: clean compile
 	${AR} rv ${LIBMISC} *.o
@@ -67,6 +67,11 @@ md5crackcuda: Interface/CUDA/RainbowMD5CrackCUDA.cu
 	${MV} $@  ${BINARY}
 
 sha1cuda: Interface/CUDA/RainbowSHA1CUDA.cu
+	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	${MV} $@  ${BINARY}
+
+hmaccuda: Interface/CUDA/RainbowHMACCUDA.cu
 	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
