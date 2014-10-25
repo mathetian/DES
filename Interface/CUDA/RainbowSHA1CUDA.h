@@ -26,13 +26,13 @@ typedef struct
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
 
 #ifdef WORDS_BIGENDIAN
-#define blk0(i) block->l[i]
+#define blk0(i) block.l[i]
 #else
-#define blk0(i) (block->l[i] = (rol(block->l[i],24)&0xFF00FF00) \
-    |(rol(block->l[i],8)&0x00FF00FF))
+#define blk0(i) (block.l[i] = (rol(block.l[i],24)&0xFF00FF00) \
+    |(rol(block.l[i],8)&0x00FF00FF))
 #endif
-#define blk(i) (block->l[i&15] = rol(block->l[(i+13)&15]^block->l[(i+8)&15] \
-    ^block->l[(i+2)&15]^block->l[i&15],1))
+#define blk(i) (block.l[i&15] = rol(block.l[(i+13)&15]^block.l[(i+8)&15] \
+    ^block.l[(i+2)&15]^block.l[i&15],1))
 
 #define R0(v,w,x,y,z,i) z+=((w&(x^y))^y)+blk0(i)+0x5A827999+rol(v,5);w=rol(w,30);
 #define R1(v,w,x,y,z,i) z+=((w&(x^y))^y)+blk(i)+0x5A827999+rol(v,5);w=rol(w,30);
@@ -48,9 +48,10 @@ __device__ void SHA1_Transform(uint32_t *state, const uint8_t *buffer)
         uint8_t c[64];
         uint32_t l[16];
     } CHAR64LONG16;
-    CHAR64LONG16* block;
 
-    block = (CHAR64LONG16*)buffer;
+    CHAR64LONG16 block; memcpy(block.c, buffer, 64);
+
+   // block = (CHAR64LONG16*)buffer;
 
     a = state[0];
     b = state[1];
@@ -172,7 +173,7 @@ __device__ void SHA1_Update(SHA1_CTX* context, const uint8_t* data, const size_t
     if((j + len) > 63)
     {
         memcpy(&context->buffer[j], data, (i = 64-j));
-        SHA1_Transform(context->state, context->buffer);
+        SHA1_Transform(context -> state, context -> buffer);
         for ( ; i + 63 < len; i += 64)
         {
             /// Notice Here
