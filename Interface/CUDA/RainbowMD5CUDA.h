@@ -47,10 +47,8 @@ typedef struct
 	(ctx->block[(n)])
 #endif
 
-__device__ uint64_t totalSpace = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
-
-uint64_t totalSpace_Global = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
-
+__device__ uint64_t totalSpace = (1ull << 63) - 1 + (1ull << 63);
+    uint64_t totalSpace_Global = (1ull << 63) - 1 + (1ull << 63);
 
 __device__ const void *body(MD5_CTX *ctx, const void *data, unsigned long size)
 {
