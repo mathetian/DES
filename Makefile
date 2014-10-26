@@ -9,7 +9,7 @@ AR	     = ar
 LIBMISC	 = libdescrypt.a
 RANLIB   = ranlib
 RM       = rm
-MV       = mv
+MV       = cp
 
 SOURCES = Common/*.cpp
 HEADER  = -I./Include
@@ -17,7 +17,7 @@ BINARY  = Binary
 
 LIB = -L. -L/usr/local/ssl/lib -lrt -ldescrypt -lssl -lcrypto -ldl 
 
-ALL = generator verified sort crack cuda crackcuda
+ALL = generator verified sort crack cuda crackcuda test
 
 lib: clean compile
 	${AR} rv ${LIBMISC} *.o
@@ -54,6 +54,10 @@ cuda: Interface/CUDA/RainbowCUDA.cu
 crackcuda: Interface/CUDA/RainbowCrackCUDA.cu
 	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	${MV} $@  ${BINARY}
+
+test: Test/TestAlgorithm.cpp
+	${CXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
 
 rungen: generator

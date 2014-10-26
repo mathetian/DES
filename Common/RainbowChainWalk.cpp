@@ -30,43 +30,42 @@ void RainbowChainWalk::SetChainInfo(uint64_t chainLen, uint64_t chainCount, cons
 
 uint64_t RainbowChainWalk::GetRandomKey()
 {
-    RAND_bytes((unsigned char*)&m_nIndex, 8);
-    m_nIndex = m_nIndex & m_keySpaceTotal;
-    return m_nIndex;
+    RAND_bytes((unsigned char*)&m_key, 8);
+    m_key = m_key & m_key;
+    return m_key;
 }
 
 void RainbowChainWalk::KeyToCipher()
 {
-    m_nIndex = Crypt(m_nIndex);
+    m_key = Crypt(m_key) & m_keySpaceTotal;
 }
 
 void RainbowChainWalk::KeyReduction(int nPos)
 {
     if(nPos >= 1300)
     {
-        m_nIndex = (m_nIndex + nPos) & m_keySpaceTotal;
-        m_nIndex = (m_nIndex + (nPos << 8)) & m_keySpaceTotal;
-        m_nIndex = (m_nIndex + ((nPos << 8) << 8)) & m_keySpaceTotal;
+        m_key = (m_key + nPos) & m_keySpaceTotal;
+        m_key = (m_key + (nPos << 8)) & m_keySpaceTotal;
+        m_key = (m_key + ((nPos << 8) << 8)) & m_keySpaceTotal;
     }
 }
 
 uint64_t RainbowChainWalk::GetKey()
 {
-    return m_nIndex & m_keySpaceTotal;
+    return m_key & m_keySpaceTotal;
 }
 
 void 	 RainbowChainWalk::SetKey(uint64_t key)
 {
-    m_nIndex = key & m_keySpaceTotal;
+    m_key = key & m_keySpaceTotal;
 }
 
 uint64_t RainbowChainWalk::Crypt(uint64_t key)
 {
     unsigned char out[8];
     m_algorithm((unsigned char*)&key, 8, out);
-    key = (*(uint64_t*)out) & m_keySpaceTotal;
-
-    return key;
+    uint64_t result = (*(uint64_t*)out);
+    return result;
 }
 
 };

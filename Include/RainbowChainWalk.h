@@ -27,7 +27,7 @@ public:
     void 	 		KeyReduction(int nPos);
     uint64_t 		GetRandomKey();
     uint64_t 		GetKey();
-    void 			SetKey(uint64_t m_nIndex);
+    void 			SetKey(uint64_t key);
     uint64_t 		Crypt(uint64_t key);
 
 private:
@@ -37,7 +37,7 @@ private:
     static HASHROUTINE m_algorithm;
 
 private:
-    uint64_t m_nIndex;
+    uint64_t m_key;
 
     friend class RainbowCrackEngine;
 };

@@ -49,7 +49,7 @@ void TestCaseGenerator(const char *type)
     {
         chain.nStartKey = cwc.GetRandomKey();
         chain.nEndKey   = cwc.Crypt(chain.nStartKey);
-
+        
         fwrite((char*)&chain, sizeof(RainbowChain), 1, file);
     }
 
