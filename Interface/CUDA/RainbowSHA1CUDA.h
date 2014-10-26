@@ -148,7 +148,6 @@ __device__ void SHA1_Transform(uint32_t *state, const uint8_t *buffer)
     a = b = c = d = e = 0;
 }
 
-
 __device__ void SHA1_Init(SHA1_CTX* context)
 {
     context->state[0] = 0x67452301;
@@ -158,7 +157,6 @@ __device__ void SHA1_Init(SHA1_CTX* context)
     context->state[4] = 0xC3D2E1F0;
     context->count[0] = context->count[1] = 0;
 }
-
 
 __device__ void SHA1_Update(SHA1_CTX* context, const uint8_t* data, const size_t len)
 {
@@ -184,7 +182,6 @@ __device__ void SHA1_Update(SHA1_CTX* context, const uint8_t* data, const size_t
         i = 0;
     memcpy(&context->buffer[j], &data[i], len - i);
 }
-
 
 __device__ void SHA1_Final(SHA1_CTX* context, uint8_t *digest)
 {

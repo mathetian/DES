@@ -22,7 +22,7 @@ void RainbowChainWalk::SetChainInfo(uint64_t chainLen, uint64_t chainCount, cons
         m_algorithm = HASH_DES;
         m_keySpaceTotal = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
     }
-    else if(strcmp(type, "md5") == 0) m_algorithm = HASH_MD5;
+    else if(strcmp(type, "md5") == 0)  m_algorithm = HASH_MD5;
     else if(strcmp(type, "sha1") == 0) m_algorithm = HASH_SHA1;
     else if(strcmp(type, "hmac") == 0) m_algorithm = HASH_HMAC;
     else assert(type && 0);

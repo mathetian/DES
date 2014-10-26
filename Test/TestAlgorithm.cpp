@@ -2,34 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-#include <openssl/des.h>
+#include "RainbowAlgorithm.h"
 
-#include "Common.h"
-#include "TimeStamp.h"
-using namespace utils;
-
-void Test_DES(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
+void Usage()
 {
-	static unsigned char m_dplainText[8] = {0x6D,0x6F,0x29,0x5A,0x30,0x55,0x32,0x28};
+    Logo();
+    printf("Usage: test type filename\n");
 
-    des_key_schedule ks;
-    des_cblock key_56;
-    memcpy(key_56, pPlain, nPlainLen);
-    DES_set_key_unchecked(&key_56, &ks);
-    unsigned char out[8];
-    des_ecb_encrypt(&m_dplainText, &out, ks, DES_ENCRYPT);
-    memcpy(pHash, out, 8);
+    printf("example 1: test des/md5/sha1/hmac filename\n");
 }
 
-void Test_DES_Encrypt(const char *filename)
+typedef void (*HASHROUTINE)(unsigned char *pPlain, int nPlainLen, unsigned char *pHash);
+
+void DoTest(const char *type, const char *filename)
 {
 	FILE *file = fopen(filename, "rb"); assert(file);
-	RainbowChain     chain;
-		
+	RainbowChain chain;
+	
+	HASHROUTINE algorithm;
+	if(strcmp(type, "des") == 0) algorithm = HASH_DES;
+	else if(strcmp(type, "md5") == 0) algorithm = HASH_MD5;
+	else if(strcmp(type, "sha1") == 0) algorithm = HASH_SHA1;
+	else algorithm = HASH_HMAC;
+
 	while(fread((char*)&chain, sizeof(RainbowChain), 1, file) == 1)
 	{
 		unsigned char result[8];
-		Test_DES((unsigned char*)&chain.nStartKey, 8, result);
+		algorithm((unsigned char*)&chain.nStartKey, 8, result);
 		uint64_t u_val = *(uint64_t*)result;
 		assert(u_val == chain.nEndKey);
 	}
@@ -37,9 +36,10 @@ void Test_DES_Encrypt(const char *filename)
 	fclose(file);
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-	Test_DES_Encrypt("TestCaseGenerator.txt");
+	if(argc != 3) { Usage(); return 0; }
+	DoTest(argv[1], argv[2]);
 	cout << "Passed All Tests" << endl;
 	
 	return 0;

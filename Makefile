@@ -63,8 +63,8 @@ test: Test/TestAlgorithm.cpp
 rungen: generator
 	mpirun -np 4 ./$^ des 4096 65536 test
 
-runcuda: gencuda
-	./$^ 4096 65536 cuda
+runcuda: cuda
+	./$^ des 4096 65536 cuda
 
 astyle:
 	astyle --style=allman */*.cpp

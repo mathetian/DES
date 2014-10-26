@@ -12,8 +12,8 @@ using namespace rainbowcrack;
 void Usage()
 {
     Logo();
-    printf("Usage  :   sort sort number fileName\n");
-    printf("example 1: sort sort 1 DES_100_100_test\n");
+    printf("Usage  :   sort number fileName\n");
+    printf("example 1: sort 1 DES_100_100_test\n");
 }
 
 typedef pair<RainbowChain, int> PPR;
@@ -139,7 +139,7 @@ void printMemory(const char * str, long long nAvailPhys)
     printf("%s %lld GB, %lld MB, %lld KB, %lld B\n", str, nAvailPhys/c, (nAvailPhys%c)/b, (nAvailPhys%b)/a, nAvailPhys%1000);
 }
 
-void SortFiles(vector <string>fileNames, vector <FILE*>files, const char * prefix)
+void SortFiles(vector<string> fileNames, vector<FILE*> files, const char *prefix)
 {
     int index = 0;
     uint64_t nAvailPhys;
@@ -266,21 +266,17 @@ ABORT:
     fclose(targetFile);
 }
 
-int main(int argc,char*argv[])
+int main(int argc, char *argv[])
 {
-    if(argc != 4 || strcmp(argv[1], "sort") != 0)
-    {
-        Usage();
-        return 0;
-    }
+    if(argc != 3) { Usage(); return 0; }
 
-    int num =  atoi(argv[2]);
+    int num =  atoi(argv[1]);
     assert((num < 9) && (num >= 1) && ("sorry number must be less than ten and more than zero\n"));
 
     if(num == 1)
     {
         printf("Begin Sort One File\n");
-        SortOneFile(argv[3]);
+        SortOneFile(argv[2]);
         printf("End Sort One File\n");
     }
     else
@@ -290,7 +286,7 @@ int main(int argc,char*argv[])
 
         for(int index = 0; index < num; index++)
         {
-            fileNames[index] = argv[3];
+            fileNames[index] = argv[2];
             fileNames[index] +=  "_";
             fileNames[index].push_back(index + '0');
             files[index] = fopen(fileNames[index].c_str(),"rb+");
@@ -298,7 +294,7 @@ int main(int argc,char*argv[])
         }
 
         printf("Begin SortFiles\n");
-        SortFiles(fileNames, files, argv[3]);
+        SortFiles(fileNames, files, argv[2]);
         printf("End SortFiles\n");
     }
 

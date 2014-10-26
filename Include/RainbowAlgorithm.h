@@ -46,9 +46,9 @@ void HASH_SHA1(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 
 void HASH_HMAC(unsigned char *pPlain, int nPlainLen, unsigned char* pHash)
 {
-    unsigned char out[20];
-    unsigned int result_len;
-    HMAC(EVP_sha1(), pPlain, nPlainLen, (const unsigned char*)"hello world", 11, out, &result_len);
+    unsigned char out[20]; unsigned int result_len;
+    uint8_t data[] = {'h'};
+    HMAC(EVP_sha1(), pPlain, nPlainLen, data, 1, out, &result_len);
     memcpy(pHash, out, 8);
 }
 
