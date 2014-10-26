@@ -78,7 +78,7 @@ void CUDAGenerator(uint64_t chainLen, uint64_t chainCount, const char *suffix, c
         else if(i_type == 2)
             SHA1CUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
         else if(i_type == 3)
-            HMACCUDA_ONCE<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
+            HMACCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
 
         _CUDA(cudaMemcpy(ends, cudaIn, size, cudaMemcpyDeviceToHost));
 
