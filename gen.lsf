@@ -14,4 +14,3 @@ module load icc/13.1.1
 module load impi/4.1.1.036
 
 mpirun ./generator 4096 262144 cuda
-

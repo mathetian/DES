@@ -1,3 +1,5 @@
+# Test 1
+
 # ./generator des testcasegenerator
 # ./test des TestCaseGenerator.txt
 # rm *.txt
@@ -14,7 +16,16 @@
 # ./test hmac TestCaseGenerator.txt
 # rm *.txt
 
-mpirun -np 4 ./generator hmac 4096 16384 test
-#mpirun -np 4 ./generator hmac 4096 65536 test
+# Test 2
 
-./cuda hmac 4096 65536 cuda
+# mpirun -np 4 ./generator des 4096 262144 test
+# ./cuda des 4096 262144 cuda
+
+# mpirun -np 4 ./generator md5 4096 262144 test
+# ./cuda md5 4096 262144 cuda
+
+# mpirun -np 4 ./generator sha1 4096 262144 test
+# ./cuda sha1 4096 262144 cuda
+
+mpirun -np 4 ./generator hmac 4096 262144 test
+./cuda hmac 4096 262144 cuda
