@@ -30,8 +30,8 @@ compile:
 all: creat ${ALL}
 
 generator: Interface/RainbowGenerator.cpp
-	#module purge && module load icc/13.1.1 impi/4.1.1.036 && ${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
-	${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	module purge && module load icc/14.0.2 impi/4.1.3.048 && ${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	#${MPICXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
 
 verified: Interface/RainbowVerified.cpp
@@ -47,13 +47,13 @@ crack: Interface/RainbowCrack.cpp
 	${MV} $@  ${BINARY}
 
 cuda: Interface/CUDA/RainbowCUDA.cu
-	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
-	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
+#	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
 
 crackcuda: Interface/CUDA/RainbowCrackCUDA.cu
-	#module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
-	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
+#	${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
 
 test: Test/TestAlgorithm.cpp

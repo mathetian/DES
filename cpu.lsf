@@ -1,0 +1,15 @@
+#BSUB -L /bin/bash
+#BSUB -J CPU_MPI
+#BSUB -n 32
+#BSUB -e %J.err
+#BSUB -o %J.out
+#BSUB -R "span[ptile=16]"
+#BSUB -q cpu
+
+MODULEPATH=/lustre/utility/modulefiles:$MODULEPATH
+module purge && module load icc/14.0.2 impi/4.1.3.048
+
+mpirun ./generator des 4096 524288 test
+mpirun ./generator md5 4096 524288 test
+mpirun ./generator sha1 4096 524288 test
+mpirun ./generator hmac 4096 524288 test
