@@ -9,7 +9,9 @@ namespace utils
 
 void Logo()
 {
-    printf("RainbowCrack 1.0\n 	Make an implementation of Time-and-Memory Tradeoff Technology\n 	By Tian Yulong(mathetian@gmail.com)\n\n");
+    cout << "RainbowCrack 1.0" << endl;
+    cout << "Make an implementation of Time-and-Memory Tradeoff Technology" << endl;
+    cout << "     By Tian Yulong (yulong.ti@gmail.com)\n\n" << endl;
 }
 
 uint64_t GetFileLen(FILE* file)
@@ -37,26 +39,25 @@ uint64_t GetAvailPhysMemorySize()
 #endif
 }
 
-bool AnylysisFileName(const char * filename, uint64_t & chainLen, uint64_t & chainCount)
+bool AnylysisFileName(const string &filename, uint64_t &chainLen, uint64_t &chainCount)
 {
-    int len = strlen(filename), i = 0, j;
-    if(len <= 6 || filename[3] != '_') return false;
-    char str[256];
-    memset(str, 0, sizeof(str));
-    for(i = 4; i< len; i++) if(filename[i] == '-') break;
-    if(i == len || i == 3) return false;
-    memcpy(str,filename + 4, i - 4);
+    int len = filename.size(), i = 0, j; bool flag = true;
+    do
+    {
+        while(i < len && filename[i] != '_') i++;
+        i++; if(i >= len) { flag = false; continue; }
+        
+        j = i + 1; while(j < len && filename[j] != '-') j++;
+        if(j + 2 >= len) { flag = false; continue; }
+        chainLen = atoi(filename.substr(i, j - i).c_str());
 
-    chainLen = atoll(str);
+        j++; i = j; while(j < len && filename[j] != '_') j++;
+        if(j >= len) { flag = false; continue; }
+        chainCount = atoi(filename.substr(i, j - i).c_str());
+    }while(0);
 
-    memset(str, 0, sizeof(str));
-    for(j = i + 1; j < len; j++) if(filename[j] == '_') break;
-    if(j == len || j == i+1) return false;
-    memcpy(str,filename + i + 1,j - i - 1);
-
-    chainCount = atoll(str);
-
-    return true;
+    cout << flag << " " << chainLen << " " << chainCount << endl;
+    return flag;
 }
 
 };

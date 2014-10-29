@@ -48,7 +48,7 @@ public:
     void ElapseTime(const char * str)
     {
         timeval_subtract(&difference,&curtime,&starttime);
-        printf("%s %lld s, %lld us\n", str, (long long)difference.tv_sec, (long long)difference.tv_usec);
+        cout << str << " " << difference.tv_sec << " s, " << difference.tv_usec << " us" << endl;
     }
 
     void AddTime(struct timeval & totalTime)
@@ -58,8 +58,7 @@ public:
         totalTime.tv_usec += difference.tv_usec;
         if(totalTime.tv_usec >= 1000000)
         {
-            totalTime.tv_sec++;
-            totalTime.tv_usec -= 1000000;
+            totalTime.tv_sec++; totalTime.tv_usec -= 1000000;
         }
     }
 

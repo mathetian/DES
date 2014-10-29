@@ -41,3 +41,7 @@ SHA1 GPU: 2^27.19 per second (log((2**30)/7.0, 2)) (one gpu)
 
 HMAC CPU: 2^19.43 per second (log(10000*4096/58.0, 2)) (one core)
 HMAC GPU: 2^25.09 per second (log((2**30)/30.0, 2)) (one gpu)
+
+Crack
+=====
+1. Method: 

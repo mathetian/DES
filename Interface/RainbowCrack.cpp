@@ -21,50 +21,32 @@ void Usage()
 
 int main(int argc,char*argv[])
 {
-    int keyNum, index, num = 0;
-    RainbowCrackEngine ce;
+    int index = 4, num = 0;
+    RainbowCrackEngine ce; RainbowChain chain;
     RainbowCipherSet  *p_cs = RainbowCipherSet::GetInstance();
-    char type[256];
-    memset(type, 0, sizeof(type));
 
-    strcpy(type, argv[1]);
-
-    if(argc <= 4)
+    if(argc < 5 || (strcmp(argv[2], "file") != 0 && strcmp(argv[2], "text") != 0))
     {
-        Usage();
-        return 0;
+        Usage(); return 0;
     }
     else if(strcmp(argv[2],"file") == 0)
     {
-        if(argc != 5)
-        {
-            Usage();
-            return 0;
-        }
+        if(argc != 5) { Usage(); return 0; }
 
         FILE * file = fopen(argv[4],"rb");
         assert(file && "main fopen error\n");
-        RainbowChain chain;
-
+        
         while(fread((char*)&chain, sizeof(RainbowChain), 1, file))
             p_cs -> AddKey(chain.nEndKey);
 
         fclose(file);
     }
-    else if(strcmp(argv[2], "text") == 0)
-    {
-        keyNum = argc - 4;
-
-        for(index = 0; index < keyNum; index++)
-            p_cs -> AddKey(atoll(argv[index+4]));
-    }
     else
     {
-        Usage();
-        return 0;
+        for(; index < argc; index++) p_cs -> AddKey(atoll(argv[index]));
     }
-
-    ce.Run(argv[3], type);
+   
+    ce.Run(argv[3], argv[1]);
 
     printf("Statistics\n");
     printf("-------------------------------------------------------\n");
@@ -73,18 +55,16 @@ int main(int argc,char*argv[])
     struct timeval diskTime  = ce.GetDiskTime();
     struct timeval totalTime = ce.GetTotalTime();
 
-    printf("Key found: %d\n", foundNum);
-    printf("Total disk access time: %lld s, %lld us\n",(long long)diskTime.tv_sec,(long long)diskTime.tv_usec);
-    printf("Total spend time      : %lld s, %lld us\n",(long long)totalTime.tv_sec,(long long)totalTime.tv_usec);
-    printf("Total chains step     : %lld\n", (long long)ce.GetTotalChains());
-    printf("Total false alarm     : %lld\n", (long long)ce.GetFalseAlarms());
-    printf("\n");
+    cout << "Key found: " << foundNum << endl;
+    cout << "Total disk access time: " << diskTime.tv_sec << " s, " << diskTime.tv_usec << " us" << endl;
+    cout << "Total dspend time     : " << totalTime.tv_sec << " s, " << totalTime.tv_usec << " us" << endl;
+    cout << "Total chains step     : " << ce.GetTotalChains()  << endl;
+    cout << "Total false alarm     : " << ce.GetFalseAlarms() << endl;
+    cout << endl;
 
-    FILE * file = fopen(argv[4],"rb");
+    FILE *file = fopen(argv[4],"rb");
 
     assert(file && "main fopen error\n");
-
-    RainbowChain chain;
 
     while(fread((char*)&chain, sizeof(RainbowChain), 1, file))
         num += p_cs -> Detect(chain);

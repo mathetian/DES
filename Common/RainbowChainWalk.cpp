@@ -8,7 +8,8 @@
 namespace rainbowcrack
 {
 
-uint64_t RainbowChainWalk::m_keySpaceTotal = (1ull << 63) - 1 + (1ull << 63);
+/// uint64_t RainbowChainWalk::m_keySpaceTotal = (1ull << 63) - 1 + (1ull << 63);
+uint64_t     RainbowChainWalk::m_keySpaceTotal = (1ull << 30) - 1;
 uint64_t     RainbowChainWalk::m_chainLen;
 uint64_t     RainbowChainWalk::m_chainCount;
 HASHROUTINE  RainbowChainWalk::m_algorithm;
@@ -20,7 +21,8 @@ void RainbowChainWalk::SetChainInfo(uint64_t chainLen, uint64_t chainCount, cons
     if(strcmp(type, "des") == 0)
     {
         m_algorithm = HASH_DES;
-        m_keySpaceTotal = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
+        /// m_keySpaceTotal = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
+        m_keySpaceTotal = (1ull << 34) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24);
     }
     else if(strcmp(type, "md5") == 0)  m_algorithm = HASH_MD5;
     else if(strcmp(type, "sha1") == 0) m_algorithm = HASH_SHA1;
@@ -31,7 +33,7 @@ void RainbowChainWalk::SetChainInfo(uint64_t chainLen, uint64_t chainCount, cons
 uint64_t RainbowChainWalk::GetRandomKey()
 {
     RAND_bytes((unsigned char*)&m_key, 8);
-    m_key = m_key & m_key;
+    m_key = m_key & m_keySpaceTotal;
     return m_key;
 }
 

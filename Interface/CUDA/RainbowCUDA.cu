@@ -56,7 +56,7 @@ void CUDAGenerator(uint64_t chainLen, uint64_t chainCount, const char *suffix, c
     
     for(int round = 0; round < time_0; round++)
     {
-        printf("Begin compute the %d round\n", round+1);
+        printf("Begin compute the %d round\n", round + 1);
 
         TimeStamp tms; tms.StartTime();
 
@@ -88,7 +88,7 @@ void CUDAGenerator(uint64_t chainLen, uint64_t chainCount, const char *suffix, c
             assert(fwrite((char*)&(ends[i]), sizeof(uint64_t), 1, file) == 1);
         }
 
-        printf("End compute the %d round\n", round+1);
+        printf("End compute the %d round\n", round + 1);
 
         tms.StopTime("StopTime: ");
     }

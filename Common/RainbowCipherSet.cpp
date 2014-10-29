@@ -54,23 +54,15 @@ bool RainbowCipherSet::Solved()
 
 int RainbowCipherSet::GetKeyFoundNum()
 {
-    return m_vFound.size();
+    return m_maps.size();
 }
 
 int RainbowCipherSet::Detect(RainbowChain chain)
 {
-    vector<uint64_t> tmp = m_maps[chain.nEndKey];
+    if(m_maps[chain.nEndKey].size() == 0) return false;
 
-    if(tmp.size() == 0)
-        return false;
-
-    cout<< chain.nEndKey << " " << tmp.size() <<endl;
-
-    for(uint64_t i = 0; i < tmp.size(); i++)
-    {
-        if(tmp[i] == chain.nStartKey)
-            return 1;
-    }
+    for(uint64_t i = 0; i < m_maps[chain.nEndKey].size(); i++) 
+        if(m_maps[chain.nEndKey][i] == chain.nStartKey) return 1;
 
     return 0;
 }

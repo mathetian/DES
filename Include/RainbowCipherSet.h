@@ -34,7 +34,6 @@ private:
 
 private:
     vector<uint64_t> m_vKeys;
-    vector<pair<uint64_t,vector<uint64_t> > > m_vFound;
     map<uint64_t, vector<uint64_t> > m_maps;
     uint32_t index;
     bool solve;

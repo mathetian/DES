@@ -53,7 +53,7 @@ extern void Logo();
 
 extern uint64_t GetAvailPhysMemorySize();
 
-extern bool AnylysisFileName(const char * filename, uint64_t & chainLen, uint64_t & chainCount);
+extern bool AnylysisFileName(const string &filename, uint64_t & chainLen, uint64_t & chainCount);
 
 #ifdef _WIN32
 inline uint64_t atoll(const char * str)

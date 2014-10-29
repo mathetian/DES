@@ -11,44 +11,38 @@ using namespace utils;
 #include "RainbowChainWalk.h"
 using namespace rainbowcrack;
 
-#define BOOLEAN int
-#define MASTER_RANK 0
 #define TRUE 1
 #define FALSE 0
-#define BOOLEAN int
-#define BLOCK_SIZE 1048576
-#define MBYTE 1048576
-#define SYNOPSIS printf ("synopsis: %s -f <file> -l <blocks>\n", argv[0])
 
 void Usage()
 {
     Logo();
     printf("Usage: generator type chainLen chainCount suffix\n");
-    printf("                 type testcasegenerator\n");
+    printf("                 type test\n");
 
     printf("example 1: generator des/md5 1000 10000 suffix\n");
-    printf("example 2: generator des/md5 testcasegenerator\n\n");
+    printf("example 2: generator des/md5 test\n\n");
 }
 
 typedef long long ll;
 
-void TestCaseGenerator(const char *type)
+void Test(const char *type)
 {
     RainbowChain     chain;
     RainbowChainWalk cwc;
 
     srand((uint32_t)time(0));
 
-    FILE *file = fopen("TestCaseGenerator.txt","wb");
+    FILE *file = fopen("Test.txt","wb");
 
-    assert(file && "TestCaseGenerator fopen error\n");
+    assert(file && "Test fopen error\n");
 
     cwc.SetChainInfo(1, 1, type);
 
     for(int index = 0; index < 100; index++)
     {
         chain.nStartKey = cwc.GetRandomKey();
-        /// chain.nStartKey = index;
+        cout << chain.nStartKey << endl;
         chain.nEndKey   = cwc.Crypt(chain.nStartKey);
         
         fwrite((char*)&chain, sizeof(RainbowChain), 1, file);
@@ -143,12 +137,9 @@ void Generator(char *szFileName, uint64_t chainLen, uint64_t totalChainCount, in
         
         chain.nStartKey = cwc.GetKey();
 
-        uint32_t nPos;
-
-        for(nPos = 0; nPos < chainLen; nPos++)
+        for(uint32_t nPos = 0; nPos < chainLen; nPos++)
         {
-            cwc.KeyToCipher();
-            cwc.KeyReduction(nPos);
+            cwc.KeyToCipher(); cwc.KeyReduction(nPos);
         }
 
         chain.nEndKey = cwc.GetKey();
@@ -186,8 +177,8 @@ int main(int argc,char * argv[])
     if(argc == 3)
     {
         strcpy(type, argv[1]);
-        if(strcmp(argv[2],"testcasegenerator") == 0)
-            TestCaseGenerator(type);
+        if(strcmp(argv[2], "test") == 0)
+            Test(type);
         else Usage();
 
         return 0;
