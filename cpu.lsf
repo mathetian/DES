@@ -9,7 +9,11 @@
 MODULEPATH=/lustre/utility/modulefiles:$MODULEPATH
 module purge && module load icc/14.0.2 impi/4.1.3.048
 
-mpirun ./generator des 4096 524288 test
-mpirun ./generator md5 4096 524288 test
-mpirun ./generator sha1 4096 524288 test
-mpirun ./generator hmac 4096 524288 test
+mpirun ./generator md5 4096 524288 cpu
+./sort 32 md5_4096-524288_cpu
+./generator md5 test
+./crack md5 file md5_4096-524288_cpu Test.txt
+#mpirun ./generator des 4096 524288 test
+#mpirun ./generator md5 4096 524288 test
+#mpirun ./generator sha1 4096 524288 test
+#mpirun ./generator hmac 4096 524288 test

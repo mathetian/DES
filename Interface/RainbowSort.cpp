@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
     if(argc != 3) { Usage(); return 0; }
 
     int num =  atoi(argv[1]);
-    assert((num < 9) && (num >= 1) && ("sorry number must be less than ten and more than zero\n"));
+    assert((num >= 1) && ("sorry number must be less than ten and more than zero\n"));
 
     if(num == 1)
     {
@@ -286,10 +286,10 @@ int main(int argc, char *argv[])
 
         for(int index = 0; index < num; index++)
         {
-            fileNames[index] = argv[2];
-            fileNames[index] +=  "_";
-            fileNames[index].push_back(index + '0');
-            files[index] = fopen(fileNames[index].c_str(),"rb+");
+	    stringstream ss; ss << argv[2] << "_" << index;
+            fileNames[index] = ss.str();
+	    files[index] = fopen(fileNames[index].c_str(),"rb+");
+            cout << fileNames[index] << endl;
             assert(files[index] && "fopen error\n");
         }
 
