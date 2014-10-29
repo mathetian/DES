@@ -27,6 +27,8 @@ public:
     /// Statistics Public Function
     struct timeval   GetDiskTime();
     struct timeval   GetTotalTime();
+    struct timeval   GetInitTime();
+    struct timeval   GetCompareTime();
     uint64_t   		 GetTotalChains();
     uint64_t		 GetFalseAlarms();
 
@@ -46,8 +48,7 @@ private:
 
 private:
     /// Statistics Private Data
-    struct timeval   m_diskTime;
-    struct timeval   m_totalTime;
+    struct timeval   m_diskTime, m_totalTime, m_initTime, m_compareTime;
     uint64_t         m_totalChains;
     uint64_t         m_falseAlarms;
 

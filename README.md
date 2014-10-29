@@ -44,4 +44,3 @@ HMAC GPU: 2^25.09 per second (log((2**30)/30.0, 2)) (one gpu)
 
 Crack
 =====
-1. Method: 

@@ -32,17 +32,17 @@ void Test(const char *type)
     RainbowChainWalk cwc;
 
     srand((uint32_t)time(0));
+     
+    char fileName[100]; sprintf(fileName, "%s.txt", type);
+    FILE *file = fopen(fileName, "wb");
 
-    FILE *file = fopen("Test.txt","wb");
-
-    assert(file && "Test fopen error\n");
+    assert(file && "fopen error\n");
 
     cwc.SetChainInfo(1, 1, type);
 
     for(int index = 0; index < 100; index++)
     {
         chain.nStartKey = cwc.GetRandomKey();
-        cout << chain.nStartKey << endl;
         chain.nEndKey   = cwc.Crypt(chain.nStartKey);
         
         fwrite((char*)&chain, sizeof(RainbowChain), 1, file);

@@ -51,15 +51,16 @@ int main(int argc,char*argv[])
     printf("Statistics\n");
     printf("-------------------------------------------------------\n");
 
-    int foundNum = p_cs -> GetKeyFoundNum();
-    struct timeval diskTime  = ce.GetDiskTime();
-    struct timeval totalTime = ce.GetTotalTime();
-
-    cout << "Key found: " << foundNum << endl;
-    cout << "Total disk access time: " << diskTime.tv_sec << " s, " << diskTime.tv_usec << " us" << endl;
-    cout << "Total dspend time     : " << totalTime.tv_sec << " s, " << totalTime.tv_usec << " us" << endl;
-    cout << "Total chains step     : " << ce.GetTotalChains()  << endl;
-    cout << "Total false alarm     : " << ce.GetFalseAlarms() << endl;
+    struct timeval diskTime  = ce.GetDiskTime(), totalTime   = ce.GetTotalTime();
+    struct timeval initTime  = ce.GetInitTime(), compareTime = ce.GetCompareTime();
+    
+    cout << "Key found             : " << p_cs -> GetKeyFoundNum() << endl;
+    cout << "Total time            : " << totalTime.tv_sec << " s, " << totalTime.tv_usec << " us" << endl;
+    cout << "Total init time       : " << initTime.tv_sec  << " s, " << initTime.tv_usec  << " us" << endl;
+    cout << "Total disk access time: " << diskTime.tv_sec  << " s, " << diskTime.tv_usec  << " us" << endl;
+    cout << "Total compare time    : " << compareTime.tv_sec << " s, " << compareTime.tv_usec << " us" << endl;
+    cout << "Total chains steps    : " << ce.GetTotalChains()  << endl;
+    cout << "Total false alarms    : " << ce.GetFalseAlarms() << endl;
     cout << endl;
 
     FILE *file = fopen(argv[4],"rb");
