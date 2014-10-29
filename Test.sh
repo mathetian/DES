@@ -37,8 +37,8 @@
 # ./generator des test
 # ./crack des file des_4096-262144_test Test.txt
 
-mpirun -np 4 ./generator md5 4096 262144 test
-./sort 4 md5_4096-262144_test
-./verified md5 md5_4096-262144_test 4096
+mpirun -np 4 ./generator md5 4096 65536 test
+./sort 4 md5_4096-65536_test
+# ./verified md5 md5_4096-65536_test 4096
 ./generator md5 test
-./crack md5 file md5_4096-262144_test Test.txt
+./crack md5 file md5_4096-65536_test Test.txt
