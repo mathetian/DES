@@ -29,7 +29,7 @@ int main(int argc,char*argv[])
     {
         Usage(); return 0;
     }
-    else if(strcmp(argv[2],"file") == 0)
+    else if(strcmp(argv[2], "file") == 0)
     {
         if(argc != 5) { Usage(); return 0; }
 

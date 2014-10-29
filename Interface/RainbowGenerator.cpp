@@ -18,15 +18,15 @@ void Usage()
 {
     Logo();
     printf("Usage: generator type chainLen chainCount suffix\n");
-    printf("                 type test\n");
+    printf("                 type rand\n");
 
     printf("example 1: generator des/md5 1000 10000 suffix\n");
-    printf("example 2: generator des/md5 test\n\n");
+    printf("example 2: generator des/md5 rand\n\n");
 }
 
 typedef long long ll;
 
-void Test(const char *type)
+void Rand(const char *type)
 {
     RainbowChain     chain;
     RainbowChainWalk cwc;
@@ -103,7 +103,7 @@ void Generator(char *szFileName, uint64_t chainLen, uint64_t totalChainCount, in
     }
 
 
-    printf("rank %d of %d, succeed to create %s\n",rank, numproc, szFileName);
+    printf("rank %d of %d, succeed to create %s\n", rank, numproc, szFileName);
     printf("%lld %lld %lld %d %d\n", (long long)chainCount, (long long)chainLen, (long long)totalChainCount, rank, numproc);
     nDatalen = 0;
 
@@ -177,8 +177,7 @@ int main(int argc,char * argv[])
     if(argc == 3)
     {
         strcpy(type, argv[1]);
-        if(strcmp(argv[2], "test") == 0)
-            Test(type);
+        if(strcmp(argv[2], "rand") == 0) Rand(type);
         else Usage();
 
         return 0;
