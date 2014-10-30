@@ -53,7 +53,7 @@
 # ./sort 4 hmac_4096-262144_cpu
 # ./verified hmac hmac_4096-262144_cpu 4096
 # ./generator hmac rand
-./crack hmac file hmac_4096-262144_cpu hmac.txt
+# ./crack hmac file hmac_4096-262144_cpu hmac.txt
 
 # ./cuda des 4096 262144 cuda
 # ./sort 1 des_4096-262144_cuda
@@ -74,3 +74,13 @@
 # ./sort 1 hmac_4096-262144_cuda
 # ./generator hmac rand
 # ./crack hmac file sha1_4096-262144_cuda hmac.txt
+
+# Test 4 (Initialization Time)
+./generator des rand
+./crackcuda des file 4096 des.txt
+
+./generator md5 rand
+./crackcuda md5 file 4096 md5.txt
+
+./generator sha1 rand
+./crackcuda sha1 file 4096 sha1.txt

@@ -13,19 +13,42 @@ using namespace rainbowcrack;
 #include "TimeStamp.h"
 using namespace utils;
 
+#include <sys/resource.h>
+
 void Usage()
 {
     Logo();
     printf("Usage: crackcuda type file chainLen encryptedFile\n\n");
 
-    printf("example 1: crackcuda type file chainLen encryptedFile\n\n");
+    printf("example 1: crackcuda des/md5/sha1/hmac file chainLen encryptedFile\n\n");
+}
+
+void increase_stack_size()
+{
+    const rlim_t kStackSize = 64L * 1024L * 1024L;   // min stack size = 64 Mb
+    struct rlimit rl;
+    int result;
+
+    result = getrlimit(RLIMIT_STACK, &rl);
+    if (result == 0)
+    {
+        if (rl.rlim_cur < kStackSize)
+        {
+            rl.rlim_cur = kStackSize;
+            result = setrlimit(RLIMIT_STACK, &rl);
+            if (result != 0)
+            {
+                fprintf(stderr, "setrlimit returned result = %d\n", result);
+            }
+        }
+    }
 }
 
 void CUDACrack(RainbowCipherSet *p_cs, uint64_t chainLen, const char *type)
 {
     assert(chainLen == 4096);
 
-    // 1024*256*2 = 2^19
+    // // 1024*256*2 = 2^19
     uint64_t starts[ALL*2], ends[ALL*2];
 
     uint64_t *cudaIn;
@@ -43,7 +66,9 @@ void CUDACrack(RainbowCipherSet *p_cs, uint64_t chainLen, const char *type)
     else if(strcmp(type, "hmac") == 0) i_type = 3;
     
     int total_value = totalSpace_Global;
-    if(i_type == 0)  total_value = totalSpace_Global_DES;
+    if(i_type == 0)   total_value = totalSpace_Global_DES;
+
+    TimeStamp tmps; tmps.StartTime();
 
     while(p_cs -> GetRemainCount() >= 128)
     {
@@ -90,12 +115,15 @@ void CUDACrack(RainbowCipherSet *p_cs, uint64_t chainLen, const char *type)
             }
         }
     }
+    tmps.StopTime("Initialization Time: ");
 
     fclose(file);
 }
 
 int main(int argc, char *argv[])
 {
+    increase_stack_size();
+    
     if(argc != 5 || strcmp(argv[2], "file") != 0) { Usage(); return 0; }
 
     RainbowCipherSet  *p_cs = RainbowCipherSet::GetInstance();

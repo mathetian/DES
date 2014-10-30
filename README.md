@@ -97,6 +97,14 @@ Total chains steps    : 26214400
 Total false alarms    : 206126
 Detected 44 numbers
 
+Initialization Time
+===
+DES:  2^25.26 per second (log((2**30)/26.6, 2)) (one gpu)
+
+MD5:  2^25.36 per second (log((2**30)/24.8, 2)) (one gpu)
+
+SHA1: 2^23.78 per second (log((2**30)/74.2, 2)) (one gpu)
+
 Todo List
 ===
 1. Review HMAC(Speed and Others)
