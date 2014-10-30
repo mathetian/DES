@@ -32,8 +32,9 @@ void Rand(const char *type)
     RainbowChainWalk cwc;
 
     srand((uint32_t)time(0));
-     
-    char fileName[100]; sprintf(fileName, "%s.txt", type);
+
+    char fileName[100];
+    sprintf(fileName, "%s.txt", type);
     FILE *file = fopen(fileName, "wb");
 
     assert(file && "fopen error\n");
@@ -44,7 +45,7 @@ void Rand(const char *type)
     {
         chain.nStartKey = cwc.GetRandomKey();
         chain.nEndKey   = cwc.Crypt(chain.nStartKey);
-        
+
         fwrite((char*)&chain, sizeof(RainbowChain), 1, file);
     }
 
@@ -60,8 +61,10 @@ uint64_t Convert(uint64_t num, int time)
     for(int i = 0; i < time; i++)
     {
         tmp = num & ((1ull << 7) - 1);
-        tmp <<= 1; tmp <<= (8*i);
-        rs |= tmp; num >>= 7;
+        tmp <<= 1;
+        tmp <<= (8*i);
+        rs |= tmp;
+        num >>= 7;
     }
 
     return rs;
@@ -129,17 +132,18 @@ void Generator(char *szFileName, uint64_t chainLen, uint64_t totalChainCount, in
     tms.StartTime();
 
     for(; index < chainCount; index++)
-    {   
+    {
         if(strcmp(type, "des") == 0)
             cwc.SetKey(Convert(rank*chainCount + index, 6));
         else
             cwc.SetKey(rank*chainCount + index);
-        
+
         chain.nStartKey = cwc.GetKey();
 
         for(uint32_t nPos = 0; nPos < chainLen; nPos++)
         {
-            cwc.KeyToCipher(); cwc.KeyReduction(nPos);
+            cwc.KeyToCipher();
+            cwc.KeyReduction(nPos);
         }
 
         chain.nEndKey = cwc.GetKey();

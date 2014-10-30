@@ -510,8 +510,10 @@ uint64_t Convert(uint64_t num, int time)
     for(int i = 0; i < time; i++)
     {
         tmp = num & ((1ull << 7) - 1);
-        tmp <<= 1; tmp <<= (8*i);
-        rs |= tmp; num >>= 7;
+        tmp <<= 1;
+        tmp <<= (8*i);
+        rs |= tmp;
+        num >>= 7;
     }
 
     return rs;

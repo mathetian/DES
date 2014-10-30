@@ -22,20 +22,26 @@ void Usage()
 int main(int argc,char*argv[])
 {
     int index = 4, num = 0;
-    RainbowCrackEngine ce; RainbowChain chain;
+    RainbowCrackEngine ce;
+    RainbowChain chain;
     RainbowCipherSet  *p_cs = RainbowCipherSet::GetInstance();
 
     if(argc < 5 || (strcmp(argv[2], "file") != 0 && strcmp(argv[2], "text") != 0))
     {
-        Usage(); return 0;
+        Usage();
+        return 0;
     }
     else if(strcmp(argv[2], "file") == 0)
     {
-        if(argc != 5) { Usage(); return 0; }
+        if(argc != 5)
+        {
+            Usage();
+            return 0;
+        }
 
         FILE * file = fopen(argv[4],"rb");
         assert(file && "main fopen error\n");
-        
+
         while(fread((char*)&chain, sizeof(RainbowChain), 1, file))
             p_cs -> AddKey(chain.nEndKey);
 
@@ -45,7 +51,7 @@ int main(int argc,char*argv[])
     {
         for(; index < argc; index++) p_cs -> AddKey(atoll(argv[index]));
     }
-   
+
     ce.Run(argv[3], argv[1]);
 
     printf("Statistics\n");
@@ -53,7 +59,7 @@ int main(int argc,char*argv[])
 
     struct timeval diskTime  = ce.GetDiskTime(), totalTime   = ce.GetTotalTime();
     struct timeval initTime  = ce.GetInitTime(), compareTime = ce.GetCompareTime();
-    
+
     cout << "Key found             : " << p_cs -> GetKeyFoundNum() << endl;
     cout << "Total time            : " << totalTime.tv_sec << " s, " << totalTime.tv_usec << " us" << endl;
     cout << "Total init time       : " << initTime.tv_sec  << " s, " << initTime.tv_usec  << " us" << endl;

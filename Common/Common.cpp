@@ -41,20 +41,38 @@ uint64_t GetAvailPhysMemorySize()
 
 bool AnylysisFileName(const string &filename, uint64_t &chainLen, uint64_t &chainCount)
 {
-    int len = filename.size(), i = 0, j; bool flag = true;
+    int len = filename.size(), i = 0, j;
+    bool flag = true;
     do
     {
         while(i < len && filename[i] != '_') i++;
-        i++; if(i >= len) { flag = false; continue; }
-        
-        j = i + 1; while(j < len && filename[j] != '-') j++;
-        if(j + 2 >= len) { flag = false; continue; }
+        i++;
+        if(i >= len)
+        {
+            flag = false;
+            continue;
+        }
+
+        j = i + 1;
+        while(j < len && filename[j] != '-') j++;
+        if(j + 2 >= len)
+        {
+            flag = false;
+            continue;
+        }
         chainLen = atoi(filename.substr(i, j - i).c_str());
 
-        j++; i = j; while(j < len && filename[j] != '_') j++;
-        if(j >= len) { flag = false; continue; }
+        j++;
+        i = j;
+        while(j < len && filename[j] != '_') j++;
+        if(j >= len)
+        {
+            flag = false;
+            continue;
+        }
         chainCount = atoi(filename.substr(i, j - i).c_str());
-    }while(0);
+    }
+    while(0);
 
     cout << flag << " " << chainLen << " " << chainCount << endl;
     return flag;

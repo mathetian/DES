@@ -12,7 +12,7 @@ namespace rainbowcrack
 
 __device__ void SHA1_HMAC_Init(SHA1_CTX *ctx, const uint8_t *key, size_t keylen)
 {
-    size_t i; 
+    size_t i;
 
     memset( ctx->ipad, 0x36, 64 );
     memset( ctx->opad, 0x5C, 64 );

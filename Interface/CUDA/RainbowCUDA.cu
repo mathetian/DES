@@ -53,12 +53,13 @@ void CUDAGenerator(uint64_t chainLen, uint64_t chainCount, const char *suffix, c
     else if(strcmp(type, "md5") == 0)  i_type = 1;
     else if(strcmp(type, "sha1") == 0) i_type = 2;
     else if(strcmp(type, "hmac") == 0) i_type = 3;
-    
+
     for(int round = 0; round < time_0; round++)
     {
         printf("Begin compute the %d round\n", round + 1);
 
-        TimeStamp tms; tms.StartTime();
+        TimeStamp tms;
+        tms.StartTime();
 
         for(uint64_t i = 0; i < ALL; i++)
         {

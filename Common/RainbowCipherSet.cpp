@@ -61,7 +61,7 @@ int RainbowCipherSet::Detect(RainbowChain chain)
 {
     if(m_maps[chain.nEndKey].size() == 0) return false;
 
-    for(uint64_t i = 0; i < m_maps[chain.nEndKey].size(); i++) 
+    for(uint64_t i = 0; i < m_maps[chain.nEndKey].size(); i++)
         if(m_maps[chain.nEndKey][i] == chain.nStartKey) return 1;
 
     return 0;

@@ -47,7 +47,8 @@ __device__ void CHAR_2_U64(uint64_t &message, uint8_t *pPlain)
     message = 0;
     for(int i = 0; i < 8; i++)
     {
-        uint64_t value = pPlain[i]; message |= (value << (i * 8));
+        uint64_t value = pPlain[i];
+        message |= (value << (i * 8));
     }
 }
 

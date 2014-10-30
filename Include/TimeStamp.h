@@ -58,7 +58,8 @@ public:
         totalTime.tv_usec += difference.tv_usec;
         if(totalTime.tv_usec >= 1000000)
         {
-            totalTime.tv_sec++; totalTime.tv_usec -= 1000000;
+            totalTime.tv_sec++;
+            totalTime.tv_usec -= 1000000;
         }
     }
 

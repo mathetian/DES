@@ -16,31 +16,36 @@ typedef void (*HASHROUTINE)(unsigned char *pPlain, int nPlainLen, unsigned char 
 
 void DoTest(const char *type, const char *filename)
 {
-	FILE *file = fopen(filename, "rb"); assert(file);
-	RainbowChain chain;
-	
-	HASHROUTINE algorithm;
-	if(strcmp(type, "des") == 0) algorithm = HASH_DES;
-	else if(strcmp(type, "md5") == 0) algorithm = HASH_MD5;
-	else if(strcmp(type, "sha1") == 0) algorithm = HASH_SHA1;
-	else algorithm = HASH_HMAC;
+    FILE *file = fopen(filename, "rb");
+    assert(file);
+    RainbowChain chain;
 
-	while(fread((char*)&chain, sizeof(RainbowChain), 1, file) == 1)
-	{
-		unsigned char result[8];
-		algorithm((unsigned char*)&chain.nStartKey, 8, result);
-		uint64_t u_val = *(uint64_t*)result;
-		assert(u_val == chain.nEndKey);
-	}
+    HASHROUTINE algorithm;
+    if(strcmp(type, "des") == 0) algorithm = HASH_DES;
+    else if(strcmp(type, "md5") == 0) algorithm = HASH_MD5;
+    else if(strcmp(type, "sha1") == 0) algorithm = HASH_SHA1;
+    else algorithm = HASH_HMAC;
 
-	fclose(file);
+    while(fread((char*)&chain, sizeof(RainbowChain), 1, file) == 1)
+    {
+        unsigned char result[8];
+        algorithm((unsigned char*)&chain.nStartKey, 8, result);
+        uint64_t u_val = *(uint64_t*)result;
+        assert(u_val == chain.nEndKey);
+    }
+
+    fclose(file);
 }
 
 int main(int argc, char *argv[])
 {
-	if(argc != 3) { Usage(); return 0; }
-	DoTest(argv[1], argv[2]);
-	cout << "Passed All Tests" << endl;
-	
-	return 0;
+    if(argc != 3)
+    {
+        Usage();
+        return 0;
+    }
+    DoTest(argv[1], argv[2]);
+    cout << "Passed All Tests" << endl;
+
+    return 0;
 }

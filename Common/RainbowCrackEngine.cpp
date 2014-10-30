@@ -14,11 +14,15 @@ MemoryPool RainbowCrackEngine::mp;
 
 RainbowCrackEngine::RainbowCrackEngine() : m_totalChains(0), m_falseAlarms(0)
 {
-    m_diskTime.tv_sec   = 0; m_diskTime.tv_usec  = 0;
-    m_totalTime.tv_sec  = 0; m_totalTime.tv_usec = 0;
-    m_initTime.tv_sec   = 0; m_initTime.tv_usec  = 0;
-    m_compareTime.tv_sec = 0; m_compareTime.tv_usec = 0;
-    
+    m_diskTime.tv_sec   = 0;
+    m_diskTime.tv_usec  = 0;
+    m_totalTime.tv_sec  = 0;
+    m_totalTime.tv_usec = 0;
+    m_initTime.tv_sec   = 0;
+    m_initTime.tv_usec  = 0;
+    m_compareTime.tv_sec = 0;
+    m_compareTime.tv_usec = 0;
+
     p_cs = RainbowCipherSet::GetInstance();
 }
 
@@ -69,7 +73,9 @@ bool RainbowCrackEngine::CheckAlarm(RainbowChain *pChain, uint64_t nGuessPos, ui
 
     for(; nPos <= nGuessPos; nPos++)
     {
-        old = cwc.GetKey(); cwc.KeyToCipher(); cwc.KeyReduction(nPos);
+        old = cwc.GetKey();
+        cwc.KeyToCipher();
+        cwc.KeyReduction(nPos);
     }
 
     if(cwc.GetKey() == pVerified[nGuessPos])
@@ -85,12 +91,12 @@ bool RainbowCrackEngine::CheckAlarm(RainbowChain *pChain, uint64_t nGuessPos, ui
 
 struct timeval RainbowCrackEngine::GetTotalTime()
 {
-   return m_totalTime;
+    return m_totalTime;
 }
 
 struct timeval RainbowCrackEngine::GetInitTime()
 {
-   return m_initTime;
+    return m_initTime;
 }
 
 struct timeval RainbowCrackEngine::GetDiskTime()
@@ -137,9 +143,11 @@ void RainbowCrackEngine::InitEndKeys(uint64_t key)
 
 void RainbowCrackEngine::SearchRainbowTable(const char *fileName)
 {
-    char str[256]; FILE *file; RainbowChain *pChain;
+    char str[256];
+    FILE *file;
+    RainbowChain *pChain;
     uint64_t fileLen, nAllocateSize, nDataRead;
-    
+
     if((file = fopen(fileName, "rb")) == NULL)
     {
         printf("SearchRainbowTable: fopen error\n");
@@ -171,7 +179,8 @@ void RainbowCrackEngine::SearchRainbowTable(const char *fileName)
     {
         if(fileLen == (uint64_t)ftell(file)) break;
 
-        TimeStamp tmps; tmps.StartTime();
+        TimeStamp tmps;
+        tmps.StartTime();
 
         nDataRead = fread(pChain, 1, nAllocateSize, file);
 
@@ -179,7 +188,9 @@ void RainbowCrackEngine::SearchRainbowTable(const char *fileName)
             cout << "Warning nDataRead: " << nDataRead << ", nAllocateSize: "<< nAllocateSize << "\n";
         sprintf(str, "%lld bytes read, disk access time: ", (long long)nAllocateSize);
 
-        tmps.StopTime(str); tmps.AddTime(m_totalTime); tmps.AddTime(m_diskTime);
+        tmps.StopTime(str);
+        tmps.AddTime(m_totalTime);
+        tmps.AddTime(m_diskTime);
 
         tmps.StartTime();
 
@@ -187,7 +198,9 @@ void RainbowCrackEngine::SearchRainbowTable(const char *fileName)
 
         sprintf(str, "cryptanalysis time: ");
 
-        tmps.StopTime(str); tmps.AddTime(m_totalTime); tmps.AddTime(m_compareTime);
+        tmps.StopTime(str);
+        tmps.AddTime(m_totalTime);
+        tmps.AddTime(m_compareTime);
     }
 
     p_cs -> Done();
@@ -202,7 +215,7 @@ void RainbowCrackEngine::SearchTableChunk(RainbowChain *pChain, int pChainCount)
 
     cout << "Searching for key: " << key << "...\n";
 
-    for(;nGuessPos < RainbowChainWalk::m_chainLen; nGuessPos++)
+    for(; nGuessPos < RainbowChainWalk::m_chainLen; nGuessPos++)
     {
         uint64_t nMathingIndexE = BinarySearch(pChain, pChainCount, pEndKeys[nGuessPos]);
 
@@ -214,14 +227,15 @@ void RainbowCrackEngine::SearchTableChunk(RainbowChain *pChain, int pChainCount)
             for(nIndex = nMathingIndexEFrom; nIndex <= nMathingIndexETo; nIndex++)
             {
                 if(CheckAlarm(pChain + nIndex, nGuessPos, pEndKeys[nGuessPos]))
-                { } //goto NEXT_HASH;
+                    { } //goto NEXT_HASH;
                 else nFalseAlarm++;
             }
         }
 
         if(nGuessPos % 1000 == 0) cout << "nGuessPos " << nGuessPos << endl;
     }
-    m_totalChains += pChainCount; m_falseAlarms += nFalseAlarm;
+    m_totalChains += pChainCount;
+    m_falseAlarms += nFalseAlarm;
 }
 
 void RainbowCrackEngine::Run(const char *fileName, const char *type)
@@ -244,12 +258,14 @@ void RainbowCrackEngine::Run(const char *fileName, const char *type)
         cout << "-------------------------------------------------------" << endl;
         cout << "Time: " << index++ << " key: " << p_cs -> GetLastKey() << "\n\n";
 
-        TimeStamp tmps; tmps.StartTime();
+        TimeStamp tmps;
+        tmps.StartTime();
 
         InitEndKeys(p_cs -> GetLastKey());
 
-        tmps.StopTime("Init Time: "); 
-        tmps.AddTime(m_totalTime); tmps.AddTime(m_initTime);
+        tmps.StopTime("Init Time: ");
+        tmps.AddTime(m_totalTime);
+        tmps.AddTime(m_initTime);
 
         SearchRainbowTable(fileName);
 

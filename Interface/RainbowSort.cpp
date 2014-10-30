@@ -268,7 +268,11 @@ ABORT:
 
 int main(int argc, char *argv[])
 {
-    if(argc != 3) { Usage(); return 0; }
+    if(argc != 3)
+    {
+        Usage();
+        return 0;
+    }
 
     int num =  atoi(argv[1]);
     assert((num >= 1) && ("sorry number must be less than ten and more than zero\n"));
@@ -286,9 +290,10 @@ int main(int argc, char *argv[])
 
         for(int index = 0; index < num; index++)
         {
-	    stringstream ss; ss << argv[2] << "_" << index;
+            stringstream ss;
+            ss << argv[2] << "_" << index;
             fileNames[index] = ss.str();
-	    files[index] = fopen(fileNames[index].c_str(),"rb+");
+            files[index] = fopen(fileNames[index].c_str(),"rb+");
             cout << fileNames[index] << endl;
             assert(files[index] && "fopen error\n");
         }
