@@ -64,6 +64,7 @@ void CUDAGenerator(uint64_t chainLen, uint64_t chainCount, const char *suffix, c
         {
             starts[i] = round*ALL + i;
             if(i_type == 0) starts[i] = Convert(starts[i], 6) & totalSpace_Global_DES;
+            else starts[i] &= totalSpace_Global;
         }
 
         _CUDA(cudaMemcpy(cudaIn, starts, size, cudaMemcpyHostToDevice));

@@ -253,8 +253,7 @@ __device__ void MD5_Final(uint8_t *result, MD5_CTX *ctx)
 
 __device__ void MD5(uint8_t* pPlain, int nPlainLen, uint8_t *pHash)
 {
-    MD5_CTX ctx;
-    MD5_Init(&ctx);
+    MD5_CTX ctx; MD5_Init(&ctx);
     MD5_Update(&ctx, pPlain, nPlainLen);
     uint8_t result[16];
     MD5_Final(result, &ctx);
@@ -272,8 +271,9 @@ __device__ uint64_t Key2Ciper_MD5(uint64_t key)
     return key;
 }
 
-__device__ uint64_t Cipher2Key_MD5(uint64_t key, int nPos = 0)
+__device__ uint64_t Cipher2Key_MD5(uint64_t key, int nPos)
 {
+    key &= totalSpace;
     if(nPos >= 1300)
     {
         key = (key + nPos) & totalSpace;

@@ -39,11 +39,12 @@ uint64_t RainbowChainWalk::GetRandomKey()
 
 void RainbowChainWalk::KeyToCipher()
 {
-    m_key = Crypt(m_key) & m_keySpaceTotal;
+    m_key = Crypt(m_key);
 }
 
 void RainbowChainWalk::KeyReduction(int nPos)
 {
+    m_key &= m_keySpaceTotal;
     if(nPos >= 1300)
     {
         m_key = (m_key + nPos) & m_keySpaceTotal;

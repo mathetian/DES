@@ -32,10 +32,10 @@ cudaError_t cudaerrno;
 		exit(EXIT_FAILURE);                                                  											\
     } }
 
-///__device__ uint64_t totalSpace = (1ull << 63) - 1 + (1ull << 63);
+// __device__ uint64_t totalSpace = (1ull << 63) - 1 + (1ull << 63);
+// uint64_t totalSpace_Global = (1ull << 63) - 1 + (1ull << 63);
 __device__ uint64_t totalSpace = (1ull << 31) - 1;
 uint64_t totalSpace_Global = (1ull << 31) - 1;
-/// uint64_t totalSpace_Global = (1ull << 63) - 1 + (1ull << 63);
 
 __device__ void U64_2_CHAR(uint64_t message, uint8_t *pPlain)
 {
@@ -47,8 +47,7 @@ __device__ void CHAR_2_U64(uint64_t &message, uint8_t *pPlain)
     message = 0;
     for(int i = 0; i < 8; i++)
     {
-        uint64_t value = pPlain[i];
-        message |= (value << (i * 8));
+        uint64_t value = pPlain[i]; message |= (value << (i * 8));
     }
 }
 

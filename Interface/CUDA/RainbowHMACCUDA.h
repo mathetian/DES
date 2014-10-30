@@ -67,6 +67,7 @@ __device__ uint64_t Key2Ciper_HMAC(uint64_t key)
 
 __device__ uint64_t Cipher2Key_HMAC(uint64_t key, int nPos)
 {
+    key &= totalSpace;
     if(nPos >= 1300)
     {
         key = (key + nPos) & totalSpace;

@@ -18,11 +18,11 @@
 
 # Test 2
 
-mpirun -np 4 ./generator des 4096 65536 cpu
-./cuda des 4096 262144 cuda
+# mpirun -np 4 ./generator des 4096 65536 cpu
+# ./cuda des 4096 262144 cuda
 
-# mpirun -np 4 ./generator md5 4096 65536 cpu
-# ./cuda md5 4096 262144 cuda
+mpirun -np 4 ./generator md5 4096 65536 cpu
+./cuda md5 4096 262144 cuda
 
 # mpirun -np 4 ./generator sha1 4096 65536 cpu
 # ./cuda sha1 4096 262144 cuda

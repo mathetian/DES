@@ -484,12 +484,13 @@ __device__ uint64_t Key2Ciper_DES(uint64_t key)
 {
     uint64_t         roundKeys[16];
     GenerateKey(key, roundKeys);
-    key  = DESOneTime(roundKeys) & totalSpace_DES;
+    key  = DESOneTime(roundKeys);
     return key;
 }
 
 __device__ uint64_t Cipher2Key_DES(uint64_t key, int nPos)
 {
+    key &= totalSpace_DES;
     if(nPos >= 1300)
     {
         key = (key + nPos) & totalSpace_DES;
