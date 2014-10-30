@@ -9,7 +9,7 @@ namespace rainbowcrack
 {
 
 /// uint64_t RainbowChainWalk::m_keySpaceTotal = (1ull << 63) - 1 + (1ull << 63);
-uint64_t     RainbowChainWalk::m_keySpaceTotal = (1ull << 31) - 1;
+uint64_t     RainbowChainWalk::m_keySpaceTotal = (1ull << 30) - 1;
 uint64_t     RainbowChainWalk::m_chainLen;
 uint64_t     RainbowChainWalk::m_chainCount;
 HASHROUTINE  RainbowChainWalk::m_algorithm;

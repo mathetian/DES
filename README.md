@@ -44,3 +44,61 @@ HMAC GPU: 2^25.09 per second (log((2**30)/30.0, 2)) (one gpu)
 
 Crack
 =====
+DES (2**30)
+-------------------------------------------------------
+Statistics
+-------------------------------------------------------
+Key found             : 67
+Total time            : 488 s, 187429 us
+Total init time       : 296 s, 237840 us
+Total disk access time: 0 s, 97907 us
+Total compare time    : 191 s, 851682 us
+Total chains steps    : 26214400
+Total false alarms    : 410400
+Detected 35 numbers
+
+MD5 (2**30)
+-------------------------------------------------------
+Statistics
+-------------------------------------------------------
+Key found             : 61
+Total time            : 221 s, 190025 us
+Total init time       : 164 s, 419520 us
+Total disk access time: 0 s, 106740 us
+Total compare time    : 56 s, 663765 us
+Total chains steps    : 26214400
+Total false alarms    : 205766
+Detected 48 numbers
+
+SHA1 (2**30)
+-------------------------------------------------------
+Statistics
+-------------------------------------------------------
+Key found             : 65
+Total time            : 234 s, 557858 us
+Total init time       : 174 s, 44006 us
+Total disk access time: 0 s, 107614 us
+Total compare time    : 60 s, 406238 us
+Total chains steps    : 26214400
+Total false alarms    : 205976
+Detected 41 numbers
+
+
+HMAC (2**30)
+-------------------------------------------------------
+Statistics
+-------------------------------------------------------
+Key found             : 61
+Total time            : 1310 s, 325729 us
+Total init time       : 978 s, 352615 us
+Total disk access time: 0 s, 96495 us
+Total compare time    : 331 s, 876619 us
+Total chains steps    : 26214400
+Total false alarms    : 206126
+Detected 44 numbers
+
+Todo List
+===
+1. Review HMAC(Speed and Others)
+
+2. RainbowCrackCUDA(Initialization -> CUDA)

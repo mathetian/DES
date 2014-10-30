@@ -14,7 +14,8 @@ void Usage()
 
 typedef void (*HASHROUTINE)(unsigned char *pPlain, int nPlainLen, unsigned char *pHash);
 
-void DoTest(const char *type, const char *filename)
+/// Test Algorithm
+void DoTest_1(const char *type, const char *filename)
 {
     FILE *file = fopen(filename, "rb");
     assert(file);
@@ -37,14 +38,28 @@ void DoTest(const char *type, const char *filename)
     fclose(file);
 }
 
+/// Test CPU & GPU
+void DoTest_2()
+{
+
+}
+
+/// Test Sort
+void DoTest_3()
+{
+
+}
+
+/// Test Performance
+void DoTest_4()
+{
+    
+}
+
 int main(int argc, char *argv[])
 {
-    if(argc != 3)
-    {
-        Usage();
-        return 0;
-    }
-    DoTest(argv[1], argv[2]);
+    if(argc != 3) { Usage(); return 0; }
+    DoTest_1(argv[1], argv[2]);
     cout << "Passed All Tests" << endl;
 
     return 0;

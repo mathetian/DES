@@ -21,8 +21,8 @@
 # mpirun -np 4 ./generator des 4096 65536 cpu
 # ./cuda des 4096 262144 cuda
 
-mpirun -np 4 ./generator md5 4096 65536 cpu
-./cuda md5 4096 262144 cuda
+# mpirun -np 4 ./generator md5 4096 65536 cpu
+# ./cuda md5 4096 262144 cuda
 
 # mpirun -np 4 ./generator sha1 4096 65536 cpu
 # ./cuda sha1 4096 262144 cuda
@@ -31,14 +31,46 @@ mpirun -np 4 ./generator md5 4096 65536 cpu
 # ./cuda hmac 4096 262144 cuda
 
 # Test 3 (Crack)
-# mpirun -np 4 ./generator des 4096 262144 test
-# ./sort 4 des_4096-262144_test
-# ./verified des des_4096-262144_test 4096
-# ./generator des test
-# ./crack des file des_4096-262144_test Test.txt
+# mpirun -np 4 ./generator des 4096 262144 cpu
+# ./sort 4 des_4096-262144_cpu
+# ./verified des des_4096-262144_cpu 4096
+# ./generator des rand
+# ./crack des file des_4096-262144_cpu des.txt
 
-# mpirun -np 4 ./generator md5 4096 65536 test
-# ./sort 4 md5_4096-65536_test
-# ./verified md5 md5_4096-65536_test 4096
-# ./generator md5 test
-# ./crack md5 file md5_4096-65536_test Test.txt
+# mpirun -np 4 ./generator md5 4096 262144 cpu
+# ./sort 4 md5_4096-262144_cpu
+# ./verified md5 md5_4096-262144_cpu 4096
+# ./generator md5 rand
+# ./crack md5 file des_4096-262144_cpu md5.txt
+
+# mpirun -np 4 ./generator sha1 4096 262144 cpu
+# ./sort 4 sha1_4096-262144_cpu
+# ./verified sha1 sha1_4096-262144_cpu 4096
+# ./generator sha1 rand
+# ./crack sha1 file sha1_4096-262144_cpu sha1.txt
+
+# mpirun -np 4 ./generator hmac 4096 262144 cpu
+# ./sort 4 hmac_4096-262144_cpu
+# ./verified hmac hmac_4096-262144_cpu 4096
+# ./generator hmac rand
+./crack hmac file hmac_4096-262144_cpu hmac.txt
+
+# ./cuda des 4096 262144 cuda
+# ./sort 1 des_4096-262144_cuda
+# ./generator des rand
+# ./crack des file des_4096-262144_cuda des.txt
+
+# ./cuda md5 4096 262144 cuda
+# ./sort 1 md5_4096-262144_cuda
+# ./generator md5 rand
+# ./crack md5 file md5_4096-262144_cuda md5.txt
+
+# ./cuda sha1 4096 262144 cuda
+# ./sort 1 sha1_4096-262144_cuda
+# ./generator sha1 rand
+# ./crack sha1 file sha1_4096-262144_cuda sha1.txt
+
+# ./cuda hmac 4096 262144 cuda
+# ./sort 1 hmac_4096-262144_cuda
+# ./generator hmac rand
+# ./crack hmac file sha1_4096-262144_cuda hmac.txt

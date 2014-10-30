@@ -541,9 +541,7 @@ __global__ void  DESCrackCUDA(uint64_t *data)
 
     __syncthreads();
 
-    uint64_t tx = TX/4096;
-    uint64_t st = tx*4096*2;
-    uint64_t ix = st + (TX%4096);
+    uint64_t tx = TX/4096, st = tx*4096*2, ix = st + (TX%4096);
 
     uint64_t key = data[ix];
     for(int nPos = (TX % 4096) + 1; nPos < 4096; nPos++)
