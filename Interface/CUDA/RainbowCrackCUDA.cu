@@ -25,6 +25,7 @@ void CUDACrack(RainbowCipherSet *p_cs, uint64_t chainLen, const char *type)
 {
     assert(chainLen == 4096);
 
+    // 1024*256*2 = 2^19
     uint64_t starts[ALL*2], ends[ALL*2];
 
     uint64_t *cudaIn;
@@ -52,6 +53,7 @@ void CUDACrack(RainbowCipherSet *p_cs, uint64_t chainLen, const char *type)
             keys[i] = p_cs -> GetLastKey(); p_cs -> Done();
         }
 
+        /// 2^12*2^7 -> 2^19
         for(int i = 0; i < 128; i++)
         {
             for(uint64_t nPos = 0; nPos < chainLen; nPos++)
@@ -75,8 +77,8 @@ void CUDACrack(RainbowCipherSet *p_cs, uint64_t chainLen, const char *type)
             MD5CrackCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
         else if(i_type == 2)
             SHA1CrackCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
-        else if(i_type == 3)
-            HMACCrackCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
+        // else if(i_type == 3)
+        //     HMACCrackCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
 
         _CUDA(cudaMemcpy(ends, cudaIn, size, cudaMemcpyDeviceToHost));
 
@@ -96,7 +98,6 @@ int main(int argc, char *argv[])
 {
     if(argc != 5 || strcmp(argv[2], "file") != 0) { Usage(); return 0; }
 
-     NULL;
     RainbowCipherSet  *p_cs = RainbowCipherSet::GetInstance();
 
     uint64_t chainLen = atoll(argv[3]);

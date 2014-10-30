@@ -100,6 +100,24 @@ __global__ void HMACCUDA_ONCE(uint64_t *data)
     __syncthreads();
 }
 
+
+// __global__ void  HMACCrackCUDA(uint64_t *data)
+// {
+//     __syncthreads();
+
+//     uint64_t ix  = TX, key = data[ix];
+//     for(int nPos = (ix % 4096) + 1; nPos < 4096; nPos++)
+//         key = Cipher2Key_HMAC(Key2Ciper_HMAC(key), nPos);
+//     data[ix] = key;
+
+//     ix = (1 << 19) - 1 - TX; key = data[ix];
+//     for(int nPos = (ix % 4096) + 1; nPos < 4096; nPos++)
+//         key = Cipher2Key_HMAC(Key2Ciper_HMAC(key), nPos);
+//     data[ix] = key;
+
+//     __syncthreads();
+// }
+
 };
 
 #endif

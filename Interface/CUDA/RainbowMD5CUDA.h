@@ -297,29 +297,23 @@ __global__ void MD5CUDA(uint64_t *data)
     __syncthreads();
 }
 
-__global__ void MD5CrackCUDA(uint64_t *data)
+__global__ void  MD5CrackCUDA(uint64_t *data)
 {
     __syncthreads();
 
-    uint64_t tx = TX/4096;
-    uint64_t st = tx*4096*2;
-    uint64_t ix = st + (TX%4096);
-
-    uint64_t key = data[ix];
-    for(int nPos = (TX % 4096) + 1; nPos < 4096; nPos++)
+    uint64_t ix  = TX, key = data[ix];
+    for(int nPos = (ix % 4096) + 1; nPos < 4096; nPos++)
         key = Cipher2Key_MD5(Key2Ciper_MD5(key), nPos);
     data[ix] = key;
 
-    ix = st + 2*4096 - TX%4096 - 1;
-    st = st + 4096;
-
-    key = data[ix];
-    for(int nPos = 4096 - (TX % 4096); nPos < 4096; nPos++)
+    ix = (1 << 19) - 1 - TX; key = data[ix];
+    for(int nPos = (ix % 4096) + 1; nPos < 4096; nPos++)
         key = Cipher2Key_MD5(Key2Ciper_MD5(key), nPos);
     data[ix] = key;
 
     __syncthreads();
 }
+
 };
 
 #endif
