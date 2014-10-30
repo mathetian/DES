@@ -49,8 +49,8 @@ void CUDAGenerator(uint64_t chainLen, uint64_t chainCount, const char *suffix, c
 
     int i_type = 0;
 
-    if(strcmp(type, "des") == 0)      i_type = 0;
-    else if(strcmp(type, "md5") == 0) i_type = 1;
+    if(strcmp(type, "des") == 0)       i_type = 0;
+    else if(strcmp(type, "md5") == 0)  i_type = 1;
     else if(strcmp(type, "sha1") == 0) i_type = 2;
     else if(strcmp(type, "hmac") == 0) i_type = 3;
     
@@ -63,10 +63,7 @@ void CUDAGenerator(uint64_t chainLen, uint64_t chainCount, const char *suffix, c
         for(uint64_t i = 0; i < ALL; i++)
         {
             starts[i] = round*ALL + i;
-            if(i_type == 0)
-            {
-                starts[i] = Convert(starts[i], 6) & totalSpace_Global_DES;
-            }
+            if(i_type == 0) starts[i] = Convert(starts[i], 6) & totalSpace_Global_DES;
         }
 
         _CUDA(cudaMemcpy(cudaIn, starts, size, cudaMemcpyHostToDevice));

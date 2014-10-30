@@ -221,7 +221,6 @@ void RainbowCrackEngine::SearchTableChunk(RainbowChain *pChain, int pChainCount)
 
         if(nGuessPos % 1000 == 0) cout << "nGuessPos " << nGuessPos << endl;
     }
-NEXT_HASH: ;
     m_totalChains += pChainCount; m_falseAlarms += nFalseAlarm;
 }
 
