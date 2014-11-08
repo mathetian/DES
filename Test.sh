@@ -21,8 +21,8 @@
 # mpirun -np 4 ./generator des 4096 65536 cpu
 # ./cuda des 4096 262144 cuda
 
-# mpirun -np 4 ./generator md5 4096 65536 cpu
-# ./cuda md5 4096 262144 cuda
+mpirun -np 4 ./generator md5 4096 65536 cpu
+./cuda md5 4096 262144 cuda
 
 # mpirun -np 4 ./generator sha1 4096 65536 cpu
 # ./cuda sha1 4096 262144 cuda
@@ -76,11 +76,11 @@
 # ./crack hmac file sha1_4096-262144_cuda hmac.txt
 
 # Test 4 (Initialization Time)
-./generator des rand
-./crackcuda des file 4096 des.txt
+# ./generator des rand
+# ./crackcuda des file 4096 des.txt
 
-./generator md5 rand
-./crackcuda md5 file 4096 md5.txt
+# ./generator md5 rand
+# ./crackcuda md5 file 4096 md5.txt
 
-./generator sha1 rand
-./crackcuda sha1 file 4096 sha1.txt
+# ./generator sha1 rand
+# ./crackcuda sha1 file 4096 sha1.txt
