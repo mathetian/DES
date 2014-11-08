@@ -52,8 +52,10 @@ void CUDAGenerator(uint64_t chainLen, uint64_t chainCount, const char *suffix, c
     if(strcmp(type, "des") == 0)       i_type = 0;
     else if(strcmp(type, "md5") == 0)  i_type = 1;
     else if(strcmp(type, "sha1") == 0) i_type = 2;
-    else if(strcmp(type, "hmac") == 0) i_type = 3;
-
+    else if(strcmp(type, "sha1_hmac") == 0) i_type = 3;
+    else if(strcmp(type, "md5_hmac") == 0) i_type = 4;
+    else assert(0);
+    
     for(int round = 0; round < time_0; round++)
     {
         printf("Begin compute the %d round\n", round + 1);
@@ -77,7 +79,9 @@ void CUDAGenerator(uint64_t chainLen, uint64_t chainCount, const char *suffix, c
         else if(i_type == 2)
             SHA1CUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
         else if(i_type == 3)
-            HMACCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
+            SHA1_HMACCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
+        else
+            MD5_HMACCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
 
         _CUDA(cudaMemcpy(ends, cudaIn, size, cudaMemcpyDeviceToHost));
 
