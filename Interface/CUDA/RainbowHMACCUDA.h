@@ -29,19 +29,19 @@ __device__ void SHA1_HMAC_Init(SHA1_CTX *ctx, const uint8_t *key, size_t keylen)
 
 __device__ void MD5_HMAC_Init(MD5_CTX *ctx, const uint8_t *key, size_t keylen)
 {
-    size_t i;
+    // size_t i;
 
-    memset( ctx->ipad, 0x36, 64 );
-    memset( ctx->opad, 0x5C, 64 );
+    // memset( ctx->ipad, 0x36, 64 );
+    // memset( ctx->opad, 0x5C, 64 );
 
-    for( i = 0; i < keylen; i++ )
-    {
-        ctx->ipad[i] = (uint8_t)( ctx->ipad[i] ^ key[i] );
-        ctx->opad[i] = (uint8_t)( ctx->opad[i] ^ key[i] );
-    }
+    // for( i = 0; i < keylen; i++ )
+    // {
+    //     ctx->ipad[i] = (uint8_t)( ctx->ipad[i] ^ key[i] );
+    //     ctx->opad[i] = (uint8_t)( ctx->opad[i] ^ key[i] );
+    // }
 
-    MD5_Init(ctx);
-    MD5_Update(ctx, ctx->ipad, 64);
+    // MD5_Init(ctx);
+    // MD5_Update(ctx, ctx->ipad, 64);
 }
 
 __device__ void SHA1_HMAC_Update(SHA1_CTX *ctx, const uint8_t *input, size_t ilen )
@@ -51,7 +51,7 @@ __device__ void SHA1_HMAC_Update(SHA1_CTX *ctx, const uint8_t *input, size_t ile
 
 __device__ void MD5_HMAC_Update(MD5_CTX *ctx, const uint8_t *input, size_t ilen )
 {
-    MD5_Update(ctx, input, ilen);
+    // MD5_Update(ctx, input, ilen);
 }
 
 __device__ void SHA1_HMAC_Final(SHA1_CTX *ctx, uint8_t *output)
@@ -67,13 +67,13 @@ __device__ void SHA1_HMAC_Final(SHA1_CTX *ctx, uint8_t *output)
 
 __device__ void MD5_HMAC_Final(MD5_CTX *ctx, uint8_t *output)
 {
-    uint8_t tmpbuf[20];
+    // uint8_t tmpbuf[20];
 
-    MD5_Final( ctx, tmpbuf );
-    MD5_Init( ctx );
-    MD5_Update( ctx, ctx->opad, 64 );
-    MD5_Update( ctx, tmpbuf, 20 );
-    MD5_Final( ctx, output );
+    // MD5_Final( ctx, tmpbuf );
+    // MD5_Init( ctx );
+    // MD5_Update( ctx, ctx->opad, 64 );
+    // MD5_Update( ctx, tmpbuf, 20 );
+    // MD5_Final( ctx, output );
 }
 
 __device__ void SHA1_HMAC(const uint8_t *key, size_t keylen, const uint8_t *input, size_t ilen, uint8_t *output)
@@ -87,11 +87,11 @@ __device__ void SHA1_HMAC(const uint8_t *key, size_t keylen, const uint8_t *inpu
 
 __device__ void MD5_HMAC(const uint8_t *key, size_t keylen, const uint8_t *input, size_t ilen, uint8_t *output)
 {
-    MD5_CTX ctx;
+    // MD5_CTX ctx;
 
-    MD5_HMAC_Init( &ctx, key, keylen );
-    MD5_HMAC_Update( &ctx, input, ilen );
-    MD5_HMAC_Final( &ctx, output );
+    // MD5_HMAC_Init( &ctx, key, keylen );
+    // MD5_HMAC_Update( &ctx, input, ilen );
+    // MD5_HMAC_Final( &ctx, output );
 }
 
 

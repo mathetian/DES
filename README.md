@@ -110,3 +110,5 @@ Todo List
 1. Review HMAC(Speed and Others)
 
 2. RainbowCrackCUDA(Initialization -> CUDA)
+
+PS 1: uint8_t cost too much time than void*

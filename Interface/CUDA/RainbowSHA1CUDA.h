@@ -15,7 +15,6 @@ typedef struct
     uint32_t state[5];
     uint32_t count[2];
     uint8_t  buffer[64];
-
     uint8_t ipad[64];
     uint8_t opad[64];
 

@@ -17,39 +17,37 @@ typedef struct
     MD5_u32plus a, b, c, d;
     uint8_t buffer[64];
     MD5_u32plus block[16];
-
-    uint8_t ipad[64];
     uint8_t opad[64];
 } MD5_CTX;
 
-#define F(x, y, z)			((z) ^ ((x) & ((y) ^ (z))))
-#define G(x, y, z)			((y) ^ ((z) & ((x) ^ (y))))
-#define H(x, y, z)			(((x) ^ (y)) ^ (z))
-#define H2(x, y, z)			((x) ^ ((y) ^ (z)))
-#define I(x, y, z)			((y) ^ ((x) | ~(z)))
+#define F(x, y, z)          ((z) ^ ((x) & ((y) ^ (z))))
+#define G(x, y, z)          ((y) ^ ((z) & ((x) ^ (y))))
+#define H(x, y, z)          (((x) ^ (y)) ^ (z))
+#define H2(x, y, z)         ((x) ^ ((y) ^ (z)))
+#define I(x, y, z)          ((y) ^ ((x) | ~(z)))
 
 #define STEP(f, a, b, c, d, x, t, s) \
-	(a) += f((b), (c), (d)) + (x) + (t); \
-	(a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s)))); \
-	(a) += (b);
+    (a) += f((b), (c), (d)) + (x) + (t); \
+    (a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s)))); \
+    (a) += (b);
 
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
 #define SET(n) \
-	(*(MD5_u32plus *)&ptr[(n) * 4])
+    (*(MD5_u32plus *)&ptr[(n) * 4])
 #define GET(n) \
-	SET(n)
+    SET(n)
 #else
 #define SET(n) \
-	(ctx->block[(n)] = \
-	(MD5_u32plus)ptr[(n) * 4] | \
-	((MD5_u32plus)ptr[(n) * 4 + 1] << 8) | \
-	((MD5_u32plus)ptr[(n) * 4 + 2] << 16) | \
-	((MD5_u32plus)ptr[(n) * 4 + 3] << 24))
+    (ctx->block[(n)] = \
+    (MD5_u32plus)ptr[(n) * 4] | \
+    ((MD5_u32plus)ptr[(n) * 4 + 1] << 8) | \
+    ((MD5_u32plus)ptr[(n) * 4 + 2] << 16) | \
+    ((MD5_u32plus)ptr[(n) * 4 + 3] << 24))
 #define GET(n) \
-	(ctx->block[(n)])
+    (ctx->block[(n)])
 #endif
 
-__device__ const uint8_t *body(MD5_CTX *ctx, const uint8_t* data, size_t len)
+__device__ const void *body(MD5_CTX *ctx, const void *data, unsigned long size)
 {
     const uint8_t *ptr;
     MD5_u32plus a, b, c, d;
@@ -144,7 +142,7 @@ __device__ const uint8_t *body(MD5_CTX *ctx, const uint8_t* data, size_t len)
 
         ptr += 64;
     }
-    while (len -= 64);
+    while (size -= 64);
 
     ctx->a = a;
     ctx->b = b;
@@ -165,15 +163,15 @@ __device__ void MD5_Init(MD5_CTX *ctx)
     ctx->hi = 0;
 }
 
-__device__ void MD5_Update(MD5_CTX *ctx, const uint8_t* data, size_t len)
+__device__ void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size)
 {
     MD5_u32plus saved_lo;
     unsigned long used, available;
 
     saved_lo = ctx->lo;
-    if ((ctx->lo = (saved_lo + len) & 0x1fffffff) < saved_lo)
+    if ((ctx->lo = (saved_lo + size) & 0x1fffffff) < saved_lo)
         ctx->hi++;
-    ctx->hi += len >> 29;
+    ctx->hi += size >> 29;
 
     used = saved_lo & 0x3f;
 
@@ -181,25 +179,25 @@ __device__ void MD5_Update(MD5_CTX *ctx, const uint8_t* data, size_t len)
     {
         available = 64 - used;
 
-        if (len < available)
+        if (size < available)
         {
-            memcpy(&ctx->buffer[used], data, len);
+            memcpy(&ctx->buffer[used], data, size);
             return;
         }
 
         memcpy(&ctx->buffer[used], data, available);
         data = (const uint8_t *)data + available;
-        len -= available;
+        size -= available;
         body(ctx, ctx->buffer, 64);
     }
 
-    if (len >= 64)
+    if (size >= 64)
     {
-        data = body(ctx, data, len & ~(unsigned long)0x3f);
-        len &= 0x3f;
+        data = body(ctx, data, size & ~(unsigned long)0x3f);
+        size &= 0x3f;
     }
 
-    memcpy(ctx->buffer, data, len);
+    memcpy(ctx->buffer, data, size);
 }
 
 __device__ void MD5_Final(MD5_CTX *ctx, uint8_t *result)
