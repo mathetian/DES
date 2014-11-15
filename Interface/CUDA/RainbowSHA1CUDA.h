@@ -15,9 +15,7 @@ typedef struct
     uint32_t state[5];
     uint32_t count[2];
     uint8_t  buffer[64];
-    uint8_t ipad[64];
-    uint8_t opad[64];
-
+    uint8_t ipad[64], opad[64];
 } SHA1_CTX;
 
 #define SHA1_DIGEST_SIZE 20
@@ -25,13 +23,13 @@ typedef struct
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
 
 #ifdef WORDS_BIGENDIAN
-#define blk0(i) block.l[i]
+#define blk0(i) blockl[i]
 #else
-#define blk0(i) (block.l[i] = (rol(block.l[i],24)&0xFF00FF00) \
-    |(rol(block.l[i],8)&0x00FF00FF))
+#define blk0(i) (blockl[i] = (rol(blockl[i],24)&0xFF00FF00) \
+    |(rol(blockl[i],8)&0x00FF00FF))
 #endif
-#define blk(i) (block.l[i&15] = rol(block.l[(i+13)&15]^block.l[(i+8)&15] \
-    ^block.l[(i+2)&15]^block.l[i&15],1))
+#define blk(i) (blockl[i&15] = rol(blockl[(i+13)&15]^blockl[(i+8)&15] \
+    ^blockl[(i+2)&15]^blockl[i&15],1))
 
 #define R0(v,w,x,y,z,i) z+=((w&(x^y))^y)+blk0(i)+0x5A827999+rol(v,5);w=rol(w,30);
 #define R1(v,w,x,y,z,i) z+=((w&(x^y))^y)+blk(i)+0x5A827999+rol(v,5);w=rol(w,30);
@@ -39,18 +37,11 @@ typedef struct
 #define R3(v,w,x,y,z,i) z+=(((w|x)&y)|(w&x))+blk(i)+0x8F1BBCDC+rol(v,5);w=rol(w,30);
 #define R4(v,w,x,y,z,i) z+=(w^x^y)+blk(i)+0xCA62C1D6+rol(v,5);w=rol(w,30);
 
-__device__ void SHA1_Transform(uint32_t *state, const uint8_t *buffer)
+__device__ void SHA1_Transform(uint32_t *state, uint8_t *buffer)
 {
     uint32_t a, b, c, d, e;
-    typedef union
-    {
-        uint8_t c[64];
-        uint32_t l[16];
-    } CHAR64LONG16;
-
-    CHAR64LONG16 block;
-    memcpy(block.c, buffer, 64);
-
+    uint32_t *blockl = (uint32_t*)buffer;
+    
     a = state[0];
     b = state[1];
     c = state[2];
@@ -157,7 +148,7 @@ __device__ void SHA1_Init(SHA1_CTX* context)
     context->count[0] = context->count[1] = 0;
 }
 
-__device__ void SHA1_Update(SHA1_CTX* context, const uint8_t* data, const size_t len)
+__device__ void SHA1_Update(SHA1_CTX* context, uint8_t* data, const size_t len)
 {
     size_t i, j;
 
@@ -185,18 +176,16 @@ __device__ void SHA1_Update(SHA1_CTX* context, const uint8_t* data, const size_t
 __device__ void SHA1_Final(SHA1_CTX* context, uint8_t *digest)
 {
     uint32_t i;
-    uint8_t  finalcount[8];
+    uint8_t  finalcount[8], *dd_1 = (uint8_t *)"\200", *dd_2 = (uint8_t *)"\0";
+    uint8_t  dd_3 = *dd_1, dd_4 = *dd_2;
 
     for (i = 0; i < 8; i++)
     {
         finalcount[i] = (uint8_t)((context->count[(i >= 4 ? 0 : 1)]
                                    >> ((3-(i & 3)) * 8) ) & 255);  /* Endian independent */
     }
-    SHA1_Update(context, (uint8_t *)"\200", 1);
-    while ((context->count[0] & 504) != 448)
-    {
-        SHA1_Update(context, (uint8_t *)"\0", 1);
-    }
+    SHA1_Update(context, &dd_3, 1);
+    while ((context->count[0] & 504) != 448) SHA1_Update(context, &dd_4, 1);
     SHA1_Update(context, finalcount, 8);  /* Should cause a SHA1_Transform() */
     for (i = 0; i < SHA1_DIGEST_SIZE; i++)
     {
@@ -211,7 +200,7 @@ __device__ void SHA1_Final(SHA1_CTX* context, uint8_t *digest)
     memset(finalcount, 0, 8);
 }
 
-__device__ void SHA1(const uint8_t *pPlain, int nPlainLen, uint8_t *pHash)
+__device__ void SHA1(uint8_t *pPlain, int nPlainLen, uint8_t *pHash)
 {
     SHA1_CTX ctx;
     SHA1_Init(&ctx);
@@ -221,11 +210,10 @@ __device__ void SHA1(const uint8_t *pPlain, int nPlainLen, uint8_t *pHash)
 
 __device__ uint64_t Key2Ciper_SHA1(uint64_t key)
 {
-    uint8_t result[20], result_2[8];
-    U64_2_CHAR(key, result_2);
-    SHA1(result_2, 8, result);
-    memcpy(result_2, result, 8);
-    CHAR_2_U64(key, result_2);
+    uint8_t result[20];
+    U64_2_CHAR(key, result);
+    SHA1(result, 8, result);
+    CHAR_2_U64(key, result);
 
     return key;
 }

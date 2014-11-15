@@ -17,7 +17,7 @@ typedef struct
     MD5_u32plus a, b, c, d;
     uint8_t buffer[64];
     MD5_u32plus block[16];
-    uint8_t opad[64];
+    uint8_t ipad[64], opad[64];
 } MD5_CTX;
 
 #define F(x, y, z)          ((z) ^ ((x) & ((y) ^ (z))))
@@ -47,13 +47,12 @@ typedef struct
     (ctx->block[(n)])
 #endif
 
-__device__ const void *body(MD5_CTX *ctx, const void *data, unsigned long size)
+__device__ void body(MD5_CTX *ctx, uint8_t *data, size_t size)
 {
-    const uint8_t *ptr;
     MD5_u32plus a, b, c, d;
     MD5_u32plus saved_a, saved_b, saved_c, saved_d;
 
-    ptr = (const uint8_t *)data;
+    uint8_t *ptr = data;
 
     a = ctx->a;
     b = ctx->b;
@@ -149,7 +148,6 @@ __device__ const void *body(MD5_CTX *ctx, const void *data, unsigned long size)
     ctx->c = c;
     ctx->d = d;
 
-    return ptr;
 }
 
 __device__ void MD5_Init(MD5_CTX *ctx)
@@ -163,7 +161,7 @@ __device__ void MD5_Init(MD5_CTX *ctx)
     ctx->hi = 0;
 }
 
-__device__ void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size)
+__device__ void MD5_Update(MD5_CTX *ctx, uint8_t *data, size_t size)
 {
     MD5_u32plus saved_lo;
     unsigned long used, available;
@@ -186,15 +184,16 @@ __device__ void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size)
         }
 
         memcpy(&ctx->buffer[used], data, available);
-        data = (const uint8_t *)data + available;
+        data += available;
         size -= available;
         body(ctx, ctx->buffer, 64);
     }
 
     if (size >= 64)
     {
-        data = body(ctx, data, size & ~(unsigned long)0x3f);
+        body(ctx, data, size & ~(unsigned long)0x3f);
         size &= 0x3f;
+        data += (size & ~(unsigned long)0x3f);
     }
 
     memcpy(ctx->buffer, data, size);
@@ -264,11 +263,11 @@ __device__ void MD5(uint8_t* pPlain, int nPlainLen, uint8_t *pHash)
 
 __device__ uint64_t Key2Ciper_MD5(uint64_t key)
 {
-    uint8_t result[16], result_2[8];
-    U64_2_CHAR(key, result_2);
-    MD5(result_2, 8, result);
-    memcpy(result_2, result, 8);
-    CHAR_2_U64(key, result_2);
+    uint8_t result[16];
+    U64_2_CHAR(key, result);
+    MD5(result, 8, result);
+    memcpy(result, result, 8);
+    CHAR_2_U64(key, result);
 
     return key;
 }

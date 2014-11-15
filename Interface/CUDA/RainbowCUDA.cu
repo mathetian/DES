@@ -52,8 +52,8 @@ void CUDAGenerator(uint64_t chainLen, uint64_t chainCount, const char *suffix, c
     if(strcmp(type, "des") == 0)       i_type = 0;
     else if(strcmp(type, "md5") == 0)  i_type = 1;
     else if(strcmp(type, "sha1") == 0) i_type = 2;
-    else if(strcmp(type, "sha1_hmac") == 0) i_type = 3;
-    else if(strcmp(type, "md5_hmac") == 0) i_type = 4;
+    else if(strcmp(type, "sha1hmac") == 0) i_type = 3;
+    else if(strcmp(type, "md5hmac") == 0) i_type = 4;
     else assert(0);
     
     for(int round = 0; round < time_0; round++)

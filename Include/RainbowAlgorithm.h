@@ -44,12 +44,21 @@ void HASH_SHA1(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
     memcpy(pHash, out, 8);
 }
 
-void HASH_HMAC(unsigned char *pPlain, int nPlainLen, unsigned char* pHash)
+void HASH_SHA1_HMAC(unsigned char *pPlain, int nPlainLen, unsigned char* pHash)
 {
     unsigned char out[20];
     unsigned int result_len;
     uint8_t data[] = {'h'};
     HMAC(EVP_sha1(), pPlain, nPlainLen, data, 1, out, &result_len);
+    memcpy(pHash, out, 8);
+}
+
+void HASH_MD5_HMAC(unsigned char *pPlain, int nPlainLen, unsigned char* pHash)
+{
+    unsigned char out[16];
+    unsigned int result_len;
+    uint8_t data[] = {'h'};
+    HMAC(EVP_md5(), pPlain, nPlainLen, data, 1, out, &result_len);
     memcpy(pHash, out, 8);
 }
 
