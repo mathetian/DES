@@ -37,6 +37,11 @@ cudaError_t cudaerrno;
 __device__ uint64_t totalSpace = (1ull << 30) - 1;
 uint64_t totalSpace_Global = (1ull << 30) - 1;
 
+/// __device__ uint64_t totalSpace_DES = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
+/// uint64_t totalSpace_Global_DES     = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
+__device__ uint64_t totalSpace_DES = (1ull << 34) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24);
+uint64_t totalSpace_Global_DES     = (1ull << 34) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24);
+
 __device__ void U64_2_CHAR(uint64_t message, uint8_t *pPlain)
 {
     for(int i = 0; i < 8; i++) pPlain[i] = (message >> (i*8)) & ((1 << 8) - 1);
@@ -50,6 +55,38 @@ __device__ void CHAR_2_U64(uint64_t &message, uint8_t *pPlain)
         uint64_t value = pPlain[i];
         message |= (value << (i * 8));
     }
+}
+
+__device__ uint64_t Cipher2Key(uint64_t key, int nPos)
+{
+    key &= totalSpace;
+    // if(nPos >= 1300)
+    // {
+    //     key = (key + nPos) & totalSpace;
+    //     key = (key + (nPos << 8)) & totalSpace;
+    //     key = (key + ((nPos << 8) << 8)) & totalSpace;
+    // }
+    key = (key + nPos) & totalSpace;
+    key = (key + (nPos << 8)) & totalSpace;
+    key = (key + ((nPos << 8) << 8)) & totalSpace;
+
+    return key;
+}
+
+__device__ uint64_t Cipher2Key_DES(uint64_t key, int nPos)
+{
+    key &= totalSpace_DES;
+    // if(nPos >= 1300)
+    // {
+    //     key = (key + nPos) & totalSpace_DES;
+    //     key = (key + (nPos << 8)) & totalSpace_DES;
+    //     key = (key + ((nPos << 8) << 8)) & totalSpace_DES;
+    // }
+    key = (key + nPos) & totalSpace_DES;
+    key = (key + (nPos << 8)) & totalSpace_DES;
+    key = (key + ((nPos << 8) << 8)) & totalSpace_DES;
+
+    return key;
 }
 
 };

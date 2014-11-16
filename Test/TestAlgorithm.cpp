@@ -25,7 +25,9 @@ void DoTest_1(const char *type, const char *filename)
     if(strcmp(type, "des") == 0) algorithm = HASH_DES;
     else if(strcmp(type, "md5") == 0) algorithm = HASH_MD5;
     else if(strcmp(type, "sha1") == 0) algorithm = HASH_SHA1;
-    else algorithm = HASH_HMAC;
+    else if(strcmp(type, "sha1hmac") == 0) algorithm = HASH_SHA1_HMAC;
+    else if(strcmp(type, "md5hmac") == 0) algorithm = HASH_MD5_HMAC;
+    else assert(0);
 
     while(fread((char*)&chain, sizeof(RainbowChain), 1, file) == 1)
     {
@@ -53,12 +55,16 @@ void DoTest_3()
 /// Test Performance
 void DoTest_4()
 {
-    
+
 }
 
 int main(int argc, char *argv[])
 {
-    if(argc != 3) { Usage(); return 0; }
+    if(argc != 3)
+    {
+        Usage();
+        return 0;
+    }
     DoTest_1(argv[1], argv[2]);
     cout << "Passed All Tests" << endl;
 

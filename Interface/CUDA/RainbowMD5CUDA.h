@@ -272,26 +272,13 @@ __device__ uint64_t Key2Ciper_MD5(uint64_t key)
     return key;
 }
 
-__device__ uint64_t Cipher2Key_MD5(uint64_t key, int nPos)
-{
-    key &= totalSpace;
-    if(nPos >= 1300)
-    {
-        key = (key + nPos) & totalSpace;
-        key = (key + (nPos << 8)) & totalSpace;
-        key = (key + ((nPos << 8) << 8)) & totalSpace;
-    }
-
-    return key;
-}
-
 __global__ void MD5CUDA(uint64_t *data)
 {
     __syncthreads();
 
     uint64_t key = data[TX];
     for(int nPos = 0; nPos < CHAINLEN; nPos++)
-        key = Cipher2Key_MD5(Key2Ciper_MD5(key), nPos);
+        key = Cipher2Key(Key2Ciper_MD5(key), nPos);
     data[TX] = key;
 
     __syncthreads();
@@ -303,12 +290,13 @@ __global__ void  MD5CrackCUDA(uint64_t *data)
 
     uint64_t ix  = TX, key = data[ix];
     for(int nPos = (ix % 4096) + 1; nPos < 4096; nPos++)
-        key = Cipher2Key_MD5(Key2Ciper_MD5(key), nPos);
+        key = Cipher2Key(Key2Ciper_MD5(key), nPos);
     data[ix] = key;
 
-    ix = (1 << 19) - 1 - TX; key = data[ix];
+    ix = (1 << 19) - 1 - TX;
+    key = data[ix];
     for(int nPos = (ix % 4096) + 1; nPos < 4096; nPos++)
-        key = Cipher2Key_MD5(Key2Ciper_MD5(key), nPos);
+        key = Cipher2Key(Key2Ciper_MD5(key), nPos);
     data[ix] = key;
 
     __syncthreads();

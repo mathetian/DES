@@ -97,7 +97,7 @@ __device__ void MD5_HMAC(uint8_t *key, size_t keylen, uint8_t *input, size_t ile
 __device__ uint64_t Key2Ciper_SHA1_HMAC(uint64_t key)
 {
     uint8_t data[] = {'h'}, result[20];
-    
+
     U64_2_CHAR(key, result);
     SHA1_HMAC(result, 8, data, 1, result);
     CHAR_2_U64(key, result);
@@ -108,23 +108,10 @@ __device__ uint64_t Key2Ciper_SHA1_HMAC(uint64_t key)
 __device__ uint64_t Key2Ciper_MD5_HMAC(uint64_t key)
 {
     uint8_t data[] = {'h'}, result[16];
-    
+
     U64_2_CHAR(key, result);
     MD5_HMAC(result, 8, data, 1, result);
     CHAR_2_U64(key, result);
-
-    return key;
-}
-
-__device__ uint64_t Cipher2Key_HMAC(uint64_t key, int nPos)
-{
-    key &= totalSpace;
-    if(nPos >= 1300)
-    {
-        key = (key + nPos) & totalSpace;
-        key = (key + (nPos << 8)) & totalSpace;
-        key = (key + ((nPos << 8) << 8)) & totalSpace;
-    }
 
     return key;
 }
@@ -135,7 +122,7 @@ __global__ void SHA1_HMACCUDA(uint64_t *data)
 
     uint64_t key = data[TX];
     for(int nPos = 0; nPos < CHAINLEN; nPos++)
-        key = Cipher2Key_HMAC(Key2Ciper_SHA1_HMAC(key), nPos);
+        key = Cipher2Key(Key2Ciper_SHA1_HMAC(key), nPos);
     data[TX] = key;
 
     __syncthreads();
@@ -147,7 +134,7 @@ __global__ void MD5_HMACCUDA(uint64_t *data)
 
     uint64_t key = data[TX];
     for(int nPos = 0; nPos < CHAINLEN; nPos++)
-        key = Cipher2Key_HMAC(Key2Ciper_MD5_HMAC(key), nPos);
+        key = Cipher2Key(Key2Ciper_MD5_HMAC(key), nPos);
     data[TX] = key;
 
     __syncthreads();
@@ -169,12 +156,12 @@ __global__ void HMACCUDA_ONCE(uint64_t *data)
 
 //     uint64_t ix  = TX, key = data[ix];
 //     for(int nPos = (ix % 4096) + 1; nPos < 4096; nPos++)
-//         key = Cipher2Key_HMAC(Key2Ciper_HMAC(key), nPos);
+//         key = Cipher2Key(Key2Ciper_HMAC(key), nPos);
 //     data[ix] = key;
 
 //     ix = (1 << 19) - 1 - TX; key = data[ix];
 //     for(int nPos = (ix % 4096) + 1; nPos < 4096; nPos++)
-//         key = Cipher2Key_HMAC(Key2Ciper_HMAC(key), nPos);
+//         key = Cipher2Key(Key2Ciper_HMAC(key), nPos);
 //     data[ix] = key;
 
 //     __syncthreads();

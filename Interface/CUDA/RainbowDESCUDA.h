@@ -13,11 +13,6 @@ namespace rainbowcrack
 __device__ uint32_t plRight = 0x5A296F6D;
 __device__ uint32_t plLeft  = 0x28325530;
 
-/// __device__ uint64_t totalSpace_DES = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
-/// uint64_t totalSpace_Global_DES     = (1ull << 43) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24) - (1ull << 32) - (1ull << 40);
-__device__ uint64_t totalSpace_DES = (1ull << 34) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24);
-uint64_t totalSpace_Global_DES     = (1ull << 34) - 2 - (1ull << 8) - (1ull << 16) - (1ull << 24);
-
 __device__ uint32_t des_d_sp_c[8][64]=
 {
     {
@@ -488,19 +483,6 @@ __device__ uint64_t Key2Ciper_DES(uint64_t key)
     return key;
 }
 
-__device__ uint64_t Cipher2Key_DES(uint64_t key, int nPos)
-{
-    key &= totalSpace_DES;
-    if(nPos >= 1300)
-    {
-        key = (key + nPos) & totalSpace_DES;
-        key = (key + (nPos << 8)) & totalSpace_DES;
-        key = (key + ((nPos << 8) << 8)) & totalSpace_DES;
-    }
-
-    return key;
-}
-
 uint64_t Convert(uint64_t num, int time)
 {
     assert(time < 8);
@@ -546,7 +528,8 @@ __global__ void  DESCrackCUDA(uint64_t *data)
         key = Cipher2Key_DES(Key2Ciper_DES(key), nPos);
     data[ix] = key;
 
-    ix = (1 << 19) - 1 - TX; key = data[ix];
+    ix = (1 << 19) - 1 - TX;
+    key = data[ix];
     for(int nPos = (ix % 4096) + 1; nPos < 4096; nPos++)
         key = Cipher2Key_DES(Key2Ciper_DES(key), nPos);
     data[ix] = key;

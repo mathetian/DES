@@ -41,7 +41,7 @@ __device__ void SHA1_Transform(uint32_t *state, uint8_t *buffer)
 {
     uint32_t a, b, c, d, e;
     uint32_t *blockl = (uint32_t*)buffer;
-    
+
     a = state[0];
     b = state[1];
     c = state[2];
@@ -218,26 +218,13 @@ __device__ uint64_t Key2Ciper_SHA1(uint64_t key)
     return key;
 }
 
-__device__ uint64_t Cipher2Key_SHA1(uint64_t key, int nPos)
-{
-    key &= totalSpace;
-    if(nPos >= 1300)
-    {
-        key = (key + nPos) & totalSpace;
-        key = (key + (nPos << 8)) & totalSpace;
-        key = (key + ((nPos << 8) << 8)) & totalSpace;
-    }
-
-    return key;
-}
-
 __global__ void SHA1CUDA(uint64_t *data)
 {
     __syncthreads();
 
     uint64_t key = data[TX];
     for(int nPos = 0; nPos < CHAINLEN; nPos++)
-        key = Cipher2Key_SHA1(Key2Ciper_SHA1(key), nPos);
+        key = Cipher2Key(Key2Ciper_SHA1(key), nPos);
     data[TX] = key;
 
     __syncthreads();
@@ -249,12 +236,13 @@ __global__ void  SHA1CrackCUDA(uint64_t *data)
 
     uint64_t ix  = TX, key = data[ix];
     for(int nPos = (ix % 4096) + 1; nPos < 4096; nPos++)
-        key = Cipher2Key_SHA1(Key2Ciper_SHA1(key), nPos);
+        key = Cipher2Key(Key2Ciper_SHA1(key), nPos);
     data[ix] = key;
 
-    ix = (1 << 19) - 1 - TX; key = data[ix];
+    ix = (1 << 19) - 1 - TX;
+    key = data[ix];
     for(int nPos = (ix % 4096) + 1; nPos < 4096; nPos++)
-        key = Cipher2Key_SHA1(Key2Ciper_SHA1(key), nPos);
+        key = Cipher2Key(Key2Ciper_SHA1(key), nPos);
     data[ix] = key;
 
     __syncthreads();

@@ -64,18 +64,20 @@ void CUDACrack(RainbowCipherSet *p_cs, uint64_t chainLen, const char *type)
     else if(strcmp(type, "md5") == 0)  i_type = 1;
     else if(strcmp(type, "sha1") == 0) i_type = 2;
     else if(strcmp(type, "hmac") == 0) i_type = 3;
-    
+
     int total_value = totalSpace_Global;
     if(i_type == 0)   total_value = totalSpace_Global_DES;
 
-    TimeStamp tmps; tmps.StartTime();
+    TimeStamp tmps;
+    tmps.StartTime();
 
     while(p_cs -> GetRemainCount() >= 128)
     {
         uint64_t keys[128];
         for(int i = 0; i < 128; i++)
         {
-            keys[i] = p_cs -> GetLastKey(); p_cs -> Done();
+            keys[i] = p_cs -> GetLastKey();
+            p_cs -> Done();
         }
 
         /// 2^12*2^7 -> 2^19
@@ -123,8 +125,12 @@ void CUDACrack(RainbowCipherSet *p_cs, uint64_t chainLen, const char *type)
 int main(int argc, char *argv[])
 {
     increase_stack_size();
-    
-    if(argc != 5 || strcmp(argv[2], "file") != 0) { Usage(); return 0; }
+
+    if(argc != 5 || strcmp(argv[2], "file") != 0)
+    {
+        Usage();
+        return 0;
+    }
 
     RainbowCipherSet  *p_cs = RainbowCipherSet::GetInstance();
 

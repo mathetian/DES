@@ -55,7 +55,7 @@ void CUDAGenerator(uint64_t chainLen, uint64_t chainCount, const char *suffix, c
     else if(strcmp(type, "sha1hmac") == 0) i_type = 3;
     else if(strcmp(type, "md5hmac") == 0) i_type = 4;
     else assert(0);
-    
+
     for(int round = 0; round < time_0; round++)
     {
         printf("Begin compute the %d round\n", round + 1);
