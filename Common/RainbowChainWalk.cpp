@@ -10,6 +10,7 @@ namespace rainbowcrack
 
 /// uint64_t RainbowChainWalk::m_keySpaceTotal = (1ull << 63) - 1 + (1ull << 63);
 uint64_t     RainbowChainWalk::m_keySpaceTotal = (1ull << 30) - 1;
+
 uint64_t     RainbowChainWalk::m_chainLen;
 uint64_t     RainbowChainWalk::m_chainCount;
 HASHROUTINE  RainbowChainWalk::m_algorithm;
@@ -52,6 +53,7 @@ void RainbowChainWalk::KeyReduction(int nPos)
     //     m_key = (m_key + (nPos << 8)) & m_keySpaceTotal;
     //     m_key = (m_key + ((nPos << 8) << 8)) & m_keySpaceTotal;
     // }
+    if(nPos >= 2048) nPos -= 2048;
     m_key = (m_key + nPos) & m_keySpaceTotal;
     m_key = (m_key + (nPos << 8)) & m_keySpaceTotal;
     m_key = (m_key + ((nPos << 8) << 8)) & m_keySpaceTotal;

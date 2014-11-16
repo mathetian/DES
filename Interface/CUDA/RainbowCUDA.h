@@ -66,10 +66,12 @@ __device__ uint64_t Cipher2Key(uint64_t key, int nPos)
     //     key = (key + (nPos << 8)) & totalSpace;
     //     key = (key + ((nPos << 8) << 8)) & totalSpace;
     // }
+
+    if(nPos >= 2048) nPos -= 2048;
     key = (key + nPos) & totalSpace;
     key = (key + (nPos << 8)) & totalSpace;
     key = (key + ((nPos << 8) << 8)) & totalSpace;
-
+	
     return key;
 }
 

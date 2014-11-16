@@ -43,8 +43,11 @@ MD5 GPU: 2^28.41 per second (log((2**30)/3.0, 2)) (one gpu)
 SHA1 CPU: 2^21.38 per second (log(10000*4096/15.0, 2)) (one core)
 SHA1 GPU: 2^27.19 per second (log((2**30)/7.0, 2)) (one gpu)
 
-HMAC CPU: 2^19.43 per second (log(10000*4096/58.0, 2)) (one core)
-HMAC GPU: 2^25.09 per second (log((2**30)/30.0, 2)) (one gpu)
+HMAC_SHA1 CPU: 2^19.43 per second (log(10000*4096/58.0, 2)) (one core)
+HMAC_SHA1 GPU: 2^25.09 per second (log((2**30)/30.0, 2)) (one gpu)
+
+HMAC_MD5 CPU: 2^19.70 per second (log(10000*4096/48.0, 2)) (one core)
+HMAC_MD5  GPU: 2^26.62 per second (log((2**30)/10.4, 2)) (one gpu)
 
 Crack
 =====
@@ -74,8 +77,8 @@ Total chains steps    : 26214400
 Total false alarms    : 205766
 Detected 48 numbers
 
-
 MD5
+-------------------------------------------------------
 Statistics
 -------------------------------------------------------
 Key found             : 94
@@ -87,7 +90,6 @@ Total chains steps    : 33554432
 Total false alarms    : 261107
 
 Detected 65 numbers
-
 
 SHA1 (2**30)
 -------------------------------------------------------
@@ -103,7 +105,7 @@ Total false alarms    : 205976
 Detected 41 numbers
 
 
-HMAC (2**30)
+HMAC_SHA1 (2**30)
 -------------------------------------------------------
 Statistics
 -------------------------------------------------------
@@ -115,6 +117,21 @@ Total compare time    : 331 s, 876619 us
 Total chains steps    : 26214400
 Total false alarms    : 206126
 Detected 44 numbers
+
+HMAC_MD5 (2**30)
+-------------------------------------------------------
+Statistics
+-------------------------------------------------------
+Key found             : 94
+Total time            : 1580 s, 196826 us
+Total init time       : 1184 s, 322558 us
+Total disk access time: 0 s, 142600 us
+Total compare time    : 395 s, 731668 us
+Total chains steps    : 33554432
+Total false alarms    : 261243
+
+Detected 64 numbers
+
 
 Initialization Time
 ===

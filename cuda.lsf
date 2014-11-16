@@ -24,7 +24,7 @@ module purge && module load cuda/5.5
 # ./generator sha1 rand
 # ./crack sha1 file sha1_4096-524288_cuda sha1.txt
 
-# ./cuda hmac 4096 524288 cuda
-# ./sort 1 hmac_4096-524288_cuda
-# ./generator hmac rand
-# ./crack hmac file hmac_4096-524288_cuda hmac.txt
+#./cuda md5hmac 4096 262144 cuda
+#./sort 1 md5hmac_4096-262144_cuda
+#./generator md5hmac rand
+#./crack md5hmac file md5hmac_4096-262144_cuda md5hmac.txt
