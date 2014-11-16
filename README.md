@@ -64,6 +64,18 @@ Total chains steps    : 26214400
 Total false alarms    : 410400
 Detected 35 numbers
 
+Statistics
+-------------------------------------------------------
+Key found             : 101
+Total time            : 552 s, 509538 us
+Total init time       : 331 s, 203586 us
+Total disk access time: 0 s, 129322 us
+Total compare time    : 221 s, 176630 us
+Total chains steps    : 33554432
+Total false alarms    : 524483
+
+Detected 58 numbers
+
 MD5 (2**30)
 -------------------------------------------------------
 Statistics

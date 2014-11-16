@@ -84,6 +84,7 @@ __device__ uint64_t Cipher2Key_DES(uint64_t key, int nPos)
     //     key = (key + (nPos << 8)) & totalSpace_DES;
     //     key = (key + ((nPos << 8) << 8)) & totalSpace_DES;
     // }
+    
     key = (key + nPos) & totalSpace_DES;
     key = (key + (nPos << 8)) & totalSpace_DES;
     key = (key + ((nPos << 8) << 8)) & totalSpace_DES;
