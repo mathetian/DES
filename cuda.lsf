@@ -1,0 +1,30 @@
+#BSUB -q gpu
+#BSUB -J CUDA_MPI
+#BSUB -L /bin/bash
+#BSUB -o %J.out
+#BSUB -e %J.err
+#BSUB -n 16
+#BSUB -R "span[ptile=16]"
+
+MODULEPATH=/lustre/utility/modulefiles:$MODULEPATH
+module purge && module load cuda/5.5
+
+# ./cuda des 4096 524288 cuda
+# ./sort 1 des_4096-524288_cuda
+# ./generator des rand
+# ./crack des file des_4096-524288_cuda des.txt
+
+./cuda md5 4096 262144 cuda
+./sort 1 md5_4096-262144_cuda
+./generator md5 rand
+./crack md5 file md5_4096-262144_cuda md5.txt
+
+# ./cuda sha1 4096 524288 cuda
+# ./sort 1 sha1_4096-524288_cuda
+# ./generator sha1 rand
+# ./crack sha1 file sha1_4096-524288_cuda sha1.txt
+
+# ./cuda hmac 4096 524288 cuda
+# ./sort 1 hmac_4096-524288_cuda
+# ./generator hmac rand
+# ./crack hmac file hmac_4096-524288_cuda hmac.txt
