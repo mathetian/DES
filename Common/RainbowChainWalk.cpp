@@ -26,7 +26,8 @@ void RainbowChainWalk::SetChainInfo(uint64_t chainLen, uint64_t chainCount, cons
     }
     else if(strcmp(type, "md5") == 0)  m_algorithm = HASH_MD5;
     else if(strcmp(type, "sha1") == 0) m_algorithm = HASH_SHA1;
-    else if(strcmp(type, "hmac") == 0) m_algorithm = HASH_HMAC;
+    else if(strcmp(type, "sha1hmac") == 0) m_algorithm = HASH_SHA1_HMAC;
+    else if(strcmp(type, "md5hmac") == 0) m_algorithm = HASH_MD5_HMAC;
     else assert(type && 0);
 }
 

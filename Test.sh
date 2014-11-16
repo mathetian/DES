@@ -27,8 +27,10 @@ mpirun -np 4 ./generator md5 4096 65536 cpu
 # mpirun -np 4 ./generator sha1 4096 65536 cpu
 # ./cuda sha1 4096 262144 cuda
 
-# mpirun -np 4 ./generator hmac 4096 65536 cpu
-# ./cuda hmac 4096 262144 cuda
+# mpirun -np 4 ./generator sha1hmac 4096 65536 cpu
+# ./cuda sha1hmac 4096 262144 cuda
+# mpirun -np 4 ./generator md5hmac 4096 65536 cpu
+./cuda md5hmac 4096 262144 cuda
 
 # Test 3 (Crack)
 # mpirun -np 4 ./generator des 4096 262144 cpu

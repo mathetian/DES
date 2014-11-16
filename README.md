@@ -26,8 +26,12 @@ MD5 GPU: 2^25.35 per second (log((2**30)/25.0, 2)) (one gpu)
 SHA1 CPU: 2^20.96 per second (log(10000*4096/20.0, 2)) (one core)
 SHA1 GPU: 2^23.79 per second (log((2**30)/74.0, 2)) (one gpu)
 
-HMAC CPU: 2^18.5 per second (log(10000*4096/110.0, 2)) (one core)
-HMAC GPU: 2^21.5 per second (log((2**30)/360.0, 2)) (one gpu)
+HMAC_SHA1 CPU: 2^18.5 per second (log(10000*4096/110.0, 2)) (one core)
+HMAC_SHA1 GPU: 2^21.5 per second (log((2**30)/360.0, 2)) (one gpu)
+HMAC_SHA1 GPU: 2^21.9 per second (log((2**30)/276.0, 2)) (one gpu)
+
+HMAC_MD5  CPU: 2^18.87 per second (log(10000*4096/85.0, 2)) (one core)
+HMAC_MD5  GPU: 2^23.25 per second (log((2**30)/107.6, 2)) (one gpu)
 
 HPC:
 DES CPU: 2^21.03 per second (log(10000*4096/19.0, 2)) (one core)
@@ -110,3 +114,5 @@ Todo List
 1. Review HMAC(Speed and Others)
 
 2. RainbowCrackCUDA(Initialization -> CUDA)
+
+PS 1: uint8_t cost too much time than void*

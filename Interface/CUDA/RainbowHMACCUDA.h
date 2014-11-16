@@ -10,7 +10,7 @@
 namespace rainbowcrack
 {
 
-__device__ void SHA1_HMAC_Init(SHA1_CTX *ctx, const uint8_t *key, size_t keylen)
+__device__ void SHA1_HMAC_Init(SHA1_CTX *ctx, uint8_t *key, size_t keylen)
 {
     size_t i;
 
@@ -27,9 +27,31 @@ __device__ void SHA1_HMAC_Init(SHA1_CTX *ctx, const uint8_t *key, size_t keylen)
     SHA1_Update(ctx, ctx->ipad, 64);
 }
 
-__device__ void SHA1_HMAC_Update(SHA1_CTX *ctx, const uint8_t *input, size_t ilen )
+__device__ void MD5_HMAC_Init(MD5_CTX *ctx, uint8_t *key, size_t keylen)
+{
+    size_t i;
+
+    memset( ctx->ipad, 0x36, 64 );
+    memset( ctx->opad, 0x5C, 64 );
+
+    for( i = 0; i < keylen; i++ )
+    {
+        ctx->ipad[i] = (uint8_t)( ctx->ipad[i] ^ key[i] );
+        ctx->opad[i] = (uint8_t)( ctx->opad[i] ^ key[i] );
+    }
+
+    MD5_Init(ctx);
+    MD5_Update(ctx, ctx->ipad, 64);
+}
+
+__device__ void SHA1_HMAC_Update(SHA1_CTX *ctx, uint8_t *input, size_t ilen )
 {
     SHA1_Update(ctx, input, ilen);
+}
+
+__device__ void MD5_HMAC_Update(MD5_CTX *ctx, uint8_t *input, size_t ilen )
+{
+    MD5_Update(ctx, input, ilen);
 }
 
 __device__ void SHA1_HMAC_Final(SHA1_CTX *ctx, uint8_t *output)
@@ -43,7 +65,18 @@ __device__ void SHA1_HMAC_Final(SHA1_CTX *ctx, uint8_t *output)
     SHA1_Final( ctx, output );
 }
 
-__device__ void SHA1_HMAC(const uint8_t *key, size_t keylen, const uint8_t *input, size_t ilen, uint8_t *output)
+__device__ void MD5_HMAC_Final(MD5_CTX *ctx, uint8_t *output)
+{
+    uint8_t tmpbuf[16];
+
+    MD5_Final( ctx, tmpbuf );
+    MD5_Init( ctx );
+    MD5_Update( ctx, ctx->opad, 64 );
+    MD5_Update( ctx, tmpbuf, 16 );
+    MD5_Final( ctx, output );
+}
+
+__device__ void SHA1_HMAC(uint8_t *key, size_t keylen, uint8_t *input, size_t ilen, uint8_t *output)
 {
     SHA1_CTX ctx;
 
@@ -52,15 +85,33 @@ __device__ void SHA1_HMAC(const uint8_t *key, size_t keylen, const uint8_t *inpu
     SHA1_HMAC_Final( &ctx, output );
 }
 
-__device__ uint64_t Key2Ciper_HMAC(uint64_t key)
+__device__ void MD5_HMAC(uint8_t *key, size_t keylen, uint8_t *input, size_t ilen, uint8_t *output)
 {
-    ///uint8_t data[] = {'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
-    uint8_t data[] = {'h'};
-    uint8_t result[20], result_2[8];
-    U64_2_CHAR(key, result_2);
-    SHA1_HMAC(result_2, 8, data, 1, result);
-    memcpy(result_2, result, 8);
-    CHAR_2_U64(key, result_2);
+    MD5_CTX ctx;
+
+    MD5_HMAC_Init( &ctx, key, keylen );
+    MD5_HMAC_Update( &ctx, input, ilen );
+    MD5_HMAC_Final( &ctx, output );
+}
+
+__device__ uint64_t Key2Ciper_SHA1_HMAC(uint64_t key)
+{
+    uint8_t data[] = {'h'}, result[20];
+    
+    U64_2_CHAR(key, result);
+    SHA1_HMAC(result, 8, data, 1, result);
+    CHAR_2_U64(key, result);
+
+    return key;
+}
+
+__device__ uint64_t Key2Ciper_MD5_HMAC(uint64_t key)
+{
+    uint8_t data[] = {'h'}, result[16];
+    
+    U64_2_CHAR(key, result);
+    MD5_HMAC(result, 8, data, 1, result);
+    CHAR_2_U64(key, result);
 
     return key;
 }
@@ -78,13 +129,25 @@ __device__ uint64_t Cipher2Key_HMAC(uint64_t key, int nPos)
     return key;
 }
 
-__global__ void HMACCUDA(uint64_t *data)
+__global__ void SHA1_HMACCUDA(uint64_t *data)
 {
     __syncthreads();
 
     uint64_t key = data[TX];
     for(int nPos = 0; nPos < CHAINLEN; nPos++)
-        key = Cipher2Key_HMAC(Key2Ciper_HMAC(key), nPos);
+        key = Cipher2Key_HMAC(Key2Ciper_SHA1_HMAC(key), nPos);
+    data[TX] = key;
+
+    __syncthreads();
+}
+
+__global__ void MD5_HMACCUDA(uint64_t *data)
+{
+    __syncthreads();
+
+    uint64_t key = data[TX];
+    for(int nPos = 0; nPos < CHAINLEN; nPos++)
+        key = Cipher2Key_HMAC(Key2Ciper_MD5_HMAC(key), nPos);
     data[TX] = key;
 
     __syncthreads();
@@ -95,11 +158,10 @@ __global__ void HMACCUDA_ONCE(uint64_t *data)
     __syncthreads();
 
     uint64_t key = data[TX];
-    data[TX] = Key2Ciper_HMAC(key);
+    data[TX] = Key2Ciper_SHA1_HMAC(key);
 
     __syncthreads();
 }
-
 
 // __global__ void  HMACCrackCUDA(uint64_t *data)
 // {
