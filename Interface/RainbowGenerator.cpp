@@ -41,7 +41,7 @@ void Rand(const char *type)
 
     cwc.SetChainInfo(1, 1, type);
 
-    for(int index = 0; index < 128; index++)
+    for(int index = 0; index < 16; index++)
     {
         chain.nStartKey = cwc.GetRandomKey();
         chain.nEndKey   = cwc.Crypt(chain.nStartKey);

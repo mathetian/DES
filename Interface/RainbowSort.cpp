@@ -268,6 +268,7 @@ ABORT:
 
 int main(int argc, char *argv[])
 {
+    TimeStamp tms;tms.StartTime();
     if(argc != 3)
     {
         Usage();
@@ -302,6 +303,6 @@ int main(int argc, char *argv[])
         SortFiles(fileNames, files, argv[2]);
         printf("End SortFiles\n");
     }
-
+    tms.StopTime("StopTime: ");
     return 0;
 }

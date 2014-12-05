@@ -210,32 +210,41 @@ void RainbowCrackEngine::SearchRainbowTable(const char *fileName)
 
 void RainbowCrackEngine::SearchTableChunk(RainbowChain *pChain, int pChainCount)
 {
-    uint64_t nFalseAlarm = 0, nIndex, nGuessPos = 0;
-    uint64_t key = p_cs -> GetLastKey();
+    uint64_t nFalseAlarm = 0, nIndex, nGuessPos = 0, key = p_cs -> GetLastKey();
 
     cout << "Searching for key: " << key << "...\n";
-
+    alarmCount = falarmCount = alarmStat = falarmStat = 0;
+    alarmTime.tv_sec = alarmTime.tv_usec = 0;
+    TimeStamp stamp;
     for(; nGuessPos < RainbowChainWalk::m_chainLen; nGuessPos++)
     {
         uint64_t nMathingIndexE = BinarySearch(pChain, pChainCount, pEndKeys[nGuessPos]);
-
         if(pChain[nMathingIndexE].nEndKey == pEndKeys[nGuessPos])
         {
-            uint64_t nMathingIndexEFrom, nMathingIndexETo;
+            stamp.StartTime(); 
+	    uint64_t nMathingIndexEFrom, nMathingIndexETo;
             GetIndexRange(pChain, pChainCount, nMathingIndexE,nMathingIndexEFrom,nMathingIndexETo);
 
             for(nIndex = nMathingIndexEFrom; nIndex <= nMathingIndexETo; nIndex++)
             {
-                if(CheckAlarm(pChain + nIndex, nGuessPos, pEndKeys[nGuessPos]))
-                    { } //goto NEXT_HASH;
-                else nFalseAlarm++;
+		alarmCount++; alarmStat += nGuessPos;
+                if(CheckAlarm(pChain + nIndex, nGuessPos, pEndKeys[nGuessPos]) == false)
+                {
+		    nFalseAlarm++; falarmCount++; falarmStat += nGuessPos;
+		} //goto NEXT_HASH;
+                else {}
             }
-        }
+	    stamp.StopTime();
+	    stamp.AddTime(alarmTime);
+	}
+ 	
 
         if(nGuessPos % 1000 == 0) cout << "nGuessPos " << nGuessPos << endl;
     }
     m_totalChains += pChainCount;
     m_falseAlarms += nFalseAlarm;
+    cout << "ddd    : " << alarmTime.tv_sec << " s, " << alarmTime.tv_usec << " us" << endl;
+    cout << alarmCount << " " << falarmCount << " " << alarmStat << " " << falarmStat << endl;
 }
 
 void RainbowCrackEngine::Run(const char *fileName, const char *type)

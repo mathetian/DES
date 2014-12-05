@@ -49,6 +49,8 @@ private:
 private:
     /// Statistics Private Data
     struct timeval   m_diskTime, m_totalTime, m_initTime, m_compareTime;
+    struct timeval   alarmTime; uint64_t alarmCount, falarmCount;
+    uint64_t alarmStat, falarmStat;
     uint64_t         m_totalChains;
     uint64_t         m_falseAlarms;
 
