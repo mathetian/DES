@@ -25,9 +25,9 @@ module purge && module load icc/14.0.2 impi/4.1.3.048
 #mpirun ./generator hmac 4096 524288 testi
 
 mpirun ./generator md5hmac 4096 262144 cpu
-#./sort 32 md5hmac_4096-262144_cpu
-#./generator md5hmac rand
-#./crack md5hmac file md5hmac_4096-262144_cpu md5hmac.txt
+./sort 32 md5hmac_4096-262144_cpu
+./generator md5hmac rand
+./crack md5hmac file md5hmac_4096-262144_cpu md5hmac.txt
 
 #mpirun ./generator des 4096 262144 cpu
 #./sort 32 des_4096-262144_cpu

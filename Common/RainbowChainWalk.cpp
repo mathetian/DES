@@ -47,13 +47,6 @@ void RainbowChainWalk::KeyToCipher()
 void RainbowChainWalk::KeyReduction(int nPos)
 {
     m_key &= m_keySpaceTotal;
-    // if(nPos >= 1300)
-    // {
-    //     m_key = (m_key + nPos) & m_keySpaceTotal;
-    //     m_key = (m_key + (nPos << 8)) & m_keySpaceTotal;
-    //     m_key = (m_key + ((nPos << 8) << 8)) & m_keySpaceTotal;
-    // }
-    if(nPos >= 2048) nPos -= 2048;
     m_key = (m_key + nPos) & m_keySpaceTotal;
     m_key = (m_key + (nPos << 8)) & m_keySpaceTotal;
     m_key = (m_key + ((nPos << 8) << 8)) & m_keySpaceTotal;

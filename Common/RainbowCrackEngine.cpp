@@ -214,7 +214,8 @@ void RainbowCrackEngine::SearchTableChunk(RainbowChain *pChain, int pChainCount)
 
     cout << "Searching for key: " << key << "...\n";
     alarmCount = falarmCount = alarmStat = falarmStat = 0;
-    alarmTime.tv_sec = alarmTime.tv_usec = 0;
+    alarmTime.tv_sec = 0; alarmTime.tv_usec = 0;
+
     TimeStamp stamp;
     for(; nGuessPos < RainbowChainWalk::m_chainLen; nGuessPos++)
     {
@@ -241,9 +242,10 @@ void RainbowCrackEngine::SearchTableChunk(RainbowChain *pChain, int pChainCount)
 
         if(nGuessPos % 1000 == 0) cout << "nGuessPos " << nGuessPos << endl;
     }
-    m_totalChains += pChainCount;
-    m_falseAlarms += nFalseAlarm;
-    cout << "ddd    : " << alarmTime.tv_sec << " s, " << alarmTime.tv_usec << " us" << endl;
+
+    m_totalChains += pChainCount; m_falseAlarms += nFalseAlarm;
+
+    cout << "alarm time: "    << alarmTime.tv_sec << " s, " << alarmTime.tv_usec << " us" << endl;
     cout << alarmCount << " " << falarmCount << " " << alarmStat << " " << falarmStat << endl;
 }
 
