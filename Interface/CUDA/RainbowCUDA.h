@@ -8,9 +8,9 @@
 #include "Common.h"
 using namespace utils;
 
-#define BLOCK_LENGTH        1024
-#define MAX_THREAD			256
-#define ALL                 (1024*256)
+#define BLOCK_LENGTH        512
+#define MAX_THREAD          64
+#define ALL                 ((BLOCK_LENGTH)*(MAX_THREAD))
 #define CHAINLEN            4096
 
 namespace rainbowcrack
