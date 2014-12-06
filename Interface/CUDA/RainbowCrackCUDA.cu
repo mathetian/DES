@@ -3,10 +3,8 @@
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
 #include "RainbowCUDA.h"
-#include "RainbowMD5CUDA.h"
 #include "RainbowDESCUDA.h"
 #include "RainbowHMACCUDA.h"
-#include "RainbowSHA1CUDA.h"
 #include "RainbowCipherSet.h"
 using namespace rainbowcrack;
 
@@ -20,7 +18,7 @@ void Usage()
     Logo();
     printf("Usage: crackcuda type file chainLen encryptedFile\n\n");
 
-    printf("example 1: crackcuda des/md5/sha1/hmac file chainLen encryptedFile\n\n");
+    printf("example 1: crackcuda des/hmac_md5 file chainLen encryptedFile\n\n");
 }
 
 void increase_stack_size()
@@ -61,12 +59,10 @@ void CUDACrack(RainbowCipherSet *p_cs, uint64_t chainLen, const char *type)
     int i_type = 0;
 
     if(strcmp(type, "des") == 0)       i_type = 0;
-    else if(strcmp(type, "md5") == 0)  i_type = 1;
-    else if(strcmp(type, "sha1") == 0) i_type = 2;
-    else if(strcmp(type, "hmac") == 0) i_type = 3;
+    else if(strcmp(type, "hmac_md5") == 0) i_type = 1;
 
     int total_value = totalSpace_Global;
-    if(i_type == 0)   total_value = totalSpace_Global_DES;
+    if(i_type == 0) total_value = totalSpace_Global_DES;
 
     TimeStamp tmps;
     tmps.StartTime();
@@ -101,11 +97,7 @@ void CUDACrack(RainbowCipherSet *p_cs, uint64_t chainLen, const char *type)
         if(i_type == 0)
             DESCrackCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
         else if(i_type == 1)
-            MD5CrackCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
-        else if(i_type == 2)
-            SHA1CrackCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
-        // else if(i_type == 3)
-        //     HMACCrackCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
+            HMAC_MD5_CrackCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
 
         _CUDA(cudaMemcpy(ends, cudaIn, size, cudaMemcpyDeviceToHost));
 

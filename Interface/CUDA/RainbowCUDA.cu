@@ -3,10 +3,8 @@
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
 #include "RainbowCUDA.h"
-#include "RainbowMD5CUDA.h"
 #include "RainbowDESCUDA.h"
 #include "RainbowHMACCUDA.h"
-#include "RainbowSHA1CUDA.h"
 using namespace rainbowcrack;
 
 #include "TimeStamp.h"
@@ -17,7 +15,7 @@ void Usage()
     Logo();
     printf("Usage:     cuda type chainLen chainCount suffix\n\n");
 
-    printf("example 1: cuda des/md5/sha1/hmac 1000 10000 suffix\n");
+    printf("example 1: cuda des/hmac_md5 1000 10000 suffix\n");
 }
 
 void CUDAGenerator(uint64_t chainLen, uint64_t chainCount, const char *suffix, const char *type)
@@ -50,10 +48,7 @@ void CUDAGenerator(uint64_t chainLen, uint64_t chainCount, const char *suffix, c
     int i_type = 0;
 
     if(strcmp(type, "des") == 0)       i_type = 0;
-    else if(strcmp(type, "md5") == 0)  i_type = 1;
-    else if(strcmp(type, "sha1") == 0) i_type = 2;
-    else if(strcmp(type, "sha1hmac") == 0) i_type = 3;
-    else if(strcmp(type, "md5hmac") == 0) i_type = 4;
+    else if(strcmp(type, "hmac_md5") == 0) i_type = 1;
     else assert(0);
 
     for(int round = 0; round < time_0; round++)
@@ -74,14 +69,8 @@ void CUDAGenerator(uint64_t chainLen, uint64_t chainCount, const char *suffix, c
 
         if(i_type == 0)
             DESCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
-        else if(i_type == 1)
-            MD5CUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
-        else if(i_type == 2)
-            SHA1CUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
-        else if(i_type == 3)
-            SHA1_HMACCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
         else
-            MD5_HMACCUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
+            HMAC_MD5_CUDA<<<BLOCK_LENGTH, MAX_THREAD>>>(cudaIn);
 
         _CUDA(cudaMemcpy(ends, cudaIn, size, cudaMemcpyDeviceToHost));
 
