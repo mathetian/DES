@@ -8,8 +8,8 @@
 #include "Common.h"
 using namespace utils;
 
-#define BLOCK_LENGTH        512
-#define MAX_THREAD          64
+#define BLOCK_LENGTH        1024
+#define MAX_THREAD          256
 #define ALL                 ((BLOCK_LENGTH)*(MAX_THREAD))
 #define CHAINLEN            4096
 

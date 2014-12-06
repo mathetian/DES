@@ -47,7 +47,7 @@ crack: Interface/RainbowCrack.cpp
 	${MV} $@  ${BINARY}
 
 cuda: Interface/CUDA/RainbowCUDA.cu
-	module purge && module load cuda/5.5 && ${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
+	module purge && module load cuda/5.5 && ${NVCC} --ptxas-options=-v ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	#${NVCC} ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
 
