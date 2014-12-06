@@ -9,10 +9,10 @@
 MODULEPATH=/lustre/utility/modulefiles:$MODULEPATH
 module purge && module load cuda/5.5
 
-./cuda des 4096 2097152 cuda
-./sort 1 des_4096-2097152_cuda
-#./generator des rand
-#./crack des file des_4096-2097152_cuda des.txt
+# ./cuda des 4096 2097152 cuda
+# ./sort 1 des_4096-2097152_cuda
+# ./generator des rand
+# ./crack des file des_4096-2097152_cuda des.txt
 
 # ./cuda md5 4096 262144 cuda
 # ./sort 1 md5_4096-262144_cuda
@@ -24,7 +24,7 @@ module purge && module load cuda/5.5
 # ./generator sha1 rand
 # ./crack sha1 file sha1_4096-524288_cuda sha1.txt
 
-#./cuda md5hmac 4096 262144 cuda
+./cuda hmac_md5 4096 262144 cuda
 #./sort 1 md5hmac_4096-262144_cuda
 #./generator md5hmac rand
-#./crack md5hmac file md5hmac_4096-262144_cuda md5hmac.txt
+# ./crack md5hmac file md5hmac_4096-262144_cuda md5hmac.txt
