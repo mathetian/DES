@@ -516,25 +516,22 @@ __global__ void DESCUDA(uint64_t *data)
     __syncthreads();
 }
 
-__global__ void  DESCrackCUDA(uint64_t *data)
+__global__ void  DES_CrackCUDA(uint64_t *data)
 {
     for(int i=0; i < 256; i++)
         ((uint64_t *)des_SP)[i] = ((uint64_t *)des_d_sp_c)[i];
 
     __syncthreads();
 
-    uint64_t ix  = TX, key = data[ix];
-    for(int nPos = (ix % 4096) + 1; nPos < 4096; nPos++)
+    uint64_t key = data[TX];
+    for(int nPos = TX; nPos < 4096; nPos++)
         key = Cipher2Key_DES(Key2Ciper_DES(key), nPos);
-    data[ix] = key;
+    data[TX] = key;
 
-    ix = (1 << 19) - 1 - TX;
-    key = data[ix];
-    for(int nPos = (ix % 4096) + 1; nPos < 4096; nPos++)
+    key = data[4095 - TX];
+    for(int nPos = TX; nPos < 4096; nPos++)
         key = Cipher2Key_DES(Key2Ciper_DES(key), nPos);
-    data[ix] = key;
-
-    __syncthreads();
+    data[4095 - TX] = key;
 }
 
 };
