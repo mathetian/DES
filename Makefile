@@ -60,6 +60,9 @@ test: Test/TestAlgorithm.cpp
 	${CXX} ${CXXFLAGS} ${HEADER} $^ -o $@ ${LIB}
 	${MV} $@  ${BINARY}
 
+test1: test.cu
+	module purge && module load cuda/6.5 && ${NVCC} --ptxas-options=-v ${NVFLAGS} ${HEADER} $^ -o $@ ${LIB}
+
 rungen: generator
 	mpirun -np 4 ./$^ des 4096 65536 test
 
