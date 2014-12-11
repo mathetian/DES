@@ -8,11 +8,10 @@ def compute(N, m, c):
 	t  = int(c*N/m); t0 = t/2
 	p  = 1.0/(N/m + (t0-1)/2.0)
 	r  = (4.0/(4 + c))**2
-	print t, t0, p, r
 	for i in range(t0):
 		r = r*(1 - p)
 		p = getP(N, m, i + 1, p)
 	return 1 - r
 
-N = 2**39; m = 2**26; c = 1
+N = 2**51; m = 2**34; c = 1
 print compute(N, m, c)
